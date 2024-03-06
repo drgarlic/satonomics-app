@@ -8,6 +8,7 @@ import { createResourceDataset } from "./creators";
 
 export function createResourceDatasets(resources: ResourcesHTTP) {
   const cachedCandlesticks = createASS<FetchedCandlestick[] | null>(null);
+
   import("/src/assets/data/btcusd.json").then((candlesticks) => {
     cachedCandlesticks.set(candlesticks.default);
 
@@ -36,6 +37,7 @@ export function createResourceDatasets(resources: ResourcesHTTP) {
   const candlesticks = createResourceDataset({
     fetch: resources.candlesticks.fetch,
     values: candlestickValues,
+    autoFetch: false,
   });
 
   const closes = createLazyDataset(() =>

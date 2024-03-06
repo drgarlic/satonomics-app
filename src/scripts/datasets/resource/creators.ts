@@ -3,12 +3,17 @@ import { createLazyMemo } from "@solid-primitives/memo";
 export const createResourceDataset = <T>({
   values,
   fetch,
+  autoFetch = true,
 }: {
   fetch: () => void;
   values: Accessor<T | null>;
+  autoFetch?: boolean;
 }): Dataset<T> => ({
   values: createLazyMemo(() => {
-    fetch();
+    if (autoFetch) {
+      fetch();
+    }
+
     return values();
   }),
 });
