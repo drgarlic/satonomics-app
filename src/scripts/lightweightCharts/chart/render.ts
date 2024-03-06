@@ -5,7 +5,7 @@ import {
   updateWhitespaceDataset,
 } from "/src/scripts";
 
-const whitespaceDataset: DatedWhitespaceData[] = [];
+export const whitespaceDataset: DatedWhitespaceData[] = [];
 
 let dispose: VoidFunction | undefined = undefined;
 

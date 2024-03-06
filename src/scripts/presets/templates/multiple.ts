@@ -51,6 +51,8 @@ export const applyMultipleSeries = ({
         id: string;
         dataset: Dataset;
         color: string;
+        lineColor?: string;
+        areaColor?: string;
         seriesType: SeriesType.Stacked;
         title: string;
         options?: BaselineSeriesOptions;
@@ -95,20 +97,17 @@ export const applyMultipleSeries = ({
     (config) => config.seriesType === SeriesType.Based,
   );
 
+  const isAnyArea = list.find(
+    (config) => config.seriesType === SeriesType.Area,
+  );
+
   const isAnyStacked = list.find(
     (config) => config.seriesType === SeriesType.Stacked,
   );
 
-  resetRightPriceScale(chart, {
+  const rightPriceScaleOptions = resetRightPriceScale(chart, {
     ...priceScaleOptions,
-    ...(isAnyBased
-      ? {
-          scaleMargins: {
-            bottom: 0.05,
-          },
-        }
-      : {}),
-    ...(isAnyStacked
+    ...(isAnyStacked || isAnyArea
       ? {
           scaleMargins: {
             bottom: 0,
@@ -123,11 +122,12 @@ export const applyMultipleSeries = ({
 
   if (stacked.length) {
     const series = chart.addCustomSeries(new StackedAreaSeries(), {
-      colors: stacked.map(({ color }) => ({
-        line: color,
-        area: `${color}11`,
+      colors: stacked.map(({ color, lineColor, areaColor }) => ({
+        line: lineColor || color,
+        // area: `${color}11`,
+        area: areaColor || color,
       })),
-      lineWidth: 1.5,
+      lineWidth: 1,
       priceLineVisible: false,
       lastValueVisible: false,
     });
@@ -186,6 +186,13 @@ export const applyMultipleSeries = ({
           series = createAreaSeries(chart, {
             color,
             showPriceLine,
+            autoscaleInfoProvider: (getInfo: () => AutoscaleInfo | null) => {
+              const info = getInfo();
+              if (info) {
+                info.priceRange.minValue = 0;
+              }
+              return info;
+            },
             ...options,
           });
         } else if (type === SeriesType.Histogram) {
@@ -232,6 +239,19 @@ export const applyMultipleSeries = ({
     options: {
       halved,
     },
+  });
+
+  createEffect(() => {
+    const options = {
+      scaleMargins: {
+        top: priceLegend[0].visible()
+          ? rightPriceScaleOptions.scaleMargins.top
+          : rightPriceScaleOptions.scaleMargins.bottom,
+        bottom: rightPriceScaleOptions.scaleMargins.bottom,
+      },
+    };
+
+    chart.priceScale("right").applyOptions(options);
   });
 
   return [...priceLegend, ...legend.reverse()];

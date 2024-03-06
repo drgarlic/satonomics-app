@@ -9,8 +9,8 @@ export {
 
 // export const USABLE_CANDLESTICKS_START_DATE = '2014-01-01'
 
-export async function createDatasets(resources: ResourcesHTTP) {
-  const resourceDatasets = await createResourceDatasets(resources);
+export function createDatasets(resources: ResourcesHTTP) {
+  const resourceDatasets = createResourceDatasets(resources);
 
   const lazyDatasets = createLazyDatasets(resourceDatasets);
 

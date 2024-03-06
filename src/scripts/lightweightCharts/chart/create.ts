@@ -30,7 +30,7 @@ export const createChart = () => {
       borderColor: white,
     },
     timeScale: {
-      minBarSpacing: 0.1,
+      minBarSpacing: 0.05,
       shiftVisibleRangeOnNewBar: true,
       borderColor: white,
     },

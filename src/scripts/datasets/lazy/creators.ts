@@ -223,40 +223,76 @@ export function createMedianLazyDataset(dataset: Dataset, number: number) {
   );
 }
 
+function computeOffset(source: Dataset, toOffset: Dataset) {
+  return createLazyMemo(() => {
+    const offset = toOffset
+      .values()
+      ?.findIndex(({ date }) => date === source.values()?.at(0)?.date);
+
+    return !offset || offset === -1 ? 0 : offset;
+  });
+}
+
+export function createAddedLazyDataset(
+  datasetRef: Dataset,
+  datasetToAdd: Dataset,
+) {
+  const offset = computeOffset(datasetRef, datasetToAdd);
+
+  return createLazyDataset(() => {
+    let secondValue = 0;
+    let index = offset();
+
+    return (datasetRef.values() || []).map(({ date, value }) => {
+      const data = datasetToAdd.values()?.at(index);
+      if (date === data?.date) {
+        secondValue = data.value;
+        index += 1;
+      }
+
+      return {
+        date,
+        time: date,
+        value: value + secondValue,
+      };
+    });
+  });
+}
+
 export function createSubtractedLazyDataset(
   datasetRef: Dataset,
-  datasetToSubstract: Dataset,
+  datasetToSubtract: Dataset,
 ) {
-  return createLazyDataset(() =>
-    (datasetRef.values() || []).map(({ date, value }, index) => ({
-      date,
-      time: date,
-      value: value - (datasetToSubstract.values()?.at(index)?.value || 0),
-    })),
-  );
+  const offset = computeOffset(datasetRef, datasetToSubtract);
+
+  return createLazyDataset(() => {
+    let secondValue = 0;
+    let index = offset();
+
+    return (datasetRef.values() || []).map(({ date, value }) => {
+      const data = datasetToSubtract.values()?.at(index);
+      if (date === data?.date) {
+        secondValue = data.value;
+        index += 1;
+      }
+
+      return {
+        date,
+        time: date,
+        value: value - secondValue,
+      };
+    });
+  });
 }
 
 export function createMultipliedLazyDataset(
   datasetRef: Dataset,
   multiplierDataset: Dataset,
+  defaultMultiplier = 1,
 ) {
-  const offsetRef = createLazyMemo(() => {
-    const offset = datasetRef
-      .values()
-      ?.findIndex(
-        (data) => data.date === multiplierDataset.values()?.[0]?.date,
-      );
+  const offsetRef = computeOffset(multiplierDataset, datasetRef);
 
-    return !offset || offset === -1 ? 0 : offset;
-  });
-
-  const offsetMultiplier = createLazyMemo(() => {
-    const offset = multiplierDataset
-      .values()
-      ?.findIndex(({ date }) => date === datasetRef.values()?.at(0)?.date);
-
-    return !offset || offset === -1 ? 0 : offset;
-  });
+  const offsetMultiplier = computeOffset(datasetRef, multiplierDataset);
 
   return createLazyDataset(() =>
     (datasetRef.values() || [])
@@ -267,7 +303,7 @@ export function createMultipliedLazyDataset(
         value:
           value *
           (multiplierDataset.values()?.at(index + offsetMultiplier())?.value ||
-            0),
+            defaultMultiplier),
       })),
   );
 }
@@ -277,21 +313,9 @@ export const createDividedLazyDataset = (
   dividerDataset: Dataset,
   isPercentage?: boolean,
 ) => {
-  const offsetRef = createLazyMemo(() => {
-    const offset = datasetRef
-      .values()
-      ?.findIndex((data) => data.date === dividerDataset.values()?.[0]?.date);
+  const offsetRef = computeOffset(dividerDataset, datasetRef);
 
-    return !offset || offset === -1 ? 0 : offset;
-  });
-
-  const offsetDivider = createLazyMemo(() => {
-    const offset = dividerDataset
-      .values()
-      ?.findIndex(({ date }) => date === datasetRef.values()?.at(0)?.date);
-
-    return !offset || offset === -1 ? 0 : offset;
-  });
+  const offsetDivider = computeOffset(datasetRef, dividerDataset);
 
   return createLazyDataset(() =>
     (datasetRef.values() || [])
@@ -356,10 +380,10 @@ export function createPercentageMomentumLazyDataset(dataset: Dataset) {
         value: _value,
         color:
           _value === Momentum.green
-            ? colors.green
+            ? colors.momentumGreen
             : _value === Momentum.yellow
-              ? colors.yellow
-              : colors.red,
+              ? colors.momentumYellow
+              : colors.momentumRed,
       };
     });
   });
@@ -442,15 +466,19 @@ export const createAnyPossibleCohortLazyDatasets = (
   { dateToMarketCap }: { dateToMarketCap: Dataset },
 ) => {
   type PossibleKeys =
+    | `dateTo${AnyPossibleCohortName}PricePaidMean`
+    | `dateTo${AnyPossibleCohortName}RealizedPrice`
+    | `dateTo${AnyPossibleCohortName}RealizedCapitalization30dChange`
     | `dateTo${AnyPossibleCohortName}UnrealizedLossNegative`
     | `dateTo${AnyPossibleCohortName}NetUnrealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}RelativeUnrealizedProfitAndLoss`
+    | `dateTo${AnyPossibleCohortName}RelativeNetUnrealizedProfitAndLoss`
     | `dateTo${AnyPossibleCohortName}RealizedLossNegative`
     | `dateTo${AnyPossibleCohortName}NetRealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}RelativeRealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}CumulatedNetRealizedProfitAndLoss`
+    | `dateTo${AnyPossibleCohortName}RelativeNetRealizedProfitAndLoss`
     | `dateTo${AnyPossibleCohortName}CumulatedRealizedProfit`
     | `dateTo${AnyPossibleCohortName}CumulatedRealizedLoss`
+    | `dateTo${AnyPossibleCohortName}CumulatedNetRealizedProfitAndLoss`
+    | `dateTo${AnyPossibleCohortName}CumulatedNetRealizedProfitAndLoss30dChange`
     | `dateTo${AnyPossibleCohortName}SupplyInLoss`
     | `dateTo${AnyPossibleCohortName}SupplyInLoss%Self`
     | `dateTo${AnyPossibleCohortName}SupplyInLoss%All`
@@ -463,7 +491,7 @@ export const createAnyPossibleCohortLazyDatasets = (
     | `dateTo${AnyPossibleCohortName}SupplyTotal50Percent`
     | `dateTo${AnyPossibleCohortName}SupplyTotal25Percent`
     | `dateTo${AnyPossibleCohortName}SupplyTotal%All`
-    | `dateTo${AnyPossibleCohortName}PricePaidMean${RatioKey}`;
+    | `dateTo${AnyPossibleCohortName}RealizedPrice${RatioKey}`;
 
   const datasets: Partial<Record<PossibleKeys, Dataset>> = {};
 
@@ -475,6 +503,8 @@ export const createAnyPossibleCohortLazyDatasets = (
     const realizedProfit = resourceDatasets[`dateTo${name}RealizedProfit`];
     const unrealizedLoss = resourceDatasets[`dateTo${name}UnrealizedLoss`];
     const unrealizedProfit = resourceDatasets[`dateTo${name}UnrealizedProfit`];
+    const realizedCapitalization =
+      resourceDatasets[`dateTo${name}RealizedCapitalization`];
 
     const realizedNet = createSubtractedLazyDataset(
       realizedProfit,
@@ -493,6 +523,11 @@ export const createAnyPossibleCohortLazyDatasets = (
       supplyTotal,
       true,
     );
+    const cumulatedNetRealized = createCumulatedLazyDataset(realizedNet);
+    const realizedPrice = createDividedLazyDataset(
+      realizedCapitalization,
+      supplyTotal,
+    );
 
     datasets[`dateTo${name}RealizedLossNegative`] =
       createTransformedLazyDataset(realizedLoss, (v) => -v);
@@ -507,13 +542,16 @@ export const createAnyPossibleCohortLazyDatasets = (
       createCumulatedLazyDataset(realizedLoss);
 
     datasets[`dateTo${name}NetRealizedProfitAndLoss`] = realizedNet;
-    datasets[`dateTo${name}RelativeRealizedProfitAndLoss`] =
+    datasets[`dateTo${name}RelativeNetRealizedProfitAndLoss`] =
       createDividedLazyDataset(realizedNet, dateToMarketCap);
+
     datasets[`dateTo${name}CumulatedNetRealizedProfitAndLoss`] =
-      createCumulatedLazyDataset(realizedNet);
+      cumulatedNetRealized;
+    datasets[`dateTo${name}CumulatedNetRealizedProfitAndLoss30dChange`] =
+      createNetChangeLazyDataset(cumulatedNetRealized, 30);
 
     datasets[`dateTo${name}NetUnrealizedProfitAndLoss`] = unrealizedNet;
-    datasets[`dateTo${name}RelativeUnrealizedProfitAndLoss`] =
+    datasets[`dateTo${name}RelativeNetUnrealizedProfitAndLoss`] =
       createDividedLazyDataset(unrealizedNet, dateToMarketCap);
 
     datasets[`dateTo${name}SupplyTotal%All`] = createDividedLazyDataset(
@@ -571,11 +609,20 @@ export const createAnyPossibleCohortLazyDatasets = (
     datasets[`dateTo${name}SupplyTotal25Percent`] =
       createTransformedLazyDataset(supplyTotal, (v) => v * 0.25);
 
-    appendRatioLazyDatasets<`${AnyPossibleCohortName}PricePaidMean`>({
+    datasets[`dateTo${name}RealizedPrice`] = realizedPrice;
+    datasets[`dateTo${name}PricePaidMean`] = realizedPrice;
+
+    datasets[`dateTo${name}RealizedCapitalization30dChange`] =
+      createNetChangeLazyDataset(
+        resourceDatasets.dateToRealizedCapitalization,
+        30,
+      );
+
+    appendRatioLazyDatasets<`${AnyPossibleCohortName}RealizedPrice`>({
       datasets,
-      sourceDataset: resourceDatasets[`dateTo${name}PricePaidMean`],
+      sourceDataset: realizedPrice,
       closes: resourceDatasets.closes,
-      key: `${name}PricePaidMean`,
+      key: `${name}RealizedPrice`,
     });
   });
 
@@ -585,7 +632,7 @@ export const createAnyPossibleCohortLazyDatasets = (
 export function appendRatioLazyDatasets<
   // Key extends `${AnyPossibleCohortName}PricePaidMean`,
   Key extends
-    | `${AnyPossibleCohortName}PricePaidMean`
+    | `${AnyPossibleCohortName}RealizedPrice`
     | `Closes${AverageName}MA`
     | "ActivePrice"
     | "VaultedPrice"
@@ -627,10 +674,10 @@ export function appendRatioLazyDatasets<
         value: momentum,
         color:
           momentum === Momentum.green
-            ? colors.green
+            ? colors.momentumGreen
             : momentum === Momentum.red
-              ? colors.red
-              : colors.yellow,
+              ? colors.momentumRed
+              : colors.momentumYellow,
       };
     }),
   );

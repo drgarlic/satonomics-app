@@ -12,7 +12,7 @@ export function File({
 }: {
   id: string;
   name: string;
-  icon?: JSXElement;
+  icon: JSXElement;
   active: Accessor<boolean>;
   depth: number;
   onClick: VoidFunction;
@@ -30,7 +30,7 @@ export function File({
         style={{
           "font-size": "0.625rem",
           background: `linear-gradient(
-            123deg,
+            ${randomDegree()}deg,
             rgba(235, 243, 208, 1) 0%,
             rgba(235, 243, 208, 0) 18%
           ),
@@ -50,18 +50,18 @@ export function File({
             rgba(194, 166, 241, 0) 100%
           ),
           linear-gradient(
-            135deg,
+            ${randomDegree()}deg,
             rgba(205, 249, 232, 1) 21%,
             rgba(205, 249, 232, 0) 48%
           ),
           linear-gradient(
-            216deg,
+            ${randomDegree()}deg,
             rgba(192, 169, 240, 0) 0%,
             rgba(192, 169, 240, 1) 1%,
             rgba(192, 169, 240, 0) 17%
           ),
           linear-gradient(
-            129deg,
+            ${randomDegree()}deg,
             rgba(192, 169, 240, 0) 29%,
             rgba(192, 169, 240, 1) 38%,
             rgba(192, 169, 240, 0) 50%
@@ -74,7 +74,7 @@ export function File({
             rgba(225, 129, 38, 0) 100%
           ),
           linear-gradient(
-            360deg,
+            ${randomDegree()}deg,
             rgba(194, 166, 241, 1) 0%,
             rgba(194, 166, 241, 1) 100%
           )`,
@@ -91,9 +91,13 @@ export function File({
       depth={depth}
       active={active}
       name={name}
-      icon={() => icon || <IconTablerFile />}
+      icon={() => icon}
       onClick={onClick}
       absolute={absolute}
     />
   );
+}
+
+function randomDegree(min = 0, max = 360) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }

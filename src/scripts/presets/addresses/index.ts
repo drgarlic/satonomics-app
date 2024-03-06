@@ -2,6 +2,7 @@ import {
   applyMultipleSeries,
   colors,
   createCohortPresetList,
+  SeriesType,
 } from "/src/scripts";
 
 import { liquidities } from "../../resources/http";
@@ -26,7 +27,8 @@ export const presets: PresetFolder = {
             {
               id: `total-non-empty-addresses`,
               title: `Total Non Empty Address`,
-              color: colors.orange,
+              color: colors.bitcoin,
+              seriesType: SeriesType.Area,
               dataset: params.datasets.dateToTotalAddressCount,
             },
           ],
@@ -72,7 +74,8 @@ export const presets: PresetFolder = {
             {
               id: "total-addresses-created",
               title: `Total Addresses Created`,
-              color: colors.orange,
+              color: colors.bitcoin,
+              seriesType: SeriesType.Area,
               dataset: params.datasets.dateToTotalAddressesCreated,
             },
           ],
@@ -96,6 +99,7 @@ export const presets: PresetFolder = {
               id: "total-empty-addresses",
               title: `Total Empty Addresses`,
               color: colors.darkWhite,
+              seriesType: SeriesType.Area,
               dataset: params.datasets.dateToTotalEmptyAddresses,
             },
           ],

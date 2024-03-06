@@ -8,33 +8,6 @@ export const presets: PresetFolder = {
   name: "Miners",
   tree: [
     {
-      id: "daily-block-count",
-      icon: IconTablerCube,
-      name: "Daily Block Count",
-      title: "Daily Block Count VS. Target",
-      description: "",
-      applyPreset(params) {
-        return applyMultipleSeries({
-          ...params,
-          priceScaleOptions: {
-            halved: true,
-          },
-          list: [
-            {
-              id: "daily-block-count",
-              title: "Daily Block Count",
-              color: colors.orange,
-              dataset: params.datasets.dateToDailyBlockCount,
-              priceLine: {
-                value: 144,
-                color: colors.white,
-              },
-            },
-          ],
-        });
-      },
-    },
-    {
       id: "yearly-inflation-rate",
       icon: IconTablerBuildingFactory,
       name: "Yearly Inflation Rate",
@@ -51,7 +24,7 @@ export const presets: PresetFolder = {
             {
               id: "yearly-inflation-rate",
               title: "Yearly Inflation Rate (%)",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToYearlyInflationRate,
             },
           ],
@@ -59,73 +32,114 @@ export const presets: PresetFolder = {
       },
     },
     {
-      id: "subsidy",
-      icon: IconTablerMoneybag,
-      name: "Subsidy",
-      title: "Daily Subsidy",
-      description: "",
-      applyPreset(params) {
-        return applyMultipleSeries({
-          ...params,
-          priceScaleOptions: {
-            halved: true,
-          },
-          list: [
+      id: "subsidies",
+      name: "Subsidies",
+      tree: [
+        {
+          id: "daily-subsidies",
+          name: "Daily",
+          tree: [
             {
-              id: "subsidy",
-              title: "Subsidy",
-              color: colors.bitcoin,
-              dataset: params.datasets.dateToSubsidy,
+              id: "daily-subsidies-in-bitcoin",
+              icon: IconTablerMoneybag,
+              name: "In Bitcoin",
+              title: "Daily Subsidies (In Bitcoin)",
+              description: "",
+              applyPreset(params) {
+                return applyMultipleSeries({
+                  ...params,
+                  priceScaleOptions: {
+                    halved: true,
+                  },
+                  list: [
+                    {
+                      id: "subsidy",
+                      title: "Subsidy",
+                      color: colors.bitcoin,
+                      dataset: params.datasets.dateToSubsidy,
+                    },
+                  ],
+                });
+              },
+            },
+            {
+              id: "daily-subsidies-in-dollars",
+              icon: IconTablerCash,
+              name: "In Dollars",
+              title: "Daily Subsidies (In Dollars)",
+              description: "",
+              applyPreset(params) {
+                return applyMultipleSeries({
+                  ...params,
+                  priceScaleOptions: {
+                    halved: true,
+                  },
+                  list: [
+                    {
+                      id: "subsidy-in-dollars",
+                      title: "Subsidy In Dollars",
+                      color: colors.dollars,
+                      dataset: params.datasets.dateToSubsidyInDollars,
+                    },
+                  ],
+                });
+              },
             },
           ],
-        });
-      },
-    },
-    {
-      id: "subsidy-in-dollars",
-      icon: IconTablerCash,
-      name: "Subsidy In Dollars",
-      title: "Daily Subsidy In Dollars",
-      description: "",
-      applyPreset(params) {
-        return applyMultipleSeries({
-          ...params,
-          priceScaleOptions: {
-            halved: true,
-          },
-          list: [
+        },
+        {
+          id: "last-subsidy",
+          name: "Last",
+          tree: [
             {
-              id: "subsidy-in-dollars",
-              title: "Subsidy In Dollars",
-              color: colors.dollars,
-              dataset: params.datasets.dateToSubsidyInDollars,
+              id: "last-subsidy-in-bitcoin",
+              icon: IconTablerCoinBitcoin,
+              name: "In Bitcoin",
+              title: "Last Subsidy (In Bitcoin)",
+              description: "",
+              applyPreset(params) {
+                return applyMultipleSeries({
+                  ...params,
+                  priceScaleOptions: {
+                    halved: true,
+                  },
+                  list: [
+                    {
+                      id: "last",
+                      title: "Last",
+                      color: colors.bitcoin,
+                      dataset: params.datasets.dateToLastSubsidy,
+                    },
+                  ],
+                });
+              },
+            },
+            {
+              id: "last-subsidy-in-dollars",
+              icon: IconTablerCoin,
+              name: "In Dollars",
+              title: "Last Subsidy (In Dollars)",
+              description: "",
+              applyPreset(params) {
+                return applyMultipleSeries({
+                  ...params,
+                  priceScaleOptions: {
+                    halved: true,
+                  },
+                  list: [
+                    {
+                      id: "last",
+                      title: "Last",
+                      color: colors.dollars,
+                      dataset: params.datasets.dateToLastSubsidyInDollars,
+                    },
+                  ],
+                });
+              },
             },
           ],
-        });
-      },
-    },
-    {
-      id: "last-subsidy",
-      icon: IconTablerMoneybag,
-      name: "Last Subsidy",
-      title: "Last Subsidy",
-      description: "",
-      applyPreset(params) {
-        return applyMultipleSeries({
-          ...params,
-          priceScaleOptions: {
-            halved: true,
-          },
-          list: [
-            {
-              id: "last-subsidy",
-              title: "Last Subsidy",
-              color: colors.bitcoin,
-              dataset: params.datasets.dateToLastSubsidy,
-            },
-          ],
-        });
-      },
+        },
+      ],
     },
     {
       id: "fees",

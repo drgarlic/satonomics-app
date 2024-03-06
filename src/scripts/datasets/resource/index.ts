@@ -1,27 +1,29 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 
-import { colors, convertCandlesticksToSingleValueDataset } from "/src/scripts";
+import { convertCandlesticksToSingleValueDataset } from "/src/scripts";
+import { createASS } from "/src/solid";
 
 import { createLazyDataset } from "../lazy";
 import { createResourceDataset } from "./creators";
 
-export async function createResourceDatasets(resources: ResourcesHTTP) {
-  const cachedCandlesticks = await (
-    await import("/src/assets/data/btcusd.json")
-  ).default;
+export function createResourceDatasets(resources: ResourcesHTTP) {
+  const cachedCandlesticks = createASS<FetchedCandlestick[] | null>(null);
+  import("/src/assets/data/btcusd.json").then((candlesticks) => {
+    cachedCandlesticks.set(candlesticks.default);
 
-  resources.candlesticks.url.searchParams.set(
-    "since",
-    (
-      new Date(cachedCandlesticks.at(-1)?.date || 0).valueOf() / 1000
-    ).toString(),
-  );
+    resources.candlesticks.url.searchParams.set(
+      "since",
+      (
+        new Date(candlesticks.default.at(-1)?.date || 0).valueOf() / 1000
+      ).toString(),
+    );
 
-  resources.candlesticks.fetch();
+    resources.candlesticks.fetch();
+  });
 
   const candlestickValues = createLazyMemo(() =>
     [
-      ...(cachedCandlesticks as FetchedCandlestick[]),
+      ...(cachedCandlesticks() || []),
       ...(resources.candlesticks.values() || []),
     ].map(
       (candle): FullCandlestick => ({
@@ -56,35 +58,35 @@ export async function createResourceDatasets(resources: ResourcesHTTP) {
     candlesticks,
     closes,
     closesRecord,
-    fundingRates: createResourceDataset({
-      fetch: resources.fundingRates.fetch,
-      values: createLazyMemo(() =>
-        (resources.fundingRates.values() || []).map(
-          ({ date, time, value }) => ({
-            date,
-            time,
-            value: value * 100,
-            color: value >= 0 ? colors.green : colors.red,
-          }),
-        ),
-      ),
-    }),
-    vddMultiple: createResourceDataset({
-      fetch: resources.vddMultiple.fetch,
-      values: createLazyMemo(() =>
-        (resources.vddMultiple.values() || []).map(({ date, time, value }) => {
-          const color =
-            value >= 3 ? colors.red : value >= 1 ? colors.orange : colors.green;
+    // fundingRates: createResourceDataset({
+    //   fetch: resources.fundingRates.fetch,
+    //   values: createLazyMemo(() =>
+    //     (resources.fundingRates.values() || []).map(
+    //       ({ date, time, value }) => ({
+    //         date,
+    //         time,
+    //         value: value * 100,
+    //         color: value >= 0 ? colors.green : colors.red,
+    //       }),
+    //     ),
+    //   ),
+    // }),
+    // vddMultiple: createResourceDataset({
+    //   fetch: resources.vddMultiple.fetch,
+    //   values: createLazyMemo(() =>
+    //     (resources.vddMultiple.values() || []).map(({ date, time, value }) => {
+    //       const color =
+    //         value >= 3 ? colors.red : value >= 1 ? colors.orange : colors.green;
 
-          return {
-            date,
-            time,
-            value: value * 100,
-            color: color,
-          };
-        }),
-      ),
-    }),
+    //       return {
+    //         date,
+    //         time,
+    //         value: value * 100,
+    //         color: color,
+    //       };
+    //     }),
+    //   ),
+    // }),
   };
 
   type PartialKeys = keyof typeof partialDatasets;

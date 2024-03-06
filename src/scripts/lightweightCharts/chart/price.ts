@@ -69,6 +69,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
     const series = createLineSeries(chart, {
       color: lowerOpacity ? colors.darkWhite : colors.white,
       ...options?.seriesOptions,
+      lastValueVisible: false,
     });
 
     chartState.priceSeries = series;

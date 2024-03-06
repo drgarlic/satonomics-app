@@ -440,7 +440,7 @@ export const presets: PresetFolder = {
                 {
                   id: "liveliness-incremental-change",
                   title: "Liveliness Incremental Change",
-                  color: colors.darkRose,
+                  color: colors.darkLiveliness,
                   seriesType: SeriesType.Based,
                   dataset: params.datasets.dateToLivelinessIncrementalChange,
                 },
@@ -807,7 +807,7 @@ export const presets: PresetFolder = {
                 {
                   id: "supply-in-profit",
                   title: "Supply in profit",
-                  color: colors.yellow,
+                  color: colors.bitcoin,
                   dataset: params.datasets.dateToSupplyInProfit,
                 },
               ],
@@ -842,7 +842,7 @@ export const presets: PresetFolder = {
                 {
                   id: "supply-in-loss",
                   title: "Supply in Loss",
-                  color: colors.yellow,
+                  color: colors.bitcoin,
                   dataset: params.datasets.dateToSupplyInLoss,
                 },
               ],
@@ -875,7 +875,7 @@ export const presets: PresetFolder = {
             {
               id: "yearly-inflation-rate",
               title: "Nominal (%)",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToYearlyInflationRate,
             },
           ],
@@ -905,7 +905,7 @@ export const presets: PresetFolder = {
             {
               id: "transactions-velocity",
               title: "Nominal",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToTransactionsVelocity,
             },
           ],
@@ -946,7 +946,8 @@ export const presets: PresetFolder = {
                   id: "realized-cap",
                   title: "Realized Cap",
                   color: colors.realizedCap,
-                  dataset: params.datasets.dateToRealizedCap,
+                  dataset:
+                    params.datasets.dateToCumulatedNetRealizedProfitAndLoss,
                 },
                 {
                   id: "market-cap",
@@ -1022,7 +1023,7 @@ export const presets: PresetFolder = {
                 {
                   id: "investor-cap",
                   title: "Investor Cap",
-                  color: colors.yellow,
+                  color: colors.bitcoin,
                   dataset: params.datasets.dateToThermoCapToInvestorCapRatio,
                 },
               ],

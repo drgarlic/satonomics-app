@@ -1,4 +1,5 @@
 import { computeBackEndURL, retryingFetch } from "/src/scripts";
+import { createASS } from "/src/solid";
 
 import { createBackEndResource, createResourceHTTP } from "./base";
 
@@ -170,6 +171,10 @@ export const percentiles = [
 
 export const anyCohortAttributes = [
   {
+    name: "RealizedCapitalization" as const,
+    route: "realized-capitalization",
+  },
+  {
     name: "RealizedLoss" as const,
     route: "realized-loss",
   },
@@ -200,10 +205,6 @@ export const anyCohortAttributes = [
   {
     name: "UtxoCount" as const,
     route: "utxo_count",
-  },
-  {
-    name: "PricePaidMean" as const,
-    route: "price_paid-mean",
   },
   {
     name: "PricePaidMedian" as const,
@@ -342,7 +343,7 @@ export const createResourcesHTTP = () => {
       url: computeBackEndURL("/ohlcv"),
       customFetch: retryingFetch,
     }),
-    dateToDailyBlockCount: createBackEndResource(`/date-to-block_count`),
+    dateToNewBlocks: createBackEndResource(`/date-to-block_count`),
     dateToTransactionCount: createBackEndResource(`/date-to-transaction-count`),
     dateToTransactionVolume: createBackEndResource(
       `/date-to-transaction-volume`,
@@ -363,30 +364,24 @@ export const createResourcesHTTP = () => {
       `/date-to-total_empty_addresses`,
     ),
 
-    sopr: createBackEndResource(`/sopr`),
+    dateToAltcoinsMarketCap: createBackEndResource(
+      `/date-to-altcoins-marketcap`,
+    ),
+    dateToStablecoinsMarketCap: createBackEndResource(
+      `/date-to-stablecoins-marketcap`,
+    ),
 
+    usdtMarketCap: createBackEndResource(`/usdt-marketcap`),
+    usdcMarketCap: createBackEndResource(`/usdc-marketcap`),
+
+    sopr: createBackEndResource(`/sopr`),
     terminalPrice: createBackEndResource(`/terminal-price`),
-    realizedPrice: createBackEndResource(`/realized-price`),
     balancedPrice: createBackEndResource(`/balanced-price`),
     cointimePrice: createBackEndResource(`/cointime-price`),
-    trueMeanPrice: createBackEndResource(`/true-mean-price`),
-    vaultedPrice: createBackEndResource(`/vaulted-price`),
     cvdd: createBackEndResource(`/cvdd`),
     fundingRates: createBackEndResource(`/funding-rates`),
     vddMultiple: createBackEndResource(`/vdd-multiple`),
     minersRevenue: createBackEndResource(`/miners-revenue`),
-    altcoinsMarketCap: createBackEndResource(`/altcoins-marketcap`),
-    bitcoinMarketCap: createBackEndResource(`/bitcoin-marketcap`),
-    ethereumMarketCap: createBackEndResource(`/ethereum-marketcap`),
-    usdtMarketCap: createBackEndResource(`/usdt-marketcap`),
-    usdcMarketCap: createBackEndResource(`/usdc-marketcap`),
-    tusdMarketCap: createBackEndResource(`/tusd-marketcap`),
-    busdMarketCap: createBackEndResource(`/busd-marketcap`),
-    daiMarketCap: createBackEndResource(`/dai-marketcap`),
-    fraxMarketCap: createBackEndResource(`/frax-marketcap`),
-    usddMarketCap: createBackEndResource(`/usdd-marketcap`),
-    ustMarketCap: createBackEndResource(`/ust-marketcap`),
-    pyusdMarketCap: createBackEndResource(`/pyusd-marketcap`),
   };
 
   // ---

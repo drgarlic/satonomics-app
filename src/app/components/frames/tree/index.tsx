@@ -1,4 +1,4 @@
-import { scrollIntoView, sleep } from "/src/scripts";
+import { openWindow, scrollIntoView, sleep } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import { Counter } from "../counter";
@@ -8,11 +8,17 @@ import { Tree } from "./components";
 export function TreeFrame({
   presets,
   visibleFrame,
+  resources,
 }: {
   presets: Presets;
   visibleFrame: Accessor<FrameName>;
+  resources: ResourcesHTTP;
 }) {
   const div = createASS<HTMLDivElement | undefined>(undefined);
+
+  onMount(() => {
+    goToSelected(presets);
+  });
 
   return (
     <div
@@ -37,6 +43,25 @@ export function TreeFrame({
             favorites={presets.favorites}
           />
         </div>
+        <div class="border-t border-dashed border-white" />
+        <button
+          class="w-full px-3 py-1.5 text-left hover:underline"
+          onClick={() => {
+            openWindow(`<html>
+            <head><title>API Routes - SATONOMICS</title></head>
+            <body>
+            ${Object.entries(resources)
+              .map(
+                ([name, resource]) =>
+                  `<p>${name}: <a href="${resource.url}" target="_blank">${resource.url}</a></p>`,
+              )
+              .join("\n")}
+            </body>
+           </html>`);
+          }}
+        >
+          API Routes <span class="opacity-50">- Free & Unlimited</span>
+        </button>
       </ScrollableFrame>
       <div class="flex w-full border-t border-dashed border-white bg-black">
         <Button

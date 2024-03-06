@@ -14,3 +14,4 @@ export * from "./sorts";
 export * from "./storage";
 export * from "./time";
 export * from "./urlParams";
+export * from "./window";

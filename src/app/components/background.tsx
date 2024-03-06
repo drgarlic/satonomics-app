@@ -21,6 +21,7 @@ const texts = [
   "hodl!",
   "Hal Finney",
   "Vote for better money",
+  "gradually then suddenly",
 ];
 
 export const LOCAL_STORAGE_MARQUEE_KEY = "bg-marquee";

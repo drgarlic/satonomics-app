@@ -1,14 +1,14 @@
 export const resetRightPriceScale = (
   chart: IChartApi,
   options?: FullPriceScaleOptions,
-) =>
-  chart.priceScale("right").applyOptions({
+) => {
+  const finalOptions = {
     ...options,
     scaleMargins: {
       ...(options?.halved
         ? {
             top: 0.5,
-            bottom: 0.01,
+            bottom: 0.05,
           }
         : {
             top: 0.1,
@@ -16,7 +16,12 @@ export const resetRightPriceScale = (
           }),
       ...options?.scaleMargins,
     },
-  });
+  };
+
+  chart.priceScale("right").applyOptions(finalOptions);
+
+  return finalOptions;
+};
 
 export const resetLeftPriceScale = (
   chart: IChartApi,

@@ -96,23 +96,21 @@ export function App() {
     },
   );
 
-  onMount(async () => {
-    const datasets = await createDatasets(resources.http);
+  const datasets = createDatasets(resources.http);
 
-    createEffect(() => {
-      const preset = presets.selected();
+  createEffect(() => {
+    const preset = presets.selected();
 
-      if (datasets.candlesticks.values()?.length) {
-        untrack(() =>
-          renderChart({
-            datasets,
-            preset,
-            liveCandle: liveCandle.latest,
-            legendSetter: legend.set,
-          }),
-        );
-      }
-    });
+    if (datasets.candlesticks.values()?.length) {
+      untrack(() =>
+        renderChart({
+          datasets,
+          preset,
+          liveCandle: liveCandle.latest,
+          legendSetter: legend.set,
+        }),
+      );
+    }
   });
 
   onCleanup(cleanChart);
@@ -180,8 +178,13 @@ export function App() {
                   !windowSizeIsAtLeastMedium() && visibleFrame() === "Chart"
                 }
                 legend={legend}
+                datasets={datasets}
               />
-              <TreeFrame presets={presets} visibleFrame={visibleFrame} />
+              <TreeFrame
+                presets={presets}
+                visibleFrame={visibleFrame}
+                resources={resources.http}
+              />
               <FavoritesFrame presets={presets} visibleFrame={visibleFrame} />
               <SearchFrame presets={presets} visibleFrame={visibleFrame} />
               <SettingsFrame marquee={marquee} visibleFrame={visibleFrame} />
@@ -206,6 +209,7 @@ export function App() {
                 resources={resources}
                 show={windowSizeIsAtLeastMedium}
                 legend={legend}
+                datasets={datasets}
               />
             </div>
           </div>

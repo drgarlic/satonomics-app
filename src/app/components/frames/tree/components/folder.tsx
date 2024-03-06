@@ -27,9 +27,11 @@ export function Folder({
       icon={icon}
       onClick={onClick}
       absolute={() => (
-        <span class="rounded-full bg-white bg-opacity-[0.075] px-2 py-0.5 text-xs text-neutral-400">
-          {children}
-        </span>
+        <Show when={!open()}>
+          <span class="rounded-full bg-white bg-opacity-[0.075] px-2 py-0.5 text-xs text-neutral-400">
+            {children}
+          </span>
+        </Show>
       )}
     ></Line>
   );

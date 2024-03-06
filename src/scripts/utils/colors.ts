@@ -1,37 +1,64 @@
-const red = "#ef4444";
-const darkRed = "#7f1d1d";
-const orange = "#f97316";
-const darkOrange = "#7c2d12";
-const amber = "#f59e0b";
-const darkAmber = "#78350f";
-const yellow = "#eab308";
-const darkYellow = "#713f12";
-const lime = "#84cc16";
-const darkLime = "#365314";
-const green = "#22c55e";
-const darkGreen = "#14532d";
-const emerald = "#10b981";
-const darkEmerald = "#064e3b";
-const teal = "#14b8a6";
-const darkTeal = "#134e4a";
-const cyan = "#06b6d4";
-const darkCyan = "#164e63";
-const sky = "#0ea5e9";
-const darkSky = "#0c4a6e";
-const blue = "#3b82f6";
-const darkBlue = "#1e3a8a";
-const indigo = "#6366f1";
-const darkIndigo = "#312e81";
-const violet = "#8b5cf6";
-const darkViolet = "#4c1d95";
-const purple = "#a855f7";
-const darkPurple = "#581c87";
-const fuchsia = "#d946ef";
-const darkFuchsia = "#701a75";
-const pink = "#ec4899";
-const darkPink = "#831843";
-const rose = "#f43f5e";
-const darkRose = "#881337";
+import {
+  amber as amberTailwind,
+  blue as blueTailwind,
+  cyan as cyanTailwind,
+  emerald as emeraldTailwind,
+  fuchsia as fuchsiaTailwind,
+  neutral as grayTailwind,
+  green as greenTailwind,
+  indigo as indigoTailwind,
+  lime as limeTailwind,
+  orange as orangeTailwind,
+  pink as pinkTailwind,
+  purple as purpleTailwind,
+  red as redTailwind,
+  rose as roseTailwind,
+  sky as skyTailwind,
+  teal as tealTailwind,
+  violet as violetTailwind,
+  yellow as yellowTailwind,
+} from "tailwindcss/colors";
+
+const red = redTailwind[500];
+const darkRed = redTailwind[900];
+const orange = orangeTailwind[500];
+const darkOrange = orangeTailwind[900];
+const amber = amberTailwind[500];
+const darkAmber = amberTailwind[900];
+const yellow = yellowTailwind[500];
+const darkYellow = yellowTailwind[500];
+const lime = limeTailwind[500];
+const darkLime = limeTailwind[900];
+const green = greenTailwind[500];
+const darkGreen = greenTailwind[900];
+const emerald = emeraldTailwind[500];
+const darkEmerald = emeraldTailwind[900];
+const teal = tealTailwind[500];
+const darkTeal = tealTailwind[900];
+const cyan = cyanTailwind[500];
+const darkCyan = cyanTailwind[900];
+const sky = skyTailwind[500];
+const darkSky = skyTailwind[900];
+const blue = blueTailwind[500];
+const darkBlue = blueTailwind[900];
+const indigo = indigoTailwind[500];
+const darkIndigo = indigoTailwind[900];
+const violet = violetTailwind[500];
+const darkViolet = violetTailwind[900];
+const purple = purpleTailwind[500];
+const darkPurple = purpleTailwind[900];
+const fuchsia = fuchsiaTailwind[500];
+const darkFuchsia = fuchsiaTailwind[900];
+const pink = pinkTailwind[500];
+const darkPink = pinkTailwind[900];
+const rose = roseTailwind[500];
+const darkRose = roseTailwind[900];
+
+const darkWhite = grayTailwind[400];
+const gray = grayTailwind[600];
+
+const black = "#000000";
+const white = "#ffffff";
 
 export const convertCandleToCandleColor = (
   candle: DatedCandlestickData,
@@ -51,57 +78,18 @@ export const convertCandleToVolumeColor = (
 ) =>
   (candle.close || 1) > (candle.open || 0)
     ? !inverse
-      ? colors.darkGreen
-      : colors.darkRed
+      ? darkGreen
+      : darkRed
     : !inverse
-      ? colors.darkRed
-      : colors.darkGreen;
-
-// const neutral: {
-//   '50': '#fafafa'
-//   '100': '#f5f5f5'
-//   '200': '#e5e5e5'
-//   '300': '#d4d4d4'
-//   '400': '#a3a3a3'
-//   '500': '#737373'
-//   '600': '#525252'
-//   '700': '#404040'
-//   '800': '#262626'
-//   '900': '#171717'
-//   '950': '#0a0a0a'
-// }
-
-const darkWhite = "#a3a3a3";
-const gray = "#525252";
-
-const black = "#000000";
-const white = "#ffffff";
+      ? darkRed
+      : darkGreen;
 
 export const colors = {
-  black,
   white,
-  red,
-  gray,
-  orange,
-  yellow,
-  green,
-  lime,
-  violet,
-  blue,
-  cyan,
-  pink,
-  rose,
-  emerald,
-  indigo,
-  purple,
-  fuchsia,
-  amber,
   darkWhite,
-  darkRed,
-  darkGreen,
-  darkRose,
-  darkPink,
+  gray,
   bitcoin: orange,
+  darkBitcoin: darkOrange,
   dollars: emerald,
   closes7DMA: yellow,
   closes30DMA: orange,
@@ -132,7 +120,9 @@ export const colors = {
   cvdd: lime,
   terminalPrice: red,
   loss: red,
+  darkLoss: darkRed,
   profit: green,
+  darkProfit: darkGreen,
   thermoCap: green,
   investorCap: rose,
   realizedCap: purple,
@@ -146,23 +136,30 @@ export const colors = {
   dai: amber,
   tusd: indigo,
   pyusd: blue,
+  darkLiveliness: darkRose,
   liveliness: rose,
   vaultedness: green,
   activityToVaultednessRatio: violet,
-  from10y: indigo,
-  from7yTo10y: blue,
-  from5yTo7y: cyan,
-  from3yTo5y: teal,
-  from2yTo3y: emerald,
+  from10y: purple,
+  from7yTo10y: violet,
+  from5yTo7y: indigo,
+  from3yTo5y: blue,
+  from2yTo3y: cyan,
   from1yTo2y: green,
   from6mTo1y: lime,
   from3mTo6m: yellow,
   from1mTo3m: amber,
   from1wTo1m: orange,
   from1dTo1w: red,
-  upTo1d: rose,
+  upTo1d: white,
   coinblocksCreated: purple,
   coinblocksDestroyed: red,
   coinblocksStored: green,
   momentum: [green, yellow, red],
+  momentumGreen: green,
+  momentumYellow: yellow,
+  momentumRed: red,
+  extremeMax: red,
+  extremeMiddle: orange,
+  extremeMin: yellow,
 };

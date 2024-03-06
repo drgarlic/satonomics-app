@@ -48,7 +48,8 @@ function Button({
       disabled={disabled?.()}
       class={classPropToString([
         colors?.() || (disabled?.() ? "" : "hover:bg-white/20"),
-        "group flex-none p-3 disabled:opacity-25",
+        !disabled?.() && "group",
+        "flex-none p-3 disabled:opacity-25",
       ])}
       onClick={onClick}
     >

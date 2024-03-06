@@ -3,14 +3,16 @@ import { createASS } from "/src/solid";
 
 import { presets as addressesPresets } from "./addresses";
 import { presets as averagesPresets } from "./averages";
-import { presets as basePresets } from "./base";
+import { presets as blocksPresets } from "./blocks";
 import { presets as coinblocksPresets } from "./coinblocks";
 import { presets as fiatPresets } from "./fiat";
 import { presets as hodlersPresets } from "./hodlers";
+import { presets as marketcapsPresets } from "./marketcaps";
 import { presets as metalsPresets } from "./metals";
 import { presets as minersPresets } from "./miners";
 import { createCohortPresetList } from "./templates";
 import { presets as transactionsPresets } from "./transactions";
+import { presets as usdPresets } from "./usd";
 
 export * from "./templates";
 
@@ -21,18 +23,20 @@ export const LOCAL_STORAGE_FOLDERS_KEY = "folders";
 
 export function createPresets(): Presets {
   const tree: PresetTree = [
-    ...basePresets,
+    usdPresets,
+    blocksPresets,
+    minersPresets,
+    transactionsPresets,
     ...createCohortPresetList({
       id: "all",
-      color: colors.orange,
+      color: colors.bitcoin,
       datasetKey: "",
     }),
-    transactionsPresets,
-    minersPresets,
     hodlersPresets,
     addressesPresets,
     averagesPresets,
     coinblocksPresets,
+    marketcapsPresets,
     fiatPresets,
     metalsPresets,
   ];

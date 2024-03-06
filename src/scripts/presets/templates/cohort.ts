@@ -41,81 +41,71 @@ export function createCohortPresetList({
 }): PresetTree {
   return [
     {
-      id: `${id}-utxo-count`,
-      name: `UTXO Count`,
-      title: `${datasetKey} UTXO Count`,
-      icon: () => IconTablerTicket,
-      applyPreset(params) {
-        return applyMultipleSeries({
-          ...params,
-          priceScaleOptions: {
-            halved: true,
-          },
-          list: [
-            {
-              id: "utxo-count",
-              title: "UTXO Count",
-              color,
-              seriesType: SeriesType.Area,
-              dataset: params.datasets[`dateTo${datasetKey}UtxoCount`],
-            },
-          ],
-        });
-      },
-      description: "",
-    },
-    {
-      id: `${id}-price-paid`,
-      name: "Prices Paid",
+      id: `${id}-utxos`,
+      name: "UTXOs - Unspent Transaction Outputs",
       tree: [
         {
-          id: `${id}-mean-price-paid-folder`,
-          name: "Mean",
-          tree: [
-            {
-              id: `${id}-mean-price-paid`,
-              name: `Price - Realized Price`,
-              title: `${datasetKey} Mean Price Paid (Realized Price)`,
-              icon: () => IconTablerMathAvg,
-              applyPreset(params) {
-                return applyMultipleSeries({
-                  ...params,
-                  list: [
-                    {
-                      id: "mean",
-                      title: "Mean",
-                      color,
-                      dataset:
-                        params.datasets[`dateTo${datasetKey}PricePaidMean`],
-                    },
-                  ],
-                });
-              },
-              description: "",
-            },
-            createRatioPresetFolder({
-              id: `${id}-mean-price-paid`,
-              color,
-              title: `${datasetKey} Mean Price Paid`,
-              datasetKey: `${datasetKey}PricePaidMean`,
-            }),
-          ],
-        },
-        {
-          id: `${id}-median-price-paid`,
-          name: "Median",
-          title: `${datasetKey} Median Price Paid`,
-          icon: () => IconTablerSquareHalf,
+          id: `${id}-utxo-count`,
+          name: `Count`,
+          title: `${datasetKey} UTXO Count`,
+          icon: () => IconTablerTicket,
           applyPreset(params) {
             return applyMultipleSeries({
               ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
               list: [
                 {
-                  id: "median",
-                  title: "Median",
+                  id: "utxo-count",
+                  title: "UTXO Count",
                   color,
+                  seriesType: SeriesType.Area,
+                  dataset: params.datasets[`dateTo${datasetKey}UtxoCount`],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+      ],
+    },
+    {
+      id: `${id}-realized`,
+      name: "Realized",
+      tree: [
+        {
+          id: `${id}-realized-capitalization`,
+          name: `Capitalization`,
+          title: `${datasetKey} Realized Capitalization`,
+          icon: () => IconTablerPigMoney,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                ...(id && id !== "all"
+                  ? [
+                      {
+                        id: "realized-capitalization",
+                        title: "Realized Capitalization",
+                        color: colors.bitcoin,
+                        dataset:
+                          params.datasets[`dateToRealizedCapitalization`],
+                      },
+                    ]
+                  : []),
+                {
+                  id: `${id}-realized-capitalization`,
+                  title: `${datasetKey} Realized Capitalization`,
+                  color,
+                  seriesType: SeriesType.Area,
                   dataset:
-                    params.datasets[`dateTo${datasetKey}PricePaidMedian`],
+                    params.datasets[
+                      `dateTo${datasetKey}RealizedCapitalization`
+                    ],
                 },
               ],
             });
@@ -123,67 +113,441 @@ export function createCohortPresetList({
           description: "",
         },
         {
-          name: "Percentiles",
-          id: `${id}-percentiles`,
+          id: `${id}-realized-capitalization-30d-change`,
+          name: `Capitalization 30 Day Change`,
+          title: `${datasetKey} Realized Capitalization 30 Day Change`,
+          icon: () => IconTablerStatusChange,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: `${id}-realized-capitalization-30d-change`,
+                  title: `${datasetKey} Realized Cap. 30 Day Change`,
+                  seriesType: SeriesType.Based,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}RealizedCapitalization30dChange`
+                    ],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-realized-price-folder`,
+          name: "Price",
           tree: [
             {
-              id: `${id}-price-paid-deciles`,
-              name: `Deciles`,
-              title: `${datasetKey} deciles`,
-              icon: () => IconTablerSquareHalf,
+              id: `${id}-realized-price`,
+              name: `Value`,
+              title: `${datasetKey} Realized Price`,
+              icon: () => IconTablerMathAvg,
               applyPreset(params) {
                 return applyMultipleSeries({
                   ...params,
                   list: [
                     {
-                      id: "median",
-                      dataset:
-                        params.datasets[`dateTo${datasetKey}PricePaidMedian`],
+                      id: "realized-price",
+                      title: "Realized Price",
                       color,
-                      title: "Median",
+                      dataset:
+                        params.datasets[`dateTo${datasetKey}RealizedPrice`],
                     },
-                    ...percentiles
-                      .filter((percentile) => Number(percentile) % 10 === 0)
-                      .map((percentile) => ({
-                        id: `${percentile}-percentile`,
-                        dataset:
-                          params.datasets[
-                            `dateTo${datasetKey}PricePaid${percentile}Percentile`
-                          ],
-                        color,
-                        title: `${percentile}th percentile`,
-                      })),
                   ],
                 });
               },
               description: "",
             },
-            ...percentiles.map(
-              (percentile): PartialPreset => ({
-                id: `${id}-price-paid-${percentile}p`,
-                name: `${percentile}%`,
-                title: `${datasetKey} ${percentile}th percentile`,
-                icon: () => IconTablerSquareHalf,
-                applyPreset(params) {
-                  return applyMultipleSeries({
-                    ...params,
-                    list: [
-                      {
-                        id: `${percentile}-percentile`,
-                        title: `${percentile}th percentile`,
-                        color,
-                        dataset:
-                          params.datasets[
-                            `dateTo${datasetKey}PricePaid${percentile}Percentile`
-                          ],
-                      },
-                    ],
-                  });
-                },
-                description: "",
-              }),
-            ),
+            createRatioPresetFolder({
+              id: `${id}-realized-price`,
+              color,
+              title: `${datasetKey} Realized Price`,
+              datasetKey: `${datasetKey}RealizedPrice`,
+            }),
           ],
+        },
+        {
+          id: `${id}-realized-profit`,
+          name: `Profit`,
+          title: `${datasetKey} Realized Profit`,
+          icon: () => IconTablerCash,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "realized-profit",
+                  title: "Realized Profit",
+                  dataset: params.datasets[`dateTo${datasetKey}RealizedProfit`],
+                  color: colors.profit,
+                  seriesType: SeriesType.Area,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-realized-loss`,
+          name: "Loss",
+          title: `${datasetKey} Realized Loss`,
+          icon: () => IconTablerCoffin,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "realized-loss",
+                  title: "Realized Loss",
+                  dataset: params.datasets[`dateTo${datasetKey}RealizedLoss`],
+                  color: colors.loss,
+                  seriesType: SeriesType.Area,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-realized-profit-and-loss`,
+          name: `PNL - Profit And Loss`,
+          title: `${datasetKey} PNL - Profit And Loss`,
+          icon: () => IconTablerArrowsVertical,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "realized-profit",
+                  title: "Realized Profit",
+                  color: colors.profit,
+                  dataset: params.datasets[`dateTo${datasetKey}RealizedProfit`],
+                  seriesType: SeriesType.Based,
+                },
+                {
+                  id: "realized-loss",
+                  title: "Realized Loss",
+                  color: colors.loss,
+                  dataset:
+                    params.datasets[`dateTo${datasetKey}RealizedLossNegative`],
+                  seriesType: SeriesType.Based,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-net-realized-profit-and-loss`,
+          name: `Net PNL`,
+          title: `${datasetKey} Net Realized Profit And Loss`,
+          icon: () => IconTablerScale,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "net-realized-profit-and-loss",
+                  title: "Net PNL",
+                  seriesType: SeriesType.Based,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}NetRealizedProfitAndLoss`
+                    ],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-relative-net-realized-profit-and-loss`,
+          name: `Relative Net PNL`,
+          title: `${datasetKey} Net Realized Profit And Loss Relative To Total Market Capitalization`,
+          icon: () => IconTablerDivide,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "relative-net-realized-profit-and-loss",
+                  title: "Relative Net PNL",
+                  seriesType: SeriesType.Based,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}RelativeNetRealizedProfitAndLoss`
+                    ],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-cumulated-realized-profit`,
+          name: `Cumulated Profit`,
+          title: `${datasetKey} Cumulated Realized Profit`,
+          icon: () => IconTablerSum,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "cumulated-realized-profit",
+                  title: "Cumulated Realized Profit",
+                  color: colors.profit,
+                  seriesType: SeriesType.Area,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}CumulatedRealizedProfit`
+                    ],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-cumulated-realized-loss`,
+          name: "Cumulated Loss",
+          title: `${datasetKey} Cumulated Realized Loss`,
+          icon: () => IconTablerSum,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "cumulated-realized-loss",
+                  title: "Cumulated Realized Loss",
+                  color: colors.loss,
+                  seriesType: SeriesType.Area,
+                  dataset:
+                    params.datasets[`dateTo${datasetKey}CumulatedRealizedLoss`],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-cumulated-net-realized-profit-and-loss`,
+          name: `Cumulated Net PNL`,
+          title: `${datasetKey} Cumulated Net Realized Profit And Loss`,
+          icon: () => IconTablerSum,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "cumulated-net-realized-profit-and-loss",
+                  title: "Cumulated Net Realized PNL",
+                  seriesType: SeriesType.Based,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}CumulatedNetRealizedProfitAndLoss`
+                    ],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-cumulated-net-realized-profit-and-loss-30d-change`,
+          name: `Cumulated Net PNL 30 Day Change`,
+          title: `${datasetKey} Cumulated Net Realized Profit And Loss 30 Day Change`,
+          icon: () => IconTablerTimeDuration30,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "cumulated-net-realized-profit-and-loss-30d-change",
+                  title: "Cumulated Net Realized PNL 30d Change",
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}CumulatedNetRealizedProfitAndLoss30dChange`
+                    ],
+                  seriesType: SeriesType.Based,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+      ],
+    },
+    {
+      id: `${id}-unrealized`,
+      name: "Unrealized",
+      tree: [
+        {
+          id: `${id}-unrealized-profit`,
+          name: `Profit`,
+          title: `${datasetKey} Unrealized Profit`,
+          icon: () => IconTablerMoodDollar,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "unrealized-profit",
+                  title: "Unrealized Profit",
+                  dataset:
+                    params.datasets[`dateTo${datasetKey}UnrealizedProfit`],
+                  color: colors.profit,
+                  seriesType: SeriesType.Area,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-unrealized-loss`,
+          name: "Loss",
+          title: `${datasetKey} Unrealized Loss`,
+          icon: () => IconTablerMoodSadDizzy,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "unrealized-loss",
+                  title: "Unrealized Loss",
+                  dataset: params.datasets[`dateTo${datasetKey}UnrealizedLoss`],
+                  color: colors.loss,
+                  seriesType: SeriesType.Area,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-unrealized-profit-and-loss`,
+          name: `PNL - Profit And Loss`,
+          title: `${datasetKey} Unrealized PNL - Profit And Loss`,
+          icon: () => IconTablerArrowsVertical,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "unrealized-loss",
+                  title: "Unrealized Profit",
+                  color: colors.profit,
+                  dataset:
+                    params.datasets[`dateTo${datasetKey}UnrealizedProfit`],
+                  seriesType: SeriesType.Based,
+                },
+                {
+                  id: "unrealized-loss",
+                  title: "Unrealized Loss",
+                  color: colors.loss,
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}UnrealizedLossNegative`
+                    ],
+                  seriesType: SeriesType.Based,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-net-unrealized-profit-and-loss`,
+          name: `Net PNL`,
+          title: `${datasetKey} Net Unrealized Profit And Loss`,
+          icon: () => IconTablerScale,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "net-unrealized-profit-and-loss",
+                  title: "Net Unrealized PNL",
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}NetUnrealizedProfitAndLoss`
+                    ],
+                  seriesType: SeriesType.Based,
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-relative-net-unrealized-profit-and-loss`,
+          name: `Relative Net PNL`,
+          title: `${datasetKey} Net Unrealized Profit And Loss Relative To Total Market Capitalization`,
+          icon: () => IconTablerDivide,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              priceScaleOptions: {
+                halved: true,
+              },
+              list: [
+                {
+                  id: "relative-net-unrealized-profit-and-loss",
+                  title: "Relative Net Unrealized PNL",
+                  dataset:
+                    params.datasets[
+                      `dateTo${datasetKey}RelativeNetUnrealizedProfitAndLoss`
+                    ],
+                  seriesType: SeriesType.Based,
+                },
+              ],
+            });
+          },
+          description: "",
         },
       ],
     },
@@ -727,361 +1091,108 @@ export function createCohortPresetList({
       ],
     },
     {
-      id: `${id}-unrealized`,
-      name: "Unrealized",
+      id: `${id}-price-paid`,
+      name: "Prices Paid",
       tree: [
         {
-          id: `${id}-unrealized-profit`,
-          name: `Profit`,
-          title: `${datasetKey} Unrealized Profit`,
-          icon: () => IconTablerMoodDollar,
+          id: `${id}-mean-price-paid`,
+          name: `Mean`,
+          title: `${datasetKey} Mean Price Paid`,
+          icon: () => IconTablerMathAvg,
           applyPreset(params) {
             return applyMultipleSeries({
               ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
               list: [
                 {
-                  id: "unrealized-profit",
-                  title: "Unrealized Profit",
+                  id: "mean",
+                  title: "Mean",
+                  color,
+                  dataset: params.datasets[`dateTo${datasetKey}PricePaidMean`],
+                },
+              ],
+            });
+          },
+          description: "",
+        },
+        {
+          id: `${id}-median-price-paid`,
+          name: "Median",
+          title: `${datasetKey} Median Price Paid`,
+          icon: () => IconTablerSquareHalf,
+          applyPreset(params) {
+            return applyMultipleSeries({
+              ...params,
+              list: [
+                {
+                  id: "median",
+                  title: "Median",
+                  color,
                   dataset:
-                    params.datasets[`dateTo${datasetKey}UnrealizedProfit`],
-                  color: colors.profit,
-                  seriesType: SeriesType.Area,
+                    params.datasets[`dateTo${datasetKey}PricePaidMedian`],
                 },
               ],
             });
           },
           description: "",
         },
+
         {
-          id: `${id}-unrealized-loss`,
-          name: "Loss",
-          title: `${datasetKey} Unrealized Loss`,
-          icon: () => IconTablerMoodSadDizzy,
+          id: `${id}-price-paid-deciles`,
+          name: `Deciles`,
+          title: `${datasetKey} deciles`,
+          icon: () => IconTablerSquareHalf,
           applyPreset(params) {
             return applyMultipleSeries({
               ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
               list: [
                 {
-                  id: "unrealized-loss",
-                  title: "Unrealized Loss",
-                  dataset: params.datasets[`dateTo${datasetKey}UnrealizedLoss`],
-                  color: colors.loss,
-                  seriesType: SeriesType.Area,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-unrealized-profit-and-loss`,
-          name: `PNL`,
-          title: `${datasetKey} Unrealized PNL - Profit And Loss`,
-          icon: () => IconTablerArrowsVertical,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "unrealized-loss",
-                  title: "Unrealized Profit",
-                  color: colors.profit,
+                  id: "median",
                   dataset:
-                    params.datasets[`dateTo${datasetKey}UnrealizedProfit`],
-                  seriesType: SeriesType.Based,
+                    params.datasets[`dateTo${datasetKey}PricePaidMedian`],
+                  color,
+                  title: "Median",
                 },
-                {
-                  id: "unrealized-loss",
-                  title: "Unrealized Loss",
-                  color: colors.loss,
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}UnrealizedLossNegative`
-                    ],
-                  seriesType: SeriesType.Based,
-                },
+                ...percentiles
+                  .filter((percentile) => Number(percentile) % 10 === 0)
+                  .map((percentile) => ({
+                    id: `${percentile}-percentile`,
+                    dataset:
+                      params.datasets[
+                        `dateTo${datasetKey}PricePaid${percentile}Percentile`
+                      ],
+                    color,
+                    title: `${percentile}th percentile`,
+                  })),
               ],
             });
           },
           description: "",
         },
-        {
-          id: `${id}-net-unrealized-profit-and-loss`,
-          name: `Net PNL`,
-          title: `${datasetKey} Net Unrealized Profit And Loss`,
-          icon: () => IconTablerScale,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "net-unrealized-profit-and-loss",
-                  title: "Net Unrealized PNL",
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}NetUnrealizedProfitAndLoss`
-                    ],
-                  seriesType: SeriesType.Based,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-relative-unrealized-profit-and-loss`,
-          name: `Relative PNL`,
-          title: `${datasetKey} Relative Unrealized Profit And Loss`,
-          icon: () => IconTablerDivide,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "relative-unrealized-profit-and-loss",
-                  title: "Relative Unrealized PNL",
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}RelativeUnrealizedProfitAndLoss`
-                    ],
-                  seriesType: SeriesType.Based,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-      ],
-    },
-    {
-      id: `${id}-realized`,
-      name: "Realized",
-      tree: [
-        {
-          id: `${id}-realized-profit`,
-          name: `Profit`,
-          title: `${datasetKey} Realized Profit`,
-          icon: () => IconTablerCash,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "realized-profit",
-                  title: "Realized Profit",
-                  dataset: params.datasets[`dateTo${datasetKey}RealizedProfit`],
-                  color: colors.profit,
-                  seriesType: SeriesType.Area,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-realized-loss`,
-          name: "Loss",
-          title: `${datasetKey} Realized Loss`,
-          icon: () => IconTablerCoffin,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "realized-loss",
-                  title: "Realized Loss",
-                  dataset: params.datasets[`dateTo${datasetKey}RealizedLoss`],
-                  color: colors.loss,
-                  seriesType: SeriesType.Area,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-realized-profit-and-loss`,
-          name: `PNL`,
-          title: `${datasetKey} PNL - Profit And Loss`,
-          icon: () => IconTablerArrowsVertical,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "realized-profit",
-                  title: "Realized Profit",
-                  color: colors.profit,
-                  dataset: params.datasets[`dateTo${datasetKey}RealizedProfit`],
-                  seriesType: SeriesType.Based,
-                },
-                {
-                  id: "realized-loss",
-                  title: "Realized Loss",
-                  color: colors.loss,
-                  dataset:
-                    params.datasets[`dateTo${datasetKey}RealizedLossNegative`],
-                  seriesType: SeriesType.Based,
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-net-realized-profit-and-loss`,
-          name: `Net PNL`,
-          title: `${datasetKey} Net Realized Profit And Loss`,
-          icon: () => IconTablerScale,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "net-realized-profit-and-loss",
-                  title: "Net PNL",
-                  seriesType: SeriesType.Based,
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}NetRealizedProfitAndLoss`
-                    ],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-relative-realized-profit-and-loss`,
-          name: `Relative PNL`,
-          title: `${datasetKey} Relative Realized Profit And Loss`,
-          icon: () => IconTablerDivide,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "relative-realized-profit-and-loss",
-                  title: "Relative PNL",
-                  seriesType: SeriesType.Based,
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}RelativeRealizedProfitAndLoss`
-                    ],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-cumulated-realized-profit`,
-          name: `Cumulated Profit`,
-          title: `${datasetKey} Cumulated Realized Profit`,
-          icon: () => IconTablerSum,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "cumulated-realized-profit",
-                  title: "Cumulated Realized Profit",
-                  color: colors.profit,
-                  seriesType: SeriesType.Area,
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}CumulatedRealizedProfit`
-                    ],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-cumulated-realized-loss`,
-          name: "Cumulated Loss",
-          title: `${datasetKey} Cumulated Realized Loss`,
-          icon: () => IconTablerSum,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "cumulated-realized-loss",
-                  title: "Cumulated Realized Loss",
-                  color: colors.loss,
-                  seriesType: SeriesType.Area,
-                  dataset:
-                    params.datasets[`dateTo${datasetKey}CumulatedRealizedLoss`],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-        {
-          id: `${id}-cumulated-net-realized-profit-and-loss`,
-          name: `Cumulated Net PNL`,
-          title: `${datasetKey} Cumulated Net Realized Profit And Loss`,
-          icon: () => IconTablerSum,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              priceScaleOptions: {
-                halved: true,
-              },
-              list: [
-                {
-                  id: "cumulated-net-realized-profit-and-loss",
-                  title: "Cumulated Net Realized PNL",
-                  seriesType: SeriesType.Based,
-                  dataset:
-                    params.datasets[
-                      `dateTo${datasetKey}CumulatedNetRealizedProfitAndLoss`
-                    ],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
+        ...percentiles.map(
+          (percentile): PartialPreset => ({
+            id: `${id}-price-paid-${percentile}p`,
+            name: `${percentile}%`,
+            title: `${datasetKey} ${percentile}th percentile`,
+            icon: () => IconTablerSquareHalf,
+            applyPreset(params) {
+              return applyMultipleSeries({
+                ...params,
+                list: [
+                  {
+                    id: `${percentile}-percentile`,
+                    title: `${percentile}th percentile`,
+                    color,
+                    dataset:
+                      params.datasets[
+                        `dateTo${datasetKey}PricePaid${percentile}Percentile`
+                      ],
+                  },
+                ],
+              });
+            },
+            description: "",
+          }),
+        ),
       ],
     },
   ];
@@ -1097,7 +1208,7 @@ export function createRatioPresetFolder({
   title: string;
   color: string;
   datasetKey:
-    | `${AnyPossibleCohortName}PricePaidMean`
+    | `${AnyPossibleCohortName}RealizedPrice`
     | `Closes${AverageName}MA`
     | "ActivePrice"
     | "VaultedPrice"
@@ -1105,7 +1216,7 @@ export function createRatioPresetFolder({
 }): PresetFolder {
   return {
     id: `${id}-ratio`,
-    name: "Ratio - MVRV",
+    name: "Ratio",
     tree: [
       {
         id: `${id}-ratio-value`,
@@ -1153,7 +1264,7 @@ export function createRatioPresetFolder({
                     id: "ratio",
                     title: "Ratio",
                     seriesType: SeriesType.Based,
-                    color: colors.white,
+                    color: colors.gray,
                     dataset: params.datasets[`dateTo${datasetKey}Ratio`],
                     options: {
                       base: 1,
@@ -1225,19 +1336,19 @@ export function createRatioPresetFolder({
                     title: "99.9th Percentile",
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio99.9Percentile`],
-                    color: colors.red,
+                    color: colors.extremeMax,
                   },
                   {
                     id: "99.5-percentile",
                     title: "99.5th Percentile",
-                    color: colors.orange,
+                    color: colors.extremeMiddle,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio99.5Percentile`],
                   },
                   {
                     id: "99-percentile",
                     title: "99th Percentile",
-                    color: colors.yellow,
+                    color: colors.extremeMin,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio99Percentile`],
                   },
@@ -1275,21 +1386,21 @@ export function createRatioPresetFolder({
                   {
                     id: "1-percentile",
                     title: "1st Percentile",
-                    color: colors.yellow,
+                    color: colors.extremeMin,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio1Percentile`],
                   },
                   {
                     id: "0.5-percentile",
                     title: "0.5th Percentile",
-                    color: colors.orange,
+                    color: colors.extremeMiddle,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio0.5Percentile`],
                   },
                   {
                     id: "0.1-percentile",
                     title: "0.1th Percentile",
-                    color: colors.red,
+                    color: colors.extremeMax,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio0.1Percentile`],
                   },
@@ -1310,21 +1421,21 @@ export function createRatioPresetFolder({
                   {
                     id: "99.9-percentile",
                     title: "99.9th Percentile",
-                    color: colors.red,
+                    color: colors.extremeMax,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio99.9Price`],
                   },
                   {
                     id: "99.5-percentile",
                     title: "99.5th Percentile",
-                    color: colors.orange,
+                    color: colors.extremeMiddle,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio99.5Price`],
                   },
                   {
                     id: "99-percentile",
                     title: "99th Percentile",
-                    color: colors.yellow,
+                    color: colors.extremeMin,
                     dataset: params.datasets[`dateTo${datasetKey}Ratio99Price`],
                   },
                 ],
@@ -1344,20 +1455,20 @@ export function createRatioPresetFolder({
                   {
                     id: "1-percentile",
                     title: "1st Percentile",
-                    color: colors.yellow,
+                    color: colors.extremeMin,
                     dataset: params.datasets[`dateTo${datasetKey}Ratio1Price`],
                   },
                   {
                     id: "0.5-percentile",
                     title: "0.5th Percentile",
-                    color: colors.orange,
+                    color: colors.extremeMiddle,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio0.5Price`],
                   },
                   {
                     id: "0.1-percentile",
                     title: "0.1th Percentile",
-                    color: colors.red,
+                    color: colors.extremeMax,
                     dataset:
                       params.datasets[`dateTo${datasetKey}Ratio0.1Price`],
                   },
@@ -1380,7 +1491,7 @@ function createMomentumPresetFolder({
   title: string;
   datasetKey:
     | `${AnyPossibleCohortName}SupplyPNL%Self`
-    | `${AnyPossibleCohortName}PricePaidMeanRatio`
+    | `${AnyPossibleCohortName}RealizedPriceRatio`
     | `Closes${AverageName}MARatio`
     | "ActivePriceRatio"
     | "VaultedPriceRatio"
@@ -1439,7 +1550,7 @@ function createMomentumPresetFolder({
                       params.datasets[
                         `dateTo${datasetKey}MomentumBLSHBitcoinReturns`
                       ],
-                    color: colors.orange,
+                    color: colors.bitcoin,
                     showPriceLine: true,
                   },
                 ],
@@ -1467,7 +1578,7 @@ function createMomentumPresetFolder({
                       params.datasets[
                         `dateTo${datasetKey}MomentumBLSHDollarReturns`
                       ],
-                    color: colors.emerald,
+                    color: colors.dollars,
                     showPriceLine: true,
                   },
                 ],

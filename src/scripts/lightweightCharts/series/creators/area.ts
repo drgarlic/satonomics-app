@@ -11,7 +11,8 @@ export const createAreaSeries = (
 ) => {
   const { color } = options || {};
 
-  const fillColor = `${color}11`;
+  // const fillColor = `${color}11`;
+  const fillColor = color;
 
   const seriesOptions: AreaOptions = {
     // priceScaleId: 'left',

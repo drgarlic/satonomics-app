@@ -22,7 +22,7 @@ export const presets: PresetFolder = {
             {
               id: "transaction-count",
               title: "Transaction Count",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToTransactionCount,
             },
           ],
@@ -45,7 +45,7 @@ export const presets: PresetFolder = {
             {
               id: "transaction-volume",
               title: "Transaction Volume",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToTransactionVolume,
             },
           ],
@@ -68,7 +68,7 @@ export const presets: PresetFolder = {
             {
               id: "transaction-volume-annualized",
               title: "Transaction Volume Annualized",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToTransactionVolumeAnnualized,
             },
           ],
@@ -91,7 +91,7 @@ export const presets: PresetFolder = {
             {
               id: "transactions-velocity",
               title: "Transactions Velocity",
-              color: colors.orange,
+              color: colors.bitcoin,
               dataset: params.datasets.dateToTransactionsVelocity,
             },
           ],

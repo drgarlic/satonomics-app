@@ -1,10 +1,16 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 
-import { computeMovingAverage } from "/src/scripts";
+import {
+  computeMonthlyMovingAverage,
+  computeMovingAverage,
+  computeWeeklyMovingAverage,
+  currencies,
+} from "/src/scripts";
 
 import { convertNormalCandleToSatCandle } from "./converters";
 import {
   appendRatioLazyDatasets,
+  createAddedLazyDataset,
   createAnnualizedLazyDataset,
   createAnyPossibleCohortLazyDatasets,
   createCumulatedLazyDataset,
@@ -124,8 +130,8 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
   );
 
   const dateTo50 = createTransformedLazyDataset(closes, () => 50);
-
   const dateTo100 = createTransformedLazyDataset(closes, () => 100);
+  const dateTo144 = createTransformedLazyDataset(closes, () => 144);
 
   const anyPossibleCohortLazyDatasets = createAnyPossibleCohortLazyDatasets(
     resourceDatasets,
@@ -145,7 +151,7 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
 
   const dateToCoinblocksCreated = createMultipliedLazyDataset(
     resourceDatasets.dateToSupplyTotal,
-    resourceDatasets.dateToDailyBlockCount,
+    resourceDatasets.dateToNewBlocks,
   );
 
   const dateToCoinblocksStored = createSubtractedLazyDataset(
@@ -267,19 +273,6 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToActvityToVaultednessRatio,
   );
 
-  const dateToRealizedCap = createSubtractedLazyDataset(
-    anyPossibleCohortLazyDatasets.dateToCumulatedRealizedProfit,
-    anyPossibleCohortLazyDatasets.dateToCumulatedRealizedLoss,
-  );
-
-  const dateToRealizedCapNetChange =
-    createNetChangeLazyDataset(dateToRealizedCap);
-
-  const dateToRealizedCapNet30dChange = createNetChangeLazyDataset(
-    dateToRealizedCap,
-    30,
-  );
-
   const dateToTransactionVolumeAnnualized = createAnnualizedLazyDataset(
     resourceDatasets.dateToTransactionVolume,
   );
@@ -317,7 +310,7 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
   );
 
   const dateToInvestorCap = createSubtractedLazyDataset(
-    dateToRealizedCap,
+    anyPossibleCohortLazyDatasets.dateToCumulatedNetRealizedProfitAndLoss,
     dateToThermoCap,
   );
 
@@ -331,18 +324,61 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     createNetChangeLazyDataset(dateToActiveSupplyChangeFromIssuance, 90);
 
   const dateToActivePrice = createDividedLazyDataset(
-    resourceDatasets.dateToPricePaidMean,
+    anyPossibleCohortLazyDatasets.dateToRealizedPrice,
     dateToLiveliness,
   );
 
   const dateToVaultedPrice = createDividedLazyDataset(
-    resourceDatasets.dateToPricePaidMean,
+    anyPossibleCohortLazyDatasets.dateToRealizedPrice,
     dateToVaultedness,
   );
 
   const dateToTrueMarketMean = createDividedLazyDataset(
     dateToInvestorCap,
     dateToActiveSupply,
+  );
+
+  const dateToNewBlocks7dSMA = createLazyDataset(() =>
+    computeWeeklyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+  );
+
+  const dateToNewBlocks30dSMA = createLazyDataset(() =>
+    computeMonthlyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+  );
+
+  type LazyCurrencyDatasets = Record<`dateTo${CurrencyName}MarketCap`, Dataset>;
+  const partialCurrencyDatasets: Partial<LazyCurrencyDatasets> = {};
+  currencies.forEach(({ name }) => {
+    partialCurrencyDatasets[`dateTo${name}MarketCap`] =
+      createMultipliedLazyDataset(
+        resourceDatasets.dateToSupplyTotal,
+        resourceDatasets[`priceIn${name}`],
+      );
+  });
+  const currencyDatasets = partialCurrencyDatasets as LazyCurrencyDatasets;
+
+  const dateToBlocksTotal = createCumulatedLazyDataset(
+    resourceDatasets.dateToNewBlocks,
+  );
+
+  const dateToLastSubsidyInDollars = createMultipliedLazyDataset(
+    resourceDatasets.dateToLastSubsidy,
+    resourceDatasets.closes,
+  );
+
+  const dateToScamcoinsMarketCap = createSubtractedLazyDataset(
+    resourceDatasets.dateToAltcoinsMarketCap,
+    resourceDatasets.dateToStablecoinsMarketCap,
+  );
+
+  const dateToCryptoMarketCap = createAddedLazyDataset(
+    dateToMarketCap,
+    resourceDatasets.dateToAltcoinsMarketCap,
+  );
+
+  const dateToStablecoinsMarketCap30dChange = createNetChangeLazyDataset(
+    resourceDatasets.dateToStablecoinsMarketCap,
+    30,
   );
 
   return {
@@ -358,6 +394,7 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToActiveSupplyNetChange,
     dateToActvityToVaultednessRatio,
     dateToCoinblocksCreated,
+    dateTo144,
     dateToCoinblocksStored,
     dateToCointimeAdjustedVelocity,
     dateToCointimeAdjustedYearlyInflationRate,
@@ -373,10 +410,9 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToInvestorCap,
     dateToMaxActiveSupply,
     dateToMinVaultedSupply,
+    dateToCryptoMarketCap,
     dateToNewAddressCount,
-    dateToRealizedCap,
-    dateToRealizedCapNet30dChange,
-    dateToRealizedCapNetChange,
+    dateToScamcoinsMarketCap,
     dateToSupplyTotalAtMinus1Block,
     dateToTotalAddressCount: dateToTotalNonEmptyAddresses,
     dateToTransactionsVelocity,
@@ -390,6 +426,10 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToThermoCap,
     dateToThermoCapToInvestorCapRatio,
     dateToActivePrice,
+    dateToNewBlocks7dSMA,
+    dateToNewBlocks30dSMA,
+    dateToLastSubsidyInDollars,
+    dateToBlocksTotal,
     ...appendRatioLazyDatasets({
       sourceDataset: dateToActivePrice,
       key: "ActivePrice" as const,
@@ -407,54 +447,11 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
       key: "TrueMarketMean" as const,
       closes,
     }),
+    ...currencyDatasets,
+    dateToStablecoinsMarketCap30dChange,
     // satsPrice,
     // satsPriceCloses: createLazyDataset(() =>
     //   convertCandlesticksToSingleValueDataset(satsPrice.values()),
-    // ),
-    // activeRealizedPrice: addQuantiles(
-    //   addRatios(
-    //     createLazyDataset(() => {
-    //       let realizedPrice = resourceDatasets.realizedPrice.values()
-
-    //       let liveliness = resourceDatasets.liveliness.values()
-
-    //       const firstRealizedPriceDate = realizedPrice?.[0]?.date
-    //       const firstLivelinessDate = liveliness?.[0]?.date
-
-    //       if (
-    //         !realizedPrice ||
-    //         !liveliness ||
-    //         !firstRealizedPriceDate ||
-    //         !firstLivelinessDate
-    //       )
-    //         return []
-
-    //       const realizedOffset = run(() => {
-    //         const offset = realizedPrice?.findIndex(
-    //           ({ date }) => date === firstLivelinessDate,
-    //         )
-    //         return offset === -1 ? 0 : offset
-    //       })
-
-    //       const livelinessOffset = run(() => {
-    //         const offset = liveliness?.findIndex(
-    //           ({ date }) => date === firstRealizedPriceDate,
-    //         )
-    //         return offset === -1 ? 0 : offset
-    //       })
-
-    //       return liveliness
-    //         .slice(livelinessOffset)
-    //         .map(({ date, value }, index) => ({
-    //           date,
-    //           time: date,
-    //           value:
-    //             (realizedPrice?.slice(realizedOffset)?.at(index)?.value || 1) /
-    //             value,
-    //         }))
-    //     }),
-    //     closes.values,
-    //   ),
     // ),
     // hashPrice: addAverages(
     //   createLazyDataset(() => {

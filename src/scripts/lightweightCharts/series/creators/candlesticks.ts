@@ -8,19 +8,19 @@ export const createCandlesticksSeries = (
 
   const upColor = lowerOpacity
     ? inverseColors
-      ? colors.darkRed
-      : colors.darkGreen
+      ? colors.darkLoss
+      : colors.darkProfit
     : inverseColors
-      ? colors.red
-      : colors.green;
+      ? colors.loss
+      : colors.profit;
 
   const downColor = lowerOpacity
     ? inverseColors
-      ? colors.darkGreen
-      : colors.darkRed
+      ? colors.darkProfit
+      : colors.darkLoss
     : inverseColors
-      ? colors.green
-      : colors.red;
+      ? colors.profit
+      : colors.loss;
 
   const candlestickSeries = chart.addCandlestickSeries({
     baseLineVisible: false,

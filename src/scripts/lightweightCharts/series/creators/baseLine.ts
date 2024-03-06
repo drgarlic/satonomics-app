@@ -37,14 +37,14 @@ export const createBaseLineSeries = (
   const seriesOptions: DeepPartialBaselineOptions = {
     priceScaleId: "right",
     ...defaultSeriesOptions,
+    lineWidth: 1,
     ...options,
     ...options.options,
     ...(base ? { baseValue: { type: "price", price: base } } : {}),
-    topLineColor: "transparent" || topLineColor || lineColor || allTopColor,
+    topLineColor: topLineColor || lineColor || allTopColor,
     topFillColor1: topFillColor,
     topFillColor2: topFillColor,
-    bottomLineColor:
-      "transparent" || bottomLineColor || lineColor || allBottomColor,
+    bottomLineColor: bottomLineColor || lineColor || allBottomColor,
     bottomFillColor1: bottomFillColor,
     bottomFillColor2: bottomFillColor,
     ...(options?.showPriceLine ? showedLastValueConfig : {}),
