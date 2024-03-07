@@ -1,4 +1,4 @@
-import { openWindow, scrollIntoView, sleep } from "/src/scripts";
+import { openWindow, scrollIntoView, sleep, tick } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import { Counter } from "../counter";
@@ -48,7 +48,7 @@ export function TreeFrame({
           class="w-full px-3 py-1.5 text-left hover:underline"
           onClick={() => {
             openWindow(`<html>
-            <head><title>API Routes - SATONOMICS</title></head>
+            <head><title>API Routes - Satonomics</title></head>
             <body>
             ${Object.entries(resources)
               .map(
@@ -61,8 +61,40 @@ export function TreeFrame({
           }}
         >
           API Routes
-          {/* <span class="opacity-50">- Free & Unlimited</span> */}
+          <span class="opacity-50"> - Free & Unlimited</span>
         </button>
+        <div class="border-t border-dashed border-white/25" />
+        <a
+          href="https://primal.net/p/npub1jagmm3x39lmwfnrtvxcs9ac7g300y3dusv9lgzhk2e4x5frpxlrqa73v44"
+          target="_blank"
+          class="block w-full px-3 py-1.5 text-left hover:underline"
+        >
+          Social <span class="opacity-50"> - NOSTR</span>
+        </a>
+        <div class="border-t border-dashed border-white/25" />
+        <a
+          href="https://github.com/satonomics-org/front"
+          target="_blank"
+          class="block w-full px-3 py-1.5 text-left hover:underline"
+        >
+          Repository <span class="opacity-50"> - Github</span>
+        </a>
+
+        <div class="border-t border-dashed border-white/25" />
+        <a
+          href="mailto:contact@satonomics.xyz"
+          class="block w-full px-3 py-1.5 text-left hover:underline"
+        >
+          Contact <span class="opacity-50"> - Email</span>
+        </a>
+        <div class="border-t border-dashed border-white/25" />
+        <a
+          href="https://counter.dev/dashboard.html?user=wjfpwo2032fk&token=GAP9y3FM4o0%3D"
+          target="_blank"
+          class="block w-full px-3 py-1.5 text-left hover:underline"
+        >
+          Analytics <span class="opacity-50"> - Privacy Friendly</span>
+        </a>
       </ScrollableFrame>
       <div class="flex w-full border-t border-dashed border-white bg-black">
         <Button
@@ -110,7 +142,7 @@ async function goToSelected(presets: Presets) {
     }),
   );
 
-  await sleep(1);
+  await tick();
 
   scrollIntoView(document.getElementById(presets.selected().id), "center");
 }

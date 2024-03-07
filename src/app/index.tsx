@@ -24,10 +24,15 @@ import {
   // Update,
 } from "./components";
 import { Background, LOCAL_STORAGE_MARQUEE_KEY } from "./components/background";
+import { registerServiceWorker } from "./scripts";
 
 const LOCAL_STORAGE_BAR_KEY = "bar-width";
 
 export function App() {
+  const updateFound = createASS(false);
+
+  registerServiceWorker(updateFound);
+
   const tabFocused = createASS(true);
 
   const legend = createASS<PresetLegend>([]);
@@ -173,7 +178,7 @@ export function App() {
                   : {}),
               }}
             >
-              <Header />
+              <Header updateFound={updateFound} />
 
               <ChartFrame
                 presets={presets}

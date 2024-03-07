@@ -156,6 +156,7 @@ declare global {
   const IconTablerQrcode: typeof import('~icons/tabler/qrcode.jsx')['default']
   const IconTablerReceiptBitcoin: typeof import('~icons/tabler/receipt-bitcoin.jsx')['default']
   const IconTablerReceiptDollar: typeof import('~icons/tabler/receipt-dollar.jsx')['default']
+  const IconTablerRefreshAlert: typeof import('~icons/tabler/refresh-alert.jsx')['default']
   const IconTablerReset: (typeof import("~icons/tabler/reset.jsx"))["default"]
   const IconTablerRipple: typeof import('~icons/tabler/ripple.jsx')['default']
   const IconTablerRocket: typeof import('~icons/tabler/rocket.jsx')['default']
