@@ -13,6 +13,7 @@ import solidPlugin from "vite-plugin-solid";
 import packageJSON from "./package.json";
 
 const black = "#000000";
+const appName = packageJSON.name[0].toUpperCase() + packageJSON.name.slice(1);
 
 export default defineConfig({
   plugins: [
@@ -34,7 +35,8 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json,woff2,ttf,md}"],
       },
       manifest: {
-        name: packageJSON.name[0].toUpperCase() + packageJSON.name.slice(1),
+        name: appName,
+        short_name: appName,
         description: packageJSON.description,
         start_url: "/",
         display: "standalone",
