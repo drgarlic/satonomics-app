@@ -1,6 +1,5 @@
 // @ts-ignore
 import { fileURLToPath } from "url";
-// import { faviconsPlugin } from '@darkobits/vite-plugin-favicons'
 import autoprefixer from "autoprefixer";
 import { visualizer } from "rollup-plugin-visualizer";
 import tailwindcss from "tailwindcss";
@@ -13,24 +12,19 @@ import solidPlugin from "vite-plugin-solid";
 
 import packageJSON from "./package.json";
 
-const logoWhite = "./src/assets/svgs/logo/white.svg";
 const black = "#000000";
 
 export default defineConfig({
   plugins: [
     solidPlugin(),
 
-    // solidSvg(),
-
-    // https://vite-pwa-org.netlify.app/guide/
-    // https://github.com/vite-pwa/vite-plugin-pwa/compare/v0.18.2...v0.19.0
     VitePWA({
       injectRegister: false,
       devOptions: {
         enabled: true,
       },
       pwaAssets: {
-        preset: "minimal-2023",
+        config: true,
         overrideManifestIcons: true,
       },
       workbox: {
@@ -40,12 +34,12 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json,woff2,ttf,md}"],
       },
       manifest: {
-        name: "Satonomics",
+        name: packageJSON.name[0].toUpperCase() + packageJSON.name.slice(1),
         description: packageJSON.description,
         start_url: "/",
         display: "standalone",
-        theme_color: "#000000",
-        background_color: "#000000",
+        theme_color: black,
+        background_color: black,
       },
     }),
 
@@ -61,37 +55,6 @@ export default defineConfig({
     }),
 
     unpluginIcons({ autoInstall: true, compiler: "solid" }),
-
-    // faviconsPlugin({
-    //   cache: true,
-    //   appName: packageJSON.name[0].toUpperCase() + packageJSON.name.slice(1),
-    //   appDescription: packageJSON.description,
-    //   start_url: '/',
-    //   theme_color: black,
-    //   background: black,
-    //   icons: {
-    //     favicons: {
-    //       source: logoWhite,
-    //       background: black,
-    //       offset: 5,
-    //     },
-    //     android: {
-    //       source: logoWhite,
-    //       background: black,
-    //       offset: 10,
-    //     },
-    //     appleIcon: {
-    //       background: black,
-    //       source: logoWhite,
-    //       offset: 10,
-    //     },
-    //     appleStartup: {
-    //       background: black,
-    //       source: logoWhite,
-    //       offset: 15,
-    //     },
-    //   },
-    // }),
 
     visualizer({
       template: "treemap",

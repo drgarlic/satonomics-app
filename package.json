@@ -11,7 +11,8 @@
     "check-watch": "$npm_execpath check --watch",
     "format": "prettier --write './src'",
     "prod": "$npm_execpath run build && vite preview --host",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "generate-pwa-assets": "pwa-assets-generator"
   },
   "license": "MIT",
   "dependencies": {
