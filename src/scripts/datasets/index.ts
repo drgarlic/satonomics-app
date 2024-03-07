@@ -7,8 +7,6 @@ export {
   createLazyDataset,
 } from "./lazy";
 
-// export const USABLE_CANDLESTICKS_START_DATE = '2014-01-01'
-
 export function createDatasets(resources: ResourcesHTTP) {
   const resourceDatasets = createResourceDatasets(resources);
 

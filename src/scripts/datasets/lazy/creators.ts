@@ -5,6 +5,7 @@ import {
   colors,
   computeWeeklyMovingAverage,
   computeYearlyMovingAverage,
+  sortedInsert,
 } from "/src/scripts";
 
 import { Momentum } from ".";
@@ -54,32 +55,12 @@ export function computePercentile(ratio: Dataset, quantile: number) {
   });
 }
 
-const sortedInsert = (array: number[], value: number) => {
-  let low = 0;
-  let high = array.length;
-
-  while (low < high) {
-    const mid = (low + high) >>> 1;
-
-    if (array[mid] < value) {
-      low = mid + 1;
-    } else {
-      high = mid;
-    }
-  }
-
-  array.splice(low, 0, value);
-};
-
 // TODO: Replace those with createDividerDataset
-export function createLazyRatioDataset(
-  dataset: Dataset,
-  closes: Accessor<DatedSingleValueData[] | null>,
-) {
+export function createLazyRatioDataset(dataset: Dataset, closes: Dataset) {
   const firstIndexWithData = createLazyMemo(() => {
-    const index = closes()?.findIndex(
-      (close) => close.date === dataset.values()?.at(0)?.date,
-    );
+    const index = closes
+      .values()
+      ?.findIndex((close) => close.date === dataset.values()?.at(0)?.date);
 
     return !index || index === -1 ? 0 : index;
   });
@@ -96,7 +77,7 @@ export function createLazyRatioDataset(
   // )
 
   const usableCandlesticks = createLazyMemo(() =>
-    (closes() || []).slice(
+    (closes.values() || []).slice(
       // firstCloseIndex(),
       firstIndexWithData(),
       (dataset.values()?.length ?? 0) + firstIndexWithData(),
@@ -108,14 +89,15 @@ export function createLazyRatioDataset(
       dataset
         .values()!
         .findIndex(
-          (data) => data.date === closes()![firstIndexWithData()].date,
+          (data) => data.date === closes.values()![firstIndexWithData()].date,
         ),
       // .findIndex((data) => data.date === closes()![firstCloseIndex()].date),
     ),
   );
 
-  return createLazyDataset(() =>
-    computeRatios(slicedValues() || [], usableCandlesticks()),
+  return createLazyDataset(
+    () => computeRatios(slicedValues() || [], usableCandlesticks()),
+    [dataset.sources, closes.sources],
   );
 }
 
@@ -141,9 +123,23 @@ const computeRatios = (
   });
 };
 
-export const createLazyDataset = <T>(calc: () => T): Dataset<T> => ({
-  values: createLazyMemo(calc),
-});
+export function createLazyDataset<T>(
+  calc: () => T,
+  sourcesList: Accessor<Sources>[],
+): Dataset<T> {
+  return {
+    values: createLazyMemo(calc),
+    sources: createLazyMemo(() => {
+      const map = new Map<string, Source>();
+      sourcesList.forEach((sources) => {
+        sources().forEach((value, key) => {
+          map.set(key, value);
+        });
+      });
+      return map;
+    }),
+  };
+}
 
 export function createTransformedLazyDataset<T = undefined>(
   dataset: Dataset,
@@ -155,12 +151,14 @@ export function createTransformedLazyDataset<T = undefined>(
   ) => number,
   state?: T,
 ) {
-  return createLazyDataset(() =>
-    (dataset.values() || []).map(({ date, value }, index, array) => ({
-      date,
-      time: date,
-      value: transform(value, index, array, state),
-    })),
+  return createLazyDataset(
+    () =>
+      (dataset.values() || []).map(({ date, value }, index, array) => ({
+        date,
+        time: date,
+        value: transform(value, index, array, state),
+      })),
+    [dataset.sources],
   );
 }
 
@@ -223,7 +221,7 @@ export function createMedianLazyDataset(dataset: Dataset, number: number) {
   );
 }
 
-function computeOffset(source: Dataset, toOffset: Dataset) {
+function createLazyOffset(source: Dataset, toOffset: Dataset) {
   return createLazyMemo(() => {
     const offset = toOffset
       .values()
@@ -237,7 +235,7 @@ export function createAddedLazyDataset(
   datasetRef: Dataset,
   datasetToAdd: Dataset,
 ) {
-  const offset = computeOffset(datasetRef, datasetToAdd);
+  const offset = createLazyOffset(datasetRef, datasetToAdd);
 
   return createLazyDataset(() => {
     let secondValue = 0;
@@ -256,14 +254,14 @@ export function createAddedLazyDataset(
         value: value + secondValue,
       };
     });
-  });
+  }, [datasetRef.sources, datasetToAdd.sources]);
 }
 
 export function createSubtractedLazyDataset(
   datasetRef: Dataset,
   datasetToSubtract: Dataset,
 ) {
-  const offset = computeOffset(datasetRef, datasetToSubtract);
+  const offset = createLazyOffset(datasetRef, datasetToSubtract);
 
   return createLazyDataset(() => {
     let secondValue = 0;
@@ -282,7 +280,7 @@ export function createSubtractedLazyDataset(
         value: value - secondValue,
       };
     });
-  });
+  }, [datasetRef.sources, datasetToSubtract.sources]);
 }
 
 export function createMultipliedLazyDataset(
@@ -290,21 +288,24 @@ export function createMultipliedLazyDataset(
   multiplierDataset: Dataset,
   defaultMultiplier = 1,
 ) {
-  const offsetRef = computeOffset(multiplierDataset, datasetRef);
+  const offsetRef = createLazyOffset(multiplierDataset, datasetRef);
 
-  const offsetMultiplier = computeOffset(datasetRef, multiplierDataset);
+  const offsetMultiplier = createLazyOffset(datasetRef, multiplierDataset);
 
-  return createLazyDataset(() =>
-    (datasetRef.values() || [])
-      .slice(offsetRef())
-      .map(({ date, value }, index) => ({
-        date,
-        time: date,
-        value:
-          value *
-          (multiplierDataset.values()?.at(index + offsetMultiplier())?.value ||
-            defaultMultiplier),
-      })),
+  return createLazyDataset(
+    () =>
+      (datasetRef.values() || [])
+        .slice(offsetRef())
+        .map(({ date, value }, index) => ({
+          date,
+          time: date,
+          value:
+            value *
+            // TODO: Move `multiplierDataset.values()` to call once, for all lazy datasets !!
+            (multiplierDataset.values()?.at(index + offsetMultiplier())
+              ?.value || defaultMultiplier),
+        })),
+    [datasetRef.sources, multiplierDataset.sources],
   );
 }
 
@@ -313,22 +314,24 @@ export const createDividedLazyDataset = (
   dividerDataset: Dataset,
   isPercentage?: boolean,
 ) => {
-  const offsetRef = computeOffset(dividerDataset, datasetRef);
+  const offsetRef = createLazyOffset(dividerDataset, datasetRef);
 
-  const offsetDivider = computeOffset(datasetRef, dividerDataset);
+  const offsetDivider = createLazyOffset(datasetRef, dividerDataset);
 
-  return createLazyDataset(() =>
-    (datasetRef.values() || [])
-      .slice(offsetRef())
-      .map(({ date, value }, index) => ({
-        date,
-        time: date,
-        value:
-          (value /
-            (dividerDataset.values()?.at(index + offsetDivider())?.value ||
-              1)) *
-          (isPercentage ? 100 : 1),
-      })),
+  return createLazyDataset(
+    () =>
+      (datasetRef.values() || [])
+        .slice(offsetRef())
+        .map(({ date, value }, index) => ({
+          date,
+          time: date,
+          value:
+            (value /
+              (dividerDataset.values()?.at(index + offsetDivider())?.value ||
+                1)) *
+            (isPercentage ? 100 : 1),
+        })),
+    [datasetRef.sources, dividerDataset.sources],
   );
 };
 
@@ -345,7 +348,7 @@ export const createCumulatedLazyDataset = (dataset: Dataset) =>
         value: sum,
       };
     });
-  });
+  }, [dataset.sources]);
 
 export function createPercentageMomentumLazyDataset(dataset: Dataset) {
   return createLazyDataset(() => {
@@ -386,7 +389,7 @@ export function createPercentageMomentumLazyDataset(dataset: Dataset) {
               : colors.momentumRed,
       };
     });
-  });
+  }, [dataset.sources]);
 }
 
 export function createBLSHBitcoinReturnsLazyDataset({
@@ -443,7 +446,7 @@ export function createBLSHBitcoinReturnsLazyDataset({
         };
       },
     );
-  });
+  }, [momentumDataset.sources, closes.sources]);
 }
 
 export function createBLSHDollarReturnsLazyDataset({
@@ -458,6 +461,7 @@ export function createBLSHDollarReturnsLazyDataset({
         time: date,
         value,
       })) || [],
+    [bitcoinReturns.sources],
   );
 }
 
@@ -648,38 +652,42 @@ export function appendRatioLazyDatasets<
   sourceDataset: Dataset;
   closes: Dataset;
 }) {
-  const ratio = createLazyRatioDataset(sourceDataset, closes.values);
+  const ratio = createLazyRatioDataset(sourceDataset, closes);
 
-  const ratio7DMA = createLazyDataset(() =>
-    computeWeeklyMovingAverage(ratio.values()),
+  const ratio7DMA = createLazyDataset(
+    () => computeWeeklyMovingAverage(ratio.values()),
+    [ratio.sources],
   );
 
-  const ratio1YMA = createLazyDataset(() =>
-    computeYearlyMovingAverage(ratio.values()),
+  const ratio1YMA = createLazyDataset(
+    () => computeYearlyMovingAverage(ratio.values()),
+    [ratio.sources],
   );
 
-  const ratioMomentum = createLazyDataset(() =>
-    (ratio1YMA.values() || []).map(({ date, value }, index) => {
-      const ratioValue = ratio.values()?.[index].value || 0;
-      const ratio7DMAValue = ratio7DMA.values()?.[index].value || 0;
-      const momentum =
-        ratio7DMAValue >= value && ratioValue >= value
-          ? Momentum.green
-          : ratio7DMAValue < value && ratioValue < value
-            ? Momentum.red
-            : Momentum.yellow;
-      return {
-        date,
-        time: date,
-        value: momentum,
-        color:
-          momentum === Momentum.green
-            ? colors.momentumGreen
-            : momentum === Momentum.red
-              ? colors.momentumRed
-              : colors.momentumYellow,
-      };
-    }),
+  const ratioMomentum = createLazyDataset(
+    () =>
+      (ratio1YMA.values() || []).map(({ date, value }, index) => {
+        const ratioValue = ratio.values()?.[index].value || 0;
+        const ratio7DMAValue = ratio7DMA.values()?.[index].value || 0;
+        const momentum =
+          ratio7DMAValue >= value && ratioValue >= value
+            ? Momentum.green
+            : ratio7DMAValue < value && ratioValue < value
+              ? Momentum.red
+              : Momentum.yellow;
+        return {
+          date,
+          time: date,
+          value: momentum,
+          color:
+            momentum === Momentum.green
+              ? colors.momentumGreen
+              : momentum === Momentum.red
+                ? colors.momentumRed
+                : colors.momentumYellow,
+        };
+      }),
+    [ratio.sources],
   );
 
   const ratioMomentumBLSHBitcoinReturns = createBLSHBitcoinReturnsLazyDataset({
@@ -687,25 +695,33 @@ export function appendRatioLazyDatasets<
     closes,
   });
 
-  const ratio99p9Percentile = createLazyDataset(() =>
-    computePercentile(ratio, 99.9),
+  const ratio99p9Percentile = createLazyDataset(
+    () => computePercentile(ratio, 99.9),
+    [ratio.sources],
   );
 
-  const ratio99p5Percentile = createLazyDataset(() =>
-    computePercentile(ratio, 99.5),
+  const ratio99p5Percentile = createLazyDataset(
+    () => computePercentile(ratio, 99.5),
+    [ratio.sources],
   );
 
-  const ratio99Percentile = createLazyDataset(() =>
-    computePercentile(ratio, 99),
+  const ratio99Percentile = createLazyDataset(
+    () => computePercentile(ratio, 99),
+    [ratio.sources],
   );
 
-  const ratio1Percentile = createLazyDataset(() => computePercentile(ratio, 1));
-
-  const ratio0p5Percentile = createLazyDataset(() =>
-    computePercentile(ratio, 0.5),
+  const ratio1Percentile = createLazyDataset(
+    () => computePercentile(ratio, 1),
+    [ratio.sources],
   );
-  const ratio0p1Percentile = createLazyDataset(() =>
-    computePercentile(ratio, 0.1),
+
+  const ratio0p5Percentile = createLazyDataset(
+    () => computePercentile(ratio, 0.5),
+    [ratio.sources],
+  );
+  const ratio0p1Percentile = createLazyDataset(
+    () => computePercentile(ratio, 0.1),
+    [ratio.sources],
   );
 
   // Create an object first to be sure that we didn't forget anything

@@ -23,6 +23,7 @@ type ApplyPreset = (params: {
   datasets: Datasets;
   liveCandle: Accessor<FullCandlestick | null>;
   preset: Preset;
+  presets: Presets;
 }) => ApplyPresetReturn;
 
 type ApplyPresetReturn = PresetLegend;
@@ -50,13 +51,17 @@ interface Presets {
   selected: ASS<Preset>;
   openedFolders: ASS<Set<string>>;
 
+  sources: Accessor<Sources>;
   undoPossible: Accessor<boolean>;
   redoPossible: Accessor<boolean>;
 
+  setSources(sourcesList: Accessor<Sources>[]);
   select(preset: Preset): void;
   selectRandom: VoidFunction;
   undo: VoidFunction;
   redo: VoidFunction;
 }
+
+type Sources = Map<string, Source>;
 
 type PresetLegend = SeriesLegend[];

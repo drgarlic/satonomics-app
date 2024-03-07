@@ -1,6 +1,7 @@
 export * from "./math";
 export * from "./selectableList";
 
+export * from "./array";
 export * from "./colors";
 export * from "./consts";
 export * from "./date";

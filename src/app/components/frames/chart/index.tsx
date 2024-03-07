@@ -1,5 +1,3 @@
-import { chartState, GENESIS_DAY } from "/src/scripts";
-
 import { Chart, Network, Title } from "./components";
 import { Actions } from "./components/actions";
 import { Legend } from "./components/legend";
@@ -20,6 +18,10 @@ export function ChartFrame({
   legend: Accessor<PresetLegend>;
   datasets: Datasets;
 }) {
+  const sortedSources = createMemo(() =>
+    [...presets.sources()].sort(([a], [b]) => a.localeCompare(b)),
+  );
+
   return (
     <div
       class="flex h-full min-h-0 w-full flex-1 flex-col border-b border-white bg-black/95 md:border-none"
@@ -48,9 +50,25 @@ export function ChartFrame({
 
       <TimeScale />
 
-      <div class="flex items-center border-t border-white px-3 py-1 backdrop-blur">
-        <div>Sources:</div>
-        <div class="flex-1" />
+      <div class="flex items-center space-x-3 border-t border-white bg-black px-3 backdrop-blur">
+        <div class="flex flex-1 space-x-1 overflow-y-auto py-1">
+          <div>Sources:</div>
+          <For each={sortedSources()}>
+            {([name, source]) => (
+              <a
+                style={{
+                  color: source.color,
+                }}
+                href={source.url}
+                target="_blank"
+                class="hover:underline"
+              >
+                {name}
+              </a>
+            )}
+          </For>
+        </div>
+        <div class="h-full flex-none border-l border-dashed border-white" />
         <Network live={liveCandle.live} resources={resources.http} />
       </div>
     </div>

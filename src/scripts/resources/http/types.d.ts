@@ -7,7 +7,14 @@ interface ResourceHTTP<T extends Array<any> = DatedSingleValueData[]> {
   values: ASS<T | null>;
   loading: ASS<boolean>;
   url: URL;
+  source: ASS<Source | undefined>;
   drop: VoidFunction;
+}
+
+interface Source {
+  name: string;
+  url: string;
+  color: string;
 }
 
 type CurrencyName = (typeof import("./index").currencies)[number]["name"];

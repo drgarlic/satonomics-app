@@ -1,6 +1,6 @@
 import { PriceScaleMode } from "lightweight-charts";
 
-import { applyPriceSeries } from "/src/scripts";
+import { applyMultipleSeries, applyPriceSeries } from "/src/scripts";
 
 export const presets: PresetFolder = {
   id: "fiat",
@@ -357,15 +357,14 @@ function createPresetFolder({
     tree: [
       {
         id: `price-${id.toLowerCase()}`,
-        icon,
+        // TODO: Fix types
+        icon: icon as any,
         name: "Price",
         title: `Bitcoin Price In ${name}`,
-        applyPreset({ chart, datasets, preset }) {
-          return applyPriceSeries({
-            chart,
-            datasets,
-            preset,
-            dataset: getPriceDataset(datasets),
+        applyPreset(params) {
+          return applyMultipleSeries({
+            ...params,
+            priceDataset: getPriceDataset(params.datasets),
           });
         },
         description: "",
@@ -375,13 +374,11 @@ function createPresetFolder({
         icon: IconTablerPercentage,
         name: `Performance`,
         title: `Bitcoin ${name} Performance`,
-        applyPreset({ chart, datasets, preset }) {
-          return applyPriceSeries({
-            chart,
-            datasets,
-            preset,
-            dataset: getPriceDataset(datasets),
-            options: {
+        applyPreset(params) {
+          return applyMultipleSeries({
+            ...params,
+            priceDataset: getPriceDataset(params.datasets),
+            priceOptions: {
               id: "performance",
               title: "Performance",
               priceScaleOptions: {
@@ -397,13 +394,11 @@ function createPresetFolder({
         icon: IconTablerInfinity,
         name: `Market Capitalization`,
         title: `Bitcoin ${name} Market Capitalization`,
-        applyPreset({ chart, datasets, preset }) {
-          return applyPriceSeries({
-            chart,
-            datasets,
-            preset,
-            dataset: getMarketCapDataset(datasets),
-            options: {
+        applyPreset(params) {
+          return applyMultipleSeries({
+            ...params,
+            priceDataset: getMarketCapDataset(params.datasets),
+            priceOptions: {
               id: "marketcap",
               title: "Market Capitalization",
               // priceScaleOptions: {

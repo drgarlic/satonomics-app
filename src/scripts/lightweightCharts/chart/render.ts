@@ -10,10 +10,11 @@ export const whitespaceDataset: DatedWhitespaceData[] = [];
 let dispose: VoidFunction | undefined = undefined;
 
 export const renderChart = async (params: {
-  preset: Preset;
   datasets: Datasets;
   liveCandle: Accessor<FullCandlestick | null>;
   legendSetter: Setter<PresetLegend>;
+  preset: Preset;
+  presets: Presets;
 }) => {
   dispose?.();
 
@@ -24,7 +25,7 @@ export const renderChart = async (params: {
       renderChart(params);
     };
 
-    const { preset, datasets, liveCandle, legendSetter } = params;
+    const { datasets, liveCandle, legendSetter, presets, preset } = params;
 
     if (!datasets.candlesticks.values()?.length) return;
 
@@ -48,6 +49,7 @@ export const renderChart = async (params: {
         datasets,
         liveCandle,
         preset,
+        presets,
       });
 
       legendSetter(legend);

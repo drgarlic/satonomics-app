@@ -22,17 +22,22 @@ export enum SeriesType {
 
 export const applyMultipleSeries = ({
   chart,
-  list,
+  list = [],
   liveCandle,
   preset,
   priceScaleOptions,
   datasets,
+  priceDataset,
+  priceOptions,
+  presets,
 }: {
   chart: IChartApi;
   preset: Preset;
+  priceDataset?: Dataset;
+  priceOptions?: PriceSeriesOptions;
   priceScaleOptions?: FullPriceScaleOptions;
   liveCandle?: Accessor<FullCandlestick | null>;
-  list: (
+  list?: (
     | {
         id: string;
         dataset: Dataset;
@@ -88,6 +93,7 @@ export const applyMultipleSeries = ({
       }
   )[];
   datasets: Datasets;
+  presets: Presets;
 }): PresetLegend => {
   const { halved } = priceScaleOptions || {};
 
@@ -231,20 +237,28 @@ export const applyMultipleSeries = ({
       },
     );
 
-  const priceLegend = applyPriceSeries({
+  const { sources: priceSources, legend: priceLegend } = applyPriceSeries({
     chart,
     datasets,
     liveCandle,
     preset,
+    presets,
+    dataset: priceDataset,
     options: {
+      ...priceOptions,
       halved,
     },
   });
 
+  presets.setSources([
+    ...list.map(({ dataset }) => dataset.sources),
+    priceSources,
+  ]);
+
   createEffect(() => {
     const options = {
       scaleMargins: {
-        top: priceLegend[0].visible()
+        top: priceLegend.visible()
           ? rightPriceScaleOptions.scaleMargins.top
           : rightPriceScaleOptions.scaleMargins.bottom,
         bottom: rightPriceScaleOptions.scaleMargins.bottom,
@@ -254,5 +268,5 @@ export const applyMultipleSeries = ({
     chart.priceScale("right").applyOptions(options);
   });
 
-  return [...priceLegend, ...legend.reverse()];
+  return [priceLegend, ...legend.reverse()];
 };

@@ -116,14 +116,32 @@ export function createPresets(): Presets {
     );
   });
 
+  const sourcesList = createASS<Accessor<Sources>[]>([], { equals: false });
+
+  const sources = createMemo(() => {
+    const map = new Map<string, Source>();
+
+    sourcesList().forEach((sources) => {
+      sources().forEach((value, key) => {
+        map.set(key, value);
+      });
+    });
+
+    return map;
+  });
+
   return {
     tree,
     list,
     selected,
     favorites,
+    sources,
     undoPossible: createMemo(() => !!history.undo().length),
     redoPossible: createMemo(() => !!history.redo().length),
     select,
+    setSources(_sourcesList) {
+      sourcesList.set(_sourcesList);
+    },
     selectRandom() {
       const preset = random(list);
 

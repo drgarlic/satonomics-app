@@ -1,6 +1,6 @@
 import { PriceScaleMode } from "lightweight-charts";
 
-import { applyPriceSeries } from "/src/scripts";
+import { applyMultipleSeries, applyPriceSeries } from "/src/scripts";
 
 export const presets: PresetFolder = {
   id: "metals",
@@ -38,15 +38,14 @@ function createPresetFolder({
     tree: [
       {
         id: `price-${id.toLowerCase()}`,
-        icon,
+        // TODO: Fix types
+        icon: icon as any,
         name: "Price",
         title: `Bitcoin Price In ${name} (Troy Ounce)`,
-        applyPreset({ chart, datasets, preset }) {
-          return applyPriceSeries({
-            chart,
-            datasets,
-            preset,
-            dataset: getDataset(datasets),
+        applyPreset(params) {
+          return applyMultipleSeries({
+            ...params,
+            priceDataset: getDataset(params.datasets),
           });
         },
         description: "",
@@ -56,13 +55,11 @@ function createPresetFolder({
         icon: IconTablerPercentage,
         name: `Performance`,
         title: `Bitcoin ${name} (Troy Ounce) Performance`,
-        applyPreset({ chart, datasets, preset }) {
-          return applyPriceSeries({
-            chart,
-            datasets,
-            preset,
-            dataset: getDataset(datasets),
-            options: {
+        applyPreset(params) {
+          return applyMultipleSeries({
+            ...params,
+            priceDataset: getDataset(params.datasets),
+            priceOptions: {
               priceScaleOptions: {
                 mode: PriceScaleMode.Percentage,
               },

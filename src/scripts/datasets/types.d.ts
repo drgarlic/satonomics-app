@@ -1,4 +1,5 @@
 interface Dataset<T = DatedSingleValueData[]> {
+  sources: Accessor<Sources>;
   values: Accessor<T | null>;
 }
 

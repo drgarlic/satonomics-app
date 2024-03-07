@@ -36,30 +36,19 @@ export function createResourceDatasets(resources: ResourcesHTTP) {
 
   const candlesticks = createResourceDataset({
     fetch: resources.candlesticks.fetch,
+    source: resources.candlesticks.source,
     values: candlestickValues,
     autoFetch: false,
   });
 
-  const closes = createLazyDataset(() =>
-    convertCandlesticksToSingleValueDataset(candlesticks.values()),
-  );
-
-  const closesRecord = createLazyDataset(
-    createLazyMemo(() =>
-      (closes.values() || []).reduce(
-        (obj, { date, value }) => {
-          obj[date] = value;
-          return obj;
-        },
-        {} as Record<string, number>,
-      ),
-    ),
+  const closes = createLazyDataset(
+    () => convertCandlesticksToSingleValueDataset(candlesticks.values()),
+    [candlesticks.sources],
   );
 
   const partialDatasets = {
     candlesticks,
     closes,
-    closesRecord,
     // fundingRates: createResourceDataset({
     //   fetch: resources.fundingRates.fetch,
     //   values: createLazyMemo(() =>
@@ -99,7 +88,9 @@ export function createResourceDatasets(resources: ResourcesHTTP) {
   for (const resource in resources) {
     if (!(resource in partialDatasets)) {
       const _resource = resource as MissingKeys;
+
       const _partialDatasets = partialDatasets as PartialDatasets;
+
       const dataset = createResourceDataset(resources[_resource]);
       _partialDatasets[_resource] = dataset;
     }

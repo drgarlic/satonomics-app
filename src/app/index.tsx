@@ -99,6 +99,10 @@ export function App() {
   const datasets = createDatasets(resources.http);
 
   createEffect(() => {
+    console.log(presets.sources());
+  });
+
+  createEffect(() => {
     const preset = presets.selected();
 
     if (datasets.candlesticks.values()?.length) {
@@ -108,6 +112,7 @@ export function App() {
           preset,
           liveCandle: liveCandle.latest,
           legendSetter: legend.set,
+          presets,
         }),
       );
     }

@@ -1,11 +1,6 @@
 import { PriceScaleMode } from "lightweight-charts";
 
-import {
-  applyMultipleSeries,
-  applyPriceSeries,
-  colors,
-  SeriesType,
-} from "/src/scripts";
+import { applyMultipleSeries } from "/src/scripts";
 
 import description from "./description.md?raw";
 
@@ -19,7 +14,7 @@ export const presets: PresetFolder = {
       name: "Price",
       title: "Bitcoin Price In US Dollars - USD",
       applyPreset(params) {
-        return applyPriceSeries(params);
+        return applyMultipleSeries(params);
       },
       description,
     },
@@ -29,9 +24,9 @@ export const presets: PresetFolder = {
       name: "Performance",
       title: "Bitcoin USD Performance",
       applyPreset(params) {
-        return applyPriceSeries({
+        return applyMultipleSeries({
           ...params,
-          options: {
+          priceOptions: {
             id: "performance",
             title: "Performance",
             priceScaleOptions: {
@@ -48,13 +43,13 @@ export const presets: PresetFolder = {
       name: "Marketcap",
       title: "Bitcoin USD Market Capitalization",
       applyPreset(params) {
-        return applyPriceSeries({
-          options: {
-            id: "marketcap",
-            title: "Marketcap",
-          },
+        return applyMultipleSeries({
           ...params,
-          dataset: params.datasets.dateToMarketCap,
+          priceDataset: params.datasets.dateToMarketCap,
+          priceOptions: {
+            id: "marketcap",
+            title: "Market Cap.",
+          },
         });
       },
       description,

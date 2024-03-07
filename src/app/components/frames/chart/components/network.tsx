@@ -14,7 +14,7 @@ export function Network({
   );
 
   return (
-    <span class="flex items-center space-x-1 bg-black">
+    <span class="flex flex-none items-center space-x-1 bg-black">
       <span
         class={classPropToString([
           fetching()

@@ -59,6 +59,7 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
             close !== Infinity,
         ),
     ),
+    [candlesticks.sources],
   );
 
   // It's not great for sure but at least it's trivial for the TS server
@@ -68,8 +69,9 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
   >;
   let partialAveragesDatasets: Partial<AverageDatasets> = {};
   averages.forEach(({ key: averageName, days }) => {
-    const averageDataset = createLazyDataset(() =>
-      computeMovingAverage(closes.values(), days),
+    const averageDataset = createLazyDataset(
+      () => computeMovingAverage(closes.values(), days),
+      [closes.sources],
     );
     const key: `Closes${AverageName}MA` = `Closes${averageName}MA`;
     partialAveragesDatasets[`dateTo${key}` as const] = averageDataset;
@@ -338,12 +340,15 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToActiveSupply,
   );
 
-  const dateToNewBlocks7dSMA = createLazyDataset(() =>
-    computeWeeklyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+  const dateToNewBlocks7dSMA = createLazyDataset(
+    () => computeWeeklyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+    [resourceDatasets.dateToNewBlocks.sources],
   );
 
-  const dateToNewBlocks30dSMA = createLazyDataset(() =>
-    computeMonthlyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+  const dateToNewBlocks30dSMA = createLazyDataset(
+    () =>
+      computeMonthlyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
+    [resourceDatasets.dateToNewBlocks.sources],
   );
 
   type LazyCurrencyDatasets = Record<`dateTo${CurrencyName}MarketCap`, Dataset>;
@@ -425,11 +430,11 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     dateToYearlyInflationRate,
     dateToThermoCap,
     dateToThermoCapToInvestorCapRatio,
-    dateToActivePrice,
     dateToNewBlocks7dSMA,
     dateToNewBlocks30dSMA,
     dateToLastSubsidyInDollars,
     dateToBlocksTotal,
+    dateToActivePrice,
     ...appendRatioLazyDatasets({
       sourceDataset: dateToActivePrice,
       key: "ActivePrice" as const,

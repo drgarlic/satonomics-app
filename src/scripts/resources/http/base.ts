@@ -8,25 +8,15 @@ import {
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
-export const convertJSONToValues = (json: any) =>
-  json && typeof json === "object"
-    ? Object.entries(json as Record<string, number>).map(
-        ([date, value]: [string, number]): DatedSingleValueData => ({
-          date,
-          time: date,
-          value: value ?? NaN,
-        }),
-      )
-    : undefined;
-
-export const createBackEndResource = (path: string) =>
-  createResourceHTTP({
+export function createBackEndResource(path: string) {
+  return createResourceHTTP({
     url: computeBackEndURL(path),
     customFetch: retryingFetch,
     transform: convertJSONToValues,
   });
+}
 
-export const createResourceHTTP = <T extends Array<any>>({
+export function createResourceHTTP<T extends Array<any>>({
   url,
   customFetch,
   transform,
@@ -34,16 +24,21 @@ export const createResourceHTTP = <T extends Array<any>>({
   url: string;
   customFetch: (path: string, init?: RequestInit) => Promise<ResponseWithJSON>;
   transform?: (json: any) => T | undefined;
-}) => {
+}) {
   const values = createASS(null as T | null);
 
   const loading = createASS(false);
 
+  const source = createASS<Source | undefined>(undefined);
+
   let lastSuccessfulFetch: Date | null;
 
-  const reponseToValues = async (response: ResponseWithJSON) => {
+  const responseToValues = async (response: ResponseWithJSON) => {
     const json = response.jsoned || (await response.json());
-    return transform ? transform(json) : (json as T);
+
+    source.set(json.source);
+
+    return transform ? transform(json.dataset) : (json.dataset as T);
   };
 
   const throttledFetch = leading(
@@ -67,10 +62,12 @@ export const createResourceHTTP = <T extends Array<any>>({
         const cachedResponse = await cache.match(url.toString());
 
         if (cachedResponse) {
-          const _values = await reponseToValues(cachedResponse);
+          const _values = await responseToValues(cachedResponse);
 
           if (_values) {
-            console.log("values: setting cached...");
+            console.log(
+              `values: setting cached... (length: ${_values.length})`,
+            );
             values.set(() => _values);
           }
         }
@@ -80,7 +77,7 @@ export const createResourceHTTP = <T extends Array<any>>({
 
       const clonedResponse = fetchedResponse.clone();
 
-      const _values = await reponseToValues(fetchedResponse);
+      const _values = await responseToValues(fetchedResponse);
 
       if (_values) {
         lastSuccessfulFetch = new Date();
@@ -90,6 +87,7 @@ export const createResourceHTTP = <T extends Array<any>>({
         }
 
         console.log("values: setting fetched...");
+
         values.set(() => _values);
       }
 
@@ -102,6 +100,7 @@ export const createResourceHTTP = <T extends Array<any>>({
     fetch: throttledFetch,
     values,
     loading,
+    source,
     url: new URL(url),
     drop() {
       values.set(null);
@@ -109,4 +108,16 @@ export const createResourceHTTP = <T extends Array<any>>({
   };
 
   return resource;
-};
+}
+
+function convertJSONToValues(json: any) {
+  if (!json || typeof json !== "object") return undefined;
+
+  return Object.entries(json as Record<string, number>).map(
+    ([date, value]: [string, number]): DatedSingleValueData => ({
+      date,
+      time: date,
+      value: value ?? NaN,
+    }),
+  );
+}

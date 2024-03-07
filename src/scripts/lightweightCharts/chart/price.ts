@@ -22,6 +22,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
   preset,
   dataset,
   options,
+  presets,
 }: {
   chart: IChartApi;
   datasets: Datasets;
@@ -29,9 +30,8 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
   liveCandle?: Accessor<FullCandlestick | null>;
   dataset?: Dataset<T>;
   options?: PriceSeriesOptions;
-}): SeriesLegend[] => {
-  if (!chart) return [];
-
+  presets: Presets;
+}): { sources: Accessor<Sources>; legend: SeriesLegend } => {
   const id = options?.id || "price";
   const title = options?.title || "Price";
 
@@ -134,15 +134,16 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
     lowerOpacity,
   });
 
-  return [
-    createSeriesLegend({
+  return {
+    sources: dataset?.sources || datasets.candlesticks.sources,
+    legend: createSeriesLegend({
       id,
       presetId: preset.id,
       title,
       color,
       series: chartState.priceSeries,
     }),
-  ];
+  };
 };
 
 function checkIfUpClose(chart: IChartApi, range?: LogicalRange | null) {

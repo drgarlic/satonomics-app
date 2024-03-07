@@ -1,22 +1,34 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 
-export const createResourceDataset = <T>({
+export function createResourceDataset<T>({
   values,
+  source: _source,
   fetch,
   autoFetch = true,
 }: {
   fetch: () => void;
+  source: ASS<Source | undefined>;
   values: Accessor<T | null>;
   autoFetch?: boolean;
-}): Dataset<T> => ({
-  values: createLazyMemo(() => {
-    if (autoFetch) {
-      fetch();
-    }
-
-    return values();
-  }),
-});
+}): Dataset<T> {
+  return {
+    sources: createLazyMemo(() => {
+      const source = _source();
+      const map = new Map<string, Source>();
+      if (source) {
+        map.set(source.name, source);
+      }
+      return map;
+    }),
+    values: createLazyMemo(() => {
+      console.log("lazy values");
+      if (autoFetch) {
+        fetch();
+      }
+      return values();
+    }),
+  };
+}
 
 // export const createEntities30DBalanceChangeDataset = (
 //   resources: ResourcesHTTP,

@@ -60,7 +60,8 @@ export function TreeFrame({
            </html>`);
           }}
         >
-          API Routes <span class="opacity-50">- Free & Unlimited</span>
+          API Routes
+          {/* <span class="opacity-50">- Free & Unlimited</span> */}
         </button>
       </ScrollableFrame>
       <div class="flex w-full border-t border-dashed border-white bg-black">
