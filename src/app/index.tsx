@@ -11,7 +11,6 @@ import {
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
-import { env } from "../env";
 import {
   ChartFrame,
   FavoritesFrame,
@@ -22,7 +21,6 @@ import {
   Selector,
   SettingsFrame,
   TreeFrame,
-  // Update,
 } from "./components";
 import { Background, LOCAL_STORAGE_MARQUEE_KEY } from "./components/background";
 import { registerServiceWorker } from "./scripts";
@@ -167,12 +165,7 @@ export function App() {
         onMouseUp={() => resizingBar.set(false)}
         onMouseLeave={() => resizingBar.set(false)}
       >
-        <div
-          class="h-full border-white"
-          style={{
-            "border-width": `${env.standalone ? 0 : 1}px`,
-          }}
-        >
+        <div class="h-full border-white md:border">
           <div class="flex h-full w-full flex-col md:flex-row">
             <div
               class="flex h-full w-full flex-none flex-col md:min-w-[384px] md:max-w-[75%]"
@@ -184,26 +177,28 @@ export function App() {
                   : {}),
               }}
             >
-              <Header updateFound={updateFound} />
+              <div class="flex min-h-0 flex-1 flex-col border border-b-0 border-white md:border-0">
+                <Header updateFound={updateFound} />
 
-              <ChartFrame
-                presets={presets}
-                liveCandle={liveCandle}
-                resources={resources}
-                show={() =>
-                  !windowSizeIsAtLeastMedium() && visibleFrame() === "Chart"
-                }
-                legend={legend}
-                datasets={datasets}
-              />
-              <TreeFrame
-                presets={presets}
-                visibleFrame={visibleFrame}
-                resources={resources.http}
-              />
-              <FavoritesFrame presets={presets} visibleFrame={visibleFrame} />
-              <SearchFrame presets={presets} visibleFrame={visibleFrame} />
-              <SettingsFrame marquee={marquee} visibleFrame={visibleFrame} />
+                <ChartFrame
+                  presets={presets}
+                  liveCandle={liveCandle}
+                  resources={resources}
+                  show={() =>
+                    !windowSizeIsAtLeastMedium() && visibleFrame() === "Chart"
+                  }
+                  legend={legend}
+                  datasets={datasets}
+                />
+                <TreeFrame
+                  presets={presets}
+                  visibleFrame={visibleFrame}
+                  resources={resources.http}
+                />
+                <FavoritesFrame presets={presets} visibleFrame={visibleFrame} />
+                <SearchFrame presets={presets} visibleFrame={visibleFrame} />
+                <SettingsFrame marquee={marquee} visibleFrame={visibleFrame} />
+              </div>
 
               <Selector
                 presets={presets}

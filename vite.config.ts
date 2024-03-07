@@ -20,9 +20,9 @@ export default defineConfig({
 
     VitePWA({
       injectRegister: false,
-      devOptions: {
-        enabled: true,
-      },
+      // devOptions: {
+      //   enabled: true,
+      // },
       pwaAssets: {
         config: true,
         overrideManifestIcons: true,
