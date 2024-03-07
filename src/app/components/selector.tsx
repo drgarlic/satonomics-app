@@ -1,3 +1,4 @@
+import { env } from "/src/env";
 import { classPropToString } from "/src/solid";
 
 export function Selector({
@@ -10,7 +11,12 @@ export function Selector({
   presets: Presets;
 }) {
   return (
-    <div class="flex justify-around bg-black bg-black/85 p-3 backdrop-blur">
+    <div
+      class={classPropToString([
+        env.standalone && "pb-6 md:pb-3",
+        "flex justify-around bg-black bg-black/85 p-3 backdrop-blur",
+      ])}
+    >
       <Button
         name="Chart"
         selected={activeButton}

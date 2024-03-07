@@ -11,6 +11,7 @@ import {
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
+import { env } from "../env";
 import {
   ChartFrame,
   FavoritesFrame,
@@ -166,7 +167,12 @@ export function App() {
         onMouseUp={() => resizingBar.set(false)}
         onMouseLeave={() => resizingBar.set(false)}
       >
-        <div class="h-full border border-white">
+        <div
+          class="h-full border-white"
+          style={{
+            "border-width": `${env.standalone ? 0 : 1}px`,
+          }}
+        >
           <div class="flex h-full w-full flex-col md:flex-row">
             <div
               class="flex h-full w-full flex-none flex-col md:min-w-[384px] md:max-w-[75%]"

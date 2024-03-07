@@ -40,6 +40,7 @@ export default defineConfig({
         display: "standalone",
         theme_color: black,
         background_color: black,
+        lang: "en",
       },
     }),
 
