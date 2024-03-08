@@ -25,7 +25,7 @@ render(() => {
         <Route
           path="/routes"
           component={() => (
-            <div class="flex h-dvh flex-col gap-2 overflow-y-auto p-2">
+            <div class="flex h-dvh flex-col gap-3 overflow-y-auto p-2">
               <For each={Object.entries(resources.http)}>
                 {([name, resource]) => (
                   <p>
@@ -33,7 +33,7 @@ render(() => {
                     <a
                       href={resource.url.toString()}
                       target="_blank"
-                      class="ml-1 text-orange-500 visited:text-orange-700 hover:text-orange-300"
+                      class="ml-1 break-words text-orange-500 visited:text-orange-700 hover:text-orange-300"
                     >
                       {resource.url.toString()}
                     </a>
