@@ -1,4 +1,4 @@
-import { openWindow, scrollIntoView, sleep, tick } from "/src/scripts";
+import { scrollIntoView, sleep, tick } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import { Counter } from "../counter";
