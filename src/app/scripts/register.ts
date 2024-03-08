@@ -1,12 +1,11 @@
 import { useRegisterSW } from "virtual:pwa-register/solid";
 
-const intervalMS = 60 * 1000;
+const intervalMS = 10 * 60 * 1000;
 
 export function registerServiceWorker() {
   return useRegisterSW({
     onRegisteredSW(swUrl, registered) {
-      // eslint-disable-next-line prefer-template
-      console.log("SW Registered: " + registered);
+      console.log("sw: registered", registered);
 
       registered &&
         setInterval(async () => {
@@ -28,10 +27,10 @@ export function registerServiceWorker() {
         }, intervalMS);
     },
     onRegisterError(error) {
-      console.log("SW registration error", error);
+      console.log("sw: registration error", error);
     },
     onNeedRefresh() {
-      console.log("onNeedRefresh message should not appear");
+      console.log("sw: needs refresh");
     },
   });
 }

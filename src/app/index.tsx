@@ -177,7 +177,11 @@ export function App({ resources }: { resources: Resources }) {
               <div class="flex min-h-0 flex-1 flex-col border border-b-0 border-white md:border-0">
                 <Header
                   needsRefresh={needRefresh[0]}
-                  onClick={() => updateServiceWorker(true)}
+                  onClick={async () => {
+                    await updateServiceWorker();
+
+                    document.location.reload();
+                  }}
                 />
 
                 <ChartFrame

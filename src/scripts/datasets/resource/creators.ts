@@ -21,7 +21,6 @@ export function createResourceDataset<T>({
       return map;
     }),
     values: createLazyMemo(() => {
-      console.log("lazy values");
       if (autoFetch) {
         fetch();
       }
