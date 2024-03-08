@@ -29,9 +29,7 @@ import { registerServiceWorker } from "./scripts";
 const LOCAL_STORAGE_BAR_KEY = "bar-width";
 
 export function App({ resources }: { resources: Resources }) {
-  const updateFound = createASS(false);
-
-  registerServiceWorker(updateFound);
+  const { needRefresh, updateServiceWorker } = registerServiceWorker();
 
   const tabFocused = createASS(true);
 
@@ -177,7 +175,10 @@ export function App({ resources }: { resources: Resources }) {
               }}
             >
               <div class="flex min-h-0 flex-1 flex-col border border-b-0 border-white md:border-0">
-                <Header updateFound={updateFound} />
+                <Header
+                  needsRefresh={needRefresh[0]}
+                  onClick={() => updateServiceWorker(true)}
+                />
 
                 <ChartFrame
                   presets={presets}
@@ -190,11 +191,7 @@ export function App({ resources }: { resources: Resources }) {
                   datasets={datasets}
                   qrcode={qrcode}
                 />
-                <TreeFrame
-                  presets={presets}
-                  visibleFrame={visibleFrame}
-                  resources={resources.http}
-                />
+                <TreeFrame presets={presets} visibleFrame={visibleFrame} />
                 <FavoritesFrame presets={presets} visibleFrame={visibleFrame} />
                 <SearchFrame presets={presets} visibleFrame={visibleFrame} />
                 <SettingsFrame marquee={marquee} visibleFrame={visibleFrame} />

@@ -1,11 +1,13 @@
-import { registerSW } from "virtual:pwa-register";
+import { useRegisterSW } from "virtual:pwa-register/solid";
 
 const intervalMS = 60 * 60 * 1000;
 
-export function registerServiceWorker(updateFound: ASS<boolean>) {
-  registerSW({
-    immediate: true,
+export function registerServiceWorker() {
+  return useRegisterSW({
     onRegisteredSW(swUrl, r) {
+      // eslint-disable-next-line prefer-template
+      console.log("SW Registered: " + r);
+
       r &&
         setInterval(async () => {
           if (!(!r.installing && navigator)) return;
@@ -22,10 +24,11 @@ export function registerServiceWorker(updateFound: ASS<boolean>) {
 
           if (resp?.status === 200) {
             await r.update();
-
-            updateFound.set(true);
           }
         }, intervalMS);
+    },
+    onRegisterError(error) {
+      console.log("SW registration error", error);
     },
     onNeedRefresh() {
       console.log("onNeedRefresh message should not appear");

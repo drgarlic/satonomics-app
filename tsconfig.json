@@ -12,7 +12,8 @@
     "types": [
       "vite/client",
       "vite-plugin-pwa/client",
-      "vite-plugin-pwa/pwa-assets"
+      "vite-plugin-pwa/pwa-assets",
+      "vite-plugin-pwa/solid"
     ],
     "noEmit": true,
     "isolatedModules": true,

@@ -8,11 +8,9 @@ import { Tree } from "./components";
 export function TreeFrame({
   presets,
   visibleFrame,
-  resources,
 }: {
   presets: Presets;
   visibleFrame: Accessor<FrameName>;
-  resources: ResourcesHTTP;
 }) {
   const div = createASS<HTMLDivElement | undefined>(undefined);
 
