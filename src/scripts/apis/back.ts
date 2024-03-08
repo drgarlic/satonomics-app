@@ -3,6 +3,6 @@ const useProdURL =
 
 export function computeBackEndURL(path: string) {
   return `${
-    useProdURL ? "https://tunnel.satonomics.xyz" : "http://localhost:3110"
+    useProdURL ? "https://api.satonomics.xyz" : "http://localhost:3110"
   }${path}`;
 }

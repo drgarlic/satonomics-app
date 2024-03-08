@@ -1,6 +1,8 @@
 import { computeBackEndURL, retryingFetch } from "/src/scripts";
 
-import { createBackEndResource, createResourceHTTP } from "./base";
+import { createBackEndResource, createResourceHTTP } from "./creators";
+
+export const scales = ["date" as const, "height" as const];
 
 export const currencies = [
   {
@@ -342,26 +344,6 @@ export const createResourcesHTTP = () => {
       url: computeBackEndURL("/ohlcv"),
       customFetch: retryingFetch,
     }),
-    dateToNewBlocks: createBackEndResource(`/date-to-block_count`),
-    dateToTransactionCount: createBackEndResource(`/date-to-transaction-count`),
-    dateToTransactionVolume: createBackEndResource(
-      `/date-to-transaction-volume`,
-    ),
-    dateToSubsidy: createBackEndResource(`/date-to-subsidy`),
-    dateToSubsidyInDollars: createBackEndResource(
-      `/date-to-subsidy_in_dollars`,
-    ),
-    dateToLastSubsidy: createBackEndResource(`/date-to-last_subsidy`),
-    dateToFees: createBackEndResource(`/date-to-fees-sumed`),
-    dateToTotalAddressesCreated: createBackEndResource(
-      `/date-to-total_addresses_created`,
-    ),
-    dateToCoinblocksDestroyed: createBackEndResource(
-      `/date-to-coinblocks-destroyed`,
-    ),
-    dateToTotalEmptyAddresses: createBackEndResource(
-      `/date-to-total_empty_addresses`,
-    ),
 
     dateToAltcoinsMarketCap: createBackEndResource(
       `/date-to-altcoins-marketcap`,
@@ -369,6 +351,7 @@ export const createResourcesHTTP = () => {
     dateToStablecoinsMarketCap: createBackEndResource(
       `/date-to-stablecoins-marketcap`,
     ),
+    heightToTimestamp: createBackEndResource(`/height-to-timestamp`),
 
     usdtMarketCap: createBackEndResource(`/usdt-marketcap`),
     usdcMarketCap: createBackEndResource(`/usdc-marketcap`),
@@ -380,7 +363,6 @@ export const createResourcesHTTP = () => {
     cvdd: createBackEndResource(`/cvdd`),
     fundingRates: createBackEndResource(`/funding-rates`),
     vddMultiple: createBackEndResource(`/vdd-multiple`),
-    minersRevenue: createBackEndResource(`/miners-revenue`),
   };
 
   // ---
@@ -414,10 +396,11 @@ export const createResourcesHTTP = () => {
   const ageCohortAttributes = [...anyCohortAttributes];
 
   const computeAgeAttributeName = (
+    scale: Scale,
     ageCohortName: AgeCohortName,
     ageCohortAttributeName: AgeCohortAttributeName,
-  ): `dateTo${AgeCohortName}${AgeCohortAttributeName}` =>
-    `dateTo${ageCohortName}${ageCohortAttributeName}`;
+  ): `${Scale}To${AgeCohortName}${AgeCohortAttributeName}` =>
+    `${scale}To${ageCohortName}${ageCohortAttributeName}`;
 
   type AgeResources = Record<
     ReturnType<typeof computeAgeAttributeName>,
@@ -426,18 +409,21 @@ export const createResourcesHTTP = () => {
 
   const partialAgeResources: Partial<AgeResources> = {};
 
-  ageCohorts.forEach(({ name: ageName, route: ageRoute }) => {
-    ageCohortAttributes.forEach(
-      ({ name: cohortAttributeName, route: cohortAttributeRoute }) => {
-        const attributeName = computeAgeAttributeName(
-          ageName,
-          cohortAttributeName,
-        );
-        partialAgeResources[attributeName] = createBackEndResource(
-          `/date-to-${ageRoute ? ageRoute + "-" : ""}${cohortAttributeRoute}`,
-        );
-      },
-    );
+  scales.forEach((scale) => {
+    ageCohorts.forEach(({ name: ageName, route: ageRoute }) => {
+      ageCohortAttributes.forEach(
+        ({ name: cohortAttributeName, route: cohortAttributeRoute }) => {
+          const attributeName = computeAgeAttributeName(
+            scale,
+            ageName,
+            cohortAttributeName,
+          );
+          partialAgeResources[attributeName] = createBackEndResource(
+            `/${scale}-to-${ageRoute ? ageRoute + "-" : ""}${cohortAttributeRoute}`,
+          );
+        },
+      );
+    });
   });
 
   const ageResources = partialAgeResources as AgeResources;
@@ -448,18 +434,20 @@ export const createResourcesHTTP = () => {
   ];
 
   function computeAddressAttributeName(
+    scale: Scale,
     addressCohortName: AddressCohortName,
     addressCohortAttributeName: AddressCohortAttributeName,
-  ): `dateTo${AddressCohortName}${AddressCohortAttributeName}` {
-    return `dateTo${addressCohortName}${addressCohortAttributeName}`;
+  ): `${Scale}To${AddressCohortName}${AddressCohortAttributeName}` {
+    return `${scale}To${addressCohortName}${addressCohortAttributeName}`;
   }
 
   function computeAddressSplitByLiquidityAttributeName(
+    scale: Scale,
     addressCohortName: AddressCohortName,
     addressCohortAttributeName: AddressCohortAttributeName,
     liquidity: LiquidityName,
-  ): `dateTo${AddressCohortName}${LiquidityName}${AddressCohortAttributeName}` {
-    return `dateTo${addressCohortName}${liquidity}${addressCohortAttributeName}`;
+  ): `${Scale}To${AddressCohortName}${LiquidityName}${AddressCohortAttributeName}` {
+    return `${scale}To${addressCohortName}${liquidity}${addressCohortAttributeName}`;
   }
 
   type AddressResources = Record<
@@ -469,37 +457,97 @@ export const createResourcesHTTP = () => {
   >;
 
   const partialAddressResources: Partial<AddressResources> = {};
-  addressCohorts.forEach(({ name: addressName, route: addressRoute }) => {
-    addressCohortAttributes.forEach(
-      ({ name: cohortAttributeName, route: cohortAttributeRoute }) => {
-        const attributeName = computeAddressAttributeName(
-          addressName,
-          cohortAttributeName,
-        );
-        partialAddressResources[attributeName] = createBackEndResource(
-          `/date-to-${addressRoute}-${cohortAttributeRoute}`,
-        );
 
-        liquidities.forEach((liquidity) => {
-          const attributeName = computeAddressSplitByLiquidityAttributeName(
+  scales.forEach((scale) => {
+    addressCohorts.forEach(({ name: addressName, route: addressRoute }) => {
+      addressCohortAttributes.forEach(
+        ({ name: cohortAttributeName, route: cohortAttributeRoute }) => {
+          const attributeName = computeAddressAttributeName(
+            scale,
             addressName,
             cohortAttributeName,
-            liquidity.name,
           );
 
           partialAddressResources[attributeName] = createBackEndResource(
-            `/date-to-${addressRoute}-${liquidity.route}-${cohortAttributeRoute}`,
+            `/${scale}-to-${addressRoute}-${cohortAttributeRoute}`,
           );
-        });
-      },
-    );
+
+          liquidities.forEach((liquidity) => {
+            const attributeName = computeAddressSplitByLiquidityAttributeName(
+              scale,
+              addressName,
+              cohortAttributeName,
+              liquidity.name,
+            );
+
+            partialAddressResources[attributeName] = createBackEndResource(
+              `/${scale}-to-${addressRoute}-${liquidity.route}-${cohortAttributeRoute}`,
+            );
+          });
+        },
+      );
+    });
   });
+
   const addressResources = partialAddressResources as AddressResources;
 
   return {
-    ...baseResources,
     ...currencyResources,
+    ...baseResources,
+
+    ...createUniqueCommonResources(),
     ...ageResources,
     ...addressResources,
   };
 };
+
+function createUniqueCommonResources() {
+  type Keys =
+    | `NewBlocks`
+    | `TransactionCount`
+    | `TransactionVolume`
+    | `Subsidy`
+    | `SubsidyInDollars`
+    | `LastSubsidy`
+    | `Fees`
+    | `TotalAddressesCreated`
+    | `CoinblocksDestroyed`
+    | `TotalEmptyAddresses`;
+
+  const resources: Partial<Record<`${Scale}To${Keys}`, ResourceHTTP>> = {};
+
+  scales.forEach((scale) => {
+    resources[`${scale}ToNewBlocks`] = createBackEndResource(
+      `/${scale}-to-block_count`,
+    );
+    resources[`${scale}ToTransactionCount`] = createBackEndResource(
+      `/${scale}-to-transaction-count`,
+    );
+    resources[`${scale}ToTransactionVolume`] = createBackEndResource(
+      `/${scale}-to-transaction-volume`,
+    );
+    resources[`${scale}ToSubsidy`] = createBackEndResource(
+      `/${scale}-to-subsidy`,
+    );
+    resources[`${scale}ToSubsidyInDollars`] = createBackEndResource(
+      `/${scale}-to-subsidy_in_dollars`,
+    );
+    resources[`${scale}ToLastSubsidy`] = createBackEndResource(
+      `/${scale}-to-last_subsidy`,
+    );
+    resources[`${scale}ToFees`] = createBackEndResource(
+      `/${scale}-to-fees-sumed`,
+    );
+    resources[`${scale}ToTotalAddressesCreated`] = createBackEndResource(
+      `/${scale}-to-total_addresses_created`,
+    );
+    resources[`${scale}ToCoinblocksDestroyed`] = createBackEndResource(
+      `/${scale}-to-total_coinblocks-destroyed`,
+    );
+    resources[`${scale}ToTotalEmptyAddresses`] = createBackEndResource(
+      `/${scale}-to-total_empty_addresses`,
+    );
+  });
+
+  return resources as Record<`${Scale}To${Keys}`, ResourceHTTP>;
+}

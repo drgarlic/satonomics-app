@@ -1,5 +1,3 @@
-import { createLazyMemo } from "@solid-primitives/memo";
-
 import {
   computeMonthlyMovingAverage,
   computeMovingAverage,
@@ -7,7 +5,6 @@ import {
   currencies,
 } from "/src/scripts";
 
-import { convertNormalCandleToSatCandle } from "./converters";
 import {
   appendRatioLazyDatasets,
   createAddedLazyDataset,
@@ -23,7 +20,7 @@ import {
   createTransformedLazyDataset,
 } from "./creators";
 
-export * from "./creators";
+export * from "./creators/base";
 export * from "./converters";
 
 // export const USABLE_CANDLESTICKS_START_DATE = '2012-01-01'
@@ -45,22 +42,22 @@ export const averages = [
 ] as const;
 
 export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
-  const { candlesticks, closes } = resourceDatasets;
+  const { closes } = resourceDatasets;
 
-  const satsPrice = createLazyDataset(
-    createLazyMemo(() =>
-      (candlesticks.values() || [])
-        .map(convertNormalCandleToSatCandle)
-        .filter(
-          ({ open, high, low, close }) =>
-            open !== Infinity &&
-            high !== Infinity &&
-            low !== Infinity &&
-            close !== Infinity,
-        ),
-    ),
-    [candlesticks.sources],
-  );
+  // const satsPrice = createLazyDataset(
+  //   createLazyMemo(() =>
+  //     (candlesticks.values() || [])
+  //       .map(convertNormalCandleToSatCandle)
+  //       .filter(
+  //         ({ open, high, low, close }) =>
+  //           open !== Infinity &&
+  //           high !== Infinity &&
+  //           low !== Infinity &&
+  //           close !== Infinity,
+  //       ),
+  //   ),
+  //   [candlesticks.sources],
+  // );
 
   // It's not great for sure but at least it's trivial for the TS server
   type AverageDatasets = Record<

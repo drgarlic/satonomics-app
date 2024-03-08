@@ -49,11 +49,14 @@ function Button({
       class={classPropToString([
         colors?.() || (disabled?.() ? "" : "hover:bg-white/20"),
         !disabled?.() && "group",
-        "flex-none p-3 disabled:opacity-25",
+        "flex-none p-2.5 disabled:opacity-25",
       ])}
       onClick={onClick}
     >
-      <Dynamic component={icon()} class="size-5 group-active:scale-90" />
+      <Dynamic
+        component={icon()}
+        class="size-[1.125rem] group-active:scale-90"
+      />
     </button>
   );
 }

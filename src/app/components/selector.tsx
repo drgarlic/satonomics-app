@@ -13,7 +13,7 @@ export function Selector({
   return (
     <div
       class={classPropToString([
-        env.standalone && "pb-6 md:pb-3",
+        env.standalone && "pb-8 md:pb-3",
         "flex justify-around bg-black bg-black/85 p-3 backdrop-blur",
       ])}
     >

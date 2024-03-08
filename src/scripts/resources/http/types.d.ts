@@ -33,3 +33,5 @@ type AddressCohortAttributeName =
 type AnyCohortName = AgeCohortName | AddressCohortName;
 type AnyPossibleCohortName = AnyCohortName | AddressCohortNameSplitByLiquidity;
 type LiquidityName = (typeof import("./index").liquidities)[number]["name"];
+
+type Scale = (typeof import("./index").scales)[index];

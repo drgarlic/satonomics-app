@@ -156,9 +156,14 @@ export function App({ resources }: { resources: Resources }) {
 
       <div
         class="relative h-dvh selection:bg-orange-800"
+        style={{
+          "user-select": resizingBar() ? "none" : undefined,
+        }}
         onMouseMove={(event) => resizingBar() && barWidth.set(event.x + 1)}
         onMouseUp={() => resizingBar.set(false)}
         onMouseLeave={() => resizingBar.set(false)}
+        onTouchEnd={() => resizingBar.set(false)}
+        onTouchCancel={() => resizingBar.set(false)}
       >
         <Qrcode qrcode={qrcode} />
 
@@ -211,6 +216,7 @@ export function App({ resources }: { resources: Resources }) {
             <div
               class="hidden w-1 cursor-col-resize items-center justify-center bg-white md:block"
               onMouseDown={() => resizingBar.set(true)}
+              onTouchStart={() => resizingBar.set(true)}
               onDblClick={() => barWidth.set(0)}
             />
 
