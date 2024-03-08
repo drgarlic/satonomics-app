@@ -44,57 +44,35 @@ export function TreeFrame({
           />
         </div>
         <div class="border-t border-dashed border-white" />
-        <button
-          class="w-full px-3 py-1.5 text-left hover:underline"
-          onClick={() => {
-            openWindow(`<html>
-            <head><title>API Routes - Satonomics</title></head>
-            <body>
-            ${Object.entries(resources)
-              .map(
-                ([name, resource]) =>
-                  `<p>${name}: <a href="${resource.url}" target="_blank">${resource.url}</a></p>`,
-              )
-              .join("\n")}
-            </body>
-           </html>`);
-          }}
-        >
-          API Routes
-          <span class="opacity-50"> - Free & Unlimited</span>
-        </button>
+        <Anchor
+          href="/routes"
+          primary="API Routes"
+          secondary="Free & Unlimited"
+        />
         <div class="border-t border-dashed border-white/25" />
-        <a
+        <Anchor
           href="https://primal.net/p/npub1jagmm3x39lmwfnrtvxcs9ac7g300y3dusv9lgzhk2e4x5frpxlrqa73v44"
-          target="_blank"
-          class="block w-full px-3 py-1.5 text-left hover:underline"
-        >
-          Social <span class="opacity-50"> - NOSTR</span>
-        </a>
+          primary="Social"
+          secondary="NOSTR"
+        />
         <div class="border-t border-dashed border-white/25" />
-        <a
-          href="https://github.com/satonomics-org/front"
-          target="_blank"
-          class="block w-full px-3 py-1.5 text-left hover:underline"
-        >
-          Repository <span class="opacity-50"> - Github</span>
-        </a>
-
+        <Anchor
+          href="https://github.com/satonomics-org"
+          primary="Repository"
+          secondary="Github"
+        />
         <div class="border-t border-dashed border-white/25" />
-        <a
+        <Anchor
           href="mailto:contact@satonomics.xyz"
-          class="block w-full px-3 py-1.5 text-left hover:underline"
-        >
-          Contact <span class="opacity-50"> - Email</span>
-        </a>
+          primary="Contact"
+          secondary="Email"
+        />
         <div class="border-t border-dashed border-white/25" />
-        <a
+        <Anchor
           href="https://counter.dev/dashboard.html?user=wjfpwo2032fk&token=GAP9y3FM4o0%3D"
-          target="_blank"
-          class="block w-full px-3 py-1.5 text-left hover:underline"
-        >
-          Analytics <span class="opacity-50"> - Privacy Friendly</span>
-        </a>
+          primary="Analytics"
+          secondary="Privacy Friendly"
+        />
       </ScrollableFrame>
       <div class="flex w-full border-t border-dashed border-white bg-black">
         <Button
@@ -145,4 +123,26 @@ async function goToSelected(presets: Presets) {
   await tick();
 
   scrollIntoView(document.getElementById(presets.selected().id), "center");
+}
+
+function Anchor({
+  href,
+  primary,
+  secondary,
+}: {
+  href: string;
+  primary: string;
+  secondary: string;
+}) {
+  return (
+    <a
+      href={href}
+      target={
+        href.startsWith("/") || href.startsWith("http") ? "_blank" : undefined
+      }
+      class="block w-full px-3 py-1.5 text-left hover:underline"
+    >
+      {primary} <span class="opacity-50"> - {secondary}</span>
+    </a>
+  );
 }

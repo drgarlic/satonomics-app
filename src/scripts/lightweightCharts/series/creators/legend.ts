@@ -29,8 +29,11 @@ export function createSeriesLegend({
     series.applyOptions({
       visible: visible(),
     });
-    writeURLParam(id, visible());
-    saveToStorage(storageID, visible());
+
+    const v = !visible() ? false : undefined;
+
+    writeURLParam(id, v);
+    saveToStorage(storageID, v);
   });
 
   return {

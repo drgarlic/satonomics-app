@@ -1,4 +1,4 @@
-import { colors, random, resetURLParams, writeURLParam } from "/src/scripts";
+import { colors, random, replaceHistory, resetURLParams } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import { presets as addressesPresets } from "./addresses";
@@ -200,7 +200,8 @@ function _select(preset: Preset, set: Setter<Preset>) {
   const value = preset.id;
 
   localStorage.setItem(key, value);
-  writeURLParam(key, value);
+
+  replaceHistory({ pathname: `/${value}` });
 
   set(preset);
 }
@@ -258,12 +259,10 @@ function checkIfDuplicateIds(ids: string[]) {
 }
 
 function findInitialPreset(presets: PresetList): Preset {
-  const urlParams = new URLSearchParams(window.location.search);
+  const params = useParams();
 
   return (
-    presets.find(
-      (preset) => preset.id === urlParams.get(LOCAL_STORAGE_SELECTED_KEY),
-    ) ||
+    presets.find((preset) => preset.id === params.preset) ||
     presets.find(
       (preset) =>
         preset.id === localStorage.getItem(LOCAL_STORAGE_SELECTED_KEY),

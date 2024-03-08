@@ -10,6 +10,7 @@ export function ChartFrame({
   show,
   legend,
   datasets,
+  qrcode,
 }: {
   presets: Presets;
   resources: Resources;
@@ -17,6 +18,7 @@ export function ChartFrame({
   show: Accessor<boolean>;
   legend: Accessor<PresetLegend>;
   datasets: Datasets;
+  qrcode: ASS<string>;
 }) {
   const sortedSources = createMemo(() =>
     [...presets.sources()].sort(([a], [b]) => a.localeCompare(b)),
@@ -30,7 +32,7 @@ export function ChartFrame({
       }}
     >
       <div class="flex border-b border-dashed border-white backdrop-blur">
-        <Title presets={presets} />
+        <Title presets={presets} qrcode={qrcode} />
       </div>
       <div class="flex border-b border-white backdrop-blur">
         <Legend legend={legend} />

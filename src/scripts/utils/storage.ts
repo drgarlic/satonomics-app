@@ -1,6 +1,6 @@
 export function saveToStorage(key?: string, value?: string | boolean) {
   if (key) {
-    value !== undefined || value !== null
+    value !== undefined && value !== null
       ? localStorage.setItem(key, String(value))
       : localStorage.removeItem(key);
   }

@@ -13,8 +13,11 @@ export const URL_PARAMS_RANGE_TO_KEY = "to";
 
 const debouncedUpdateURLParams = debounce((range: LogicalRange | null) => {
   if (!range) return;
+
   writeURLParam(URL_PARAMS_RANGE_FROM_KEY, String(range.from));
+
   writeURLParam(URL_PARAMS_RANGE_TO_KEY, String(range.to));
+
   localStorage.setItem(LOCAL_STORAGE_RANGE_KEY, JSON.stringify(range));
 }, 1000);
 

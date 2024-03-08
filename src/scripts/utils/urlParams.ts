@@ -1,6 +1,7 @@
+import { replaceHistory } from "./history";
 import { isSerializedBooleanTrue } from "./storage";
 
-const whitelist = ["from", "to", "preset"];
+const whitelist = ["from", "to"];
 
 export function resetURLParams() {
   const urlParams = new URLSearchParams();
@@ -11,22 +12,29 @@ export function resetURLParams() {
       urlParams.set(key, value);
     });
 
-  window.history.replaceState(null, "", `?${urlParams.toString()}`);
+  replaceHistory({ urlParams });
 }
 
-export function writeURLParam(key: string, value: string | boolean) {
+export function writeURLParam(key: string, value?: string | boolean) {
   const urlParams = new URLSearchParams(window.location.search);
 
-  urlParams.set(key, String(value));
+  if (value !== undefined) {
+    urlParams.set(key, String(value));
+  } else {
+    urlParams.delete(key);
+  }
 
-  window.history.replaceState(null, "", `?${urlParams.toString()}`);
+  replaceHistory({ urlParams });
 }
 
 export function readBooleanURLParam(key: string) {
   const urlParams = new URLSearchParams(window.location.search);
+
   const parameter = urlParams.get(key);
+
   if (parameter) {
     return isSerializedBooleanTrue(parameter);
   }
+
   return null;
 }

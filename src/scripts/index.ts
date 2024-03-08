@@ -6,4 +6,3 @@ export * from "./lightweightCharts";
 export * from "./datasets";
 export * from "./presets";
 export * from "./resources";
-export * from "./ui";

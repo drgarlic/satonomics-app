@@ -5,34 +5,37 @@ import {
   cleanChart,
   createDatasets,
   createPresets,
-  createResources,
   renderChart,
   sleep,
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import {
+  Background,
   ChartFrame,
   FavoritesFrame,
   Head,
   Header,
   INPUT_PRESET_SEARCH_ID,
+  LOCAL_STORAGE_MARQUEE_KEY,
+  Qrcode,
   SearchFrame,
   Selector,
   SettingsFrame,
   TreeFrame,
 } from "./components";
-import { Background, LOCAL_STORAGE_MARQUEE_KEY } from "./components/background";
 import { registerServiceWorker } from "./scripts";
 
 const LOCAL_STORAGE_BAR_KEY = "bar-width";
 
-export function App() {
+export function App({ resources }: { resources: Resources }) {
   const updateFound = createASS(false);
 
   registerServiceWorker(updateFound);
 
   const tabFocused = createASS(true);
+
+  const qrcode = createASS("");
 
   const legend = createASS<PresetLegend>([]);
 
@@ -74,8 +77,6 @@ export function App() {
     "Tree" as VisibleFrameName,
   );
 
-  const resources = createResources();
-
   const presets = createPresets();
 
   const marquee = createASS(!!localStorage.getItem(LOCAL_STORAGE_MARQUEE_KEY));
@@ -101,10 +102,6 @@ export function App() {
   );
 
   const datasets = createDatasets(resources.http);
-
-  createEffect(() => {
-    console.log(presets.sources());
-  });
 
   createEffect(() => {
     const preset = presets.selected();
@@ -160,11 +157,13 @@ export function App() {
       />
 
       <div
-        class="h-dvh selection:bg-orange-800"
+        class="relative h-dvh selection:bg-orange-800"
         onMouseMove={(event) => resizingBar() && barWidth.set(event.x + 1)}
         onMouseUp={() => resizingBar.set(false)}
         onMouseLeave={() => resizingBar.set(false)}
       >
+        <Qrcode qrcode={qrcode} />
+
         <div class="h-full border-white md:border">
           <div class="flex h-full w-full flex-col md:flex-row">
             <div
@@ -189,6 +188,7 @@ export function App() {
                   }
                   legend={legend}
                   datasets={datasets}
+                  qrcode={qrcode}
                 />
                 <TreeFrame
                   presets={presets}
@@ -221,6 +221,7 @@ export function App() {
                 show={windowSizeIsAtLeastMedium}
                 legend={legend}
                 datasets={datasets}
+                qrcode={qrcode}
               />
             </div>
           </div>
