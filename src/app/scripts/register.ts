@@ -4,13 +4,13 @@ const intervalMS = 60 * 60 * 1000;
 
 export function registerServiceWorker() {
   return useRegisterSW({
-    onRegisteredSW(swUrl, r) {
+    onRegisteredSW(swUrl, registered) {
       // eslint-disable-next-line prefer-template
-      console.log("SW Registered: " + r);
+      console.log("SW Registered: " + registered);
 
-      r &&
+      registered &&
         setInterval(async () => {
-          if (!(!r.installing && navigator)) return;
+          if (!(!registered.installing && navigator)) return;
 
           if ("connection" in navigator && !navigator.onLine) return;
 
@@ -23,7 +23,7 @@ export function registerServiceWorker() {
           });
 
           if (resp?.status === 200) {
-            await r.update();
+            await registered.update();
           }
         }, intervalMS);
     },
