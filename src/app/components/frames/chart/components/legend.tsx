@@ -1,6 +1,6 @@
 export function Legend({ legend }: { legend: Accessor<PresetLegend> }) {
   return (
-    <div class="flex flex-1 items-center gap-2 overflow-y-auto px-1.5">
+    <div class="flex flex-1 items-center gap-1 overflow-y-auto px-1.5">
       <For each={legend()}>
         {({ color, hovering, title, visible }) => (
           <button

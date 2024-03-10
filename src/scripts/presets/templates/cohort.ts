@@ -1115,28 +1115,6 @@ export function createCohortPresetList({
           description: "",
         },
         {
-          id: `${id}-median-price-paid`,
-          name: "Median",
-          title: `${datasetKey} Median Price Paid`,
-          icon: () => IconTablerSquareHalf,
-          applyPreset(params) {
-            return applyMultipleSeries({
-              ...params,
-              list: [
-                {
-                  id: "median",
-                  title: "Median",
-                  color,
-                  dataset:
-                    params.datasets[`dateTo${datasetKey}PricePaidMedian`],
-                },
-              ],
-            });
-          },
-          description: "",
-        },
-
-        {
           id: `${id}-price-paid-deciles`,
           name: `Deciles`,
           title: `${datasetKey} deciles`,
@@ -1144,48 +1122,33 @@ export function createCohortPresetList({
           applyPreset(params) {
             return applyMultipleSeries({
               ...params,
-              list: [
-                {
-                  id: "median",
-                  dataset:
-                    params.datasets[`dateTo${datasetKey}PricePaidMedian`],
+              list: percentiles
+                .filter(({ value }) => Number(value) % 10 === 0)
+                .map(({ value: percentile, name, route, key }) => ({
+                  id: route.replaceAll("_", "-"),
+                  dataset: params.datasets[`dateTo${datasetKey}${key}`],
                   color,
-                  title: "Median",
-                },
-                ...percentiles
-                  .filter((percentile) => Number(percentile) % 10 === 0)
-                  .map((percentile) => ({
-                    id: `${percentile}-percentile`,
-                    dataset:
-                      params.datasets[
-                        `dateTo${datasetKey}PricePaid${percentile}Percentile`
-                      ],
-                    color,
-                    title: `${percentile}th percentile`,
-                  })),
-              ],
+                  title: name,
+                })),
             });
           },
           description: "",
         },
         ...percentiles.map(
-          (percentile): PartialPreset => ({
-            id: `${id}-price-paid-${percentile}p`,
-            name: `${percentile}%`,
-            title: `${datasetKey} ${percentile}th percentile`,
+          ({ name, route, key, title }): PartialPreset => ({
+            id: `${id}-${route.replaceAll("_", "-")}`,
+            name,
+            title: `${datasetKey} ${title}`,
             icon: () => IconTablerSquareHalf,
             applyPreset(params) {
               return applyMultipleSeries({
                 ...params,
                 list: [
                   {
-                    id: `${percentile}-percentile`,
-                    title: `${percentile}th percentile`,
+                    id: route.replaceAll("_", "-"),
+                    title: name,
                     color,
-                    dataset:
-                      params.datasets[
-                        `dateTo${datasetKey}PricePaid${percentile}Percentile`
-                      ],
+                    dataset: params.datasets[`dateTo${datasetKey}${key}`],
                   },
                 ],
               });

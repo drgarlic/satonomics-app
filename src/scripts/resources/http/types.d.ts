@@ -18,20 +18,23 @@ interface Source {
 }
 
 type CurrencyName = (typeof import("./index").currencies)[number]["name"];
-type AnyCohortAttributeName =
-  (typeof import("./index").anyCohortAttributes)[number]["name"];
-type AgeCohortName = (typeof import("./index").ageCohorts)[number]["name"];
-type AgeCohortAttributeName = AnyCohortAttributeName;
-type AddressOnlyCohortAttributeName =
-  (typeof import("./index").addressOnlyCohortAttributes)[number]["name"];
+type AnyCohortAttributeKey =
+  (typeof import("./index").anyCohortAttributes)[number]["key"];
+type AgeCohortKey = (typeof import("./index").ageCohorts)[number]["key"];
+type AgeCohortAttributeKey = AnyCohortAttributeKey;
+type AddressOnlyCohortAttributeKey =
+  (typeof import("./index").addressOnlyCohortAttributes)[number]["key"];
+
+type AddressCohortAttributeName =
+  | AnyCohortAttributeKey
+  | AddressOnlyCohortAttributeKey;
+type AnyCohortName = AgeCohortKey | AddressCohortName;
+type AnyPossibleCohortName = AnyCohortName | AddressCohortNameSplitByLiquidity;
+
 type AddressCohortName =
   (typeof import("./index").addressCohorts)[number]["name"];
-type AddressCohortNameSplitByLiquidity = `${AddressCohortName}${LiquidityName}`;
-type AddressCohortAttributeName =
-  | AnyCohortAttributeName
-  | AddressOnlyCohortAttributeName;
-type AnyCohortName = AgeCohortName | AddressCohortName;
-type AnyPossibleCohortName = AnyCohortName | AddressCohortNameSplitByLiquidity;
 type LiquidityName = (typeof import("./index").liquidities)[number]["name"];
+type AddressCohortNameSplitByLiquidity =
+  `${LiquidityName} ${AddressCohortName}`;
 
-type Scale = (typeof import("./index").scales)[index];
+type ResourceScale = (typeof import("./index").scales)[index];

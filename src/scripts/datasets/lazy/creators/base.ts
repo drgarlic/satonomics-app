@@ -7,8 +7,13 @@ import {
   computeYearlyMovingAverage,
 } from "/src/scripts";
 
-import { Momentum } from "..";
 import { createLazyPercentileDataset, createLazyRatioDataset } from "./ratio";
+
+export enum Momentum {
+  red = 1,
+  yellow = 2,
+  green = 3,
+}
 
 export function createLazyDataset<T>(
   calc: () => T,

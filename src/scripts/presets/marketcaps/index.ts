@@ -23,13 +23,13 @@ export const presets: PresetFolder = {
               id: "all",
               title: "Combined",
               color: colors.white,
-              dataset: params.datasets.dateToCryptoMarketCap,
+              dataset: params.datasets.dateToCryptoMarketCapitalization,
             },
             {
               id: "bitcoin",
               title: "Bitcoin's Market Cap.",
               color: colors.bitcoin,
-              dataset: params.datasets.dateToMarketCap,
+              dataset: params.datasets.dateToMarketCapitalization,
             },
             {
               id: "scamcoins",
@@ -41,7 +41,7 @@ export const presets: PresetFolder = {
               id: "fiatcoins",
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
-              dataset: params.datasets.dateToStablecoinsMarketCap,
+              dataset: params.datasets.dateToStablecoinsMarketCapitalization,
             },
           ],
         });
@@ -65,7 +65,7 @@ export const presets: PresetFolder = {
               title: "Bitcoin's Market Cap.",
               color: colors.bitcoin,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.dateToMarketCap,
+              dataset: params.datasets.dateToMarketCapitalization,
             },
           ],
         });
@@ -113,7 +113,7 @@ export const presets: PresetFolder = {
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.dateToStablecoinsMarketCap,
+              dataset: params.datasets.dateToStablecoinsMarketCapitalization,
             },
           ],
         });
@@ -136,7 +136,8 @@ export const presets: PresetFolder = {
               id: "30d-change",
               title: "30 Day Change",
               seriesType: SeriesType.Based,
-              dataset: params.datasets.dateToStablecoinsMarketCap30dChange,
+              dataset:
+                params.datasets.dateToStablecoinsMarketCapitalization30dChange,
             },
           ],
         });

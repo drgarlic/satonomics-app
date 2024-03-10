@@ -45,7 +45,7 @@ export const presets: PresetFolder = {
       applyPreset(params) {
         return applyMultipleSeries({
           ...params,
-          priceDataset: params.datasets.dateToMarketCap,
+          priceDataset: params.datasets.dateToMarketCapitalization,
           priceOptions: {
             id: "marketcap",
             title: "Market Cap.",

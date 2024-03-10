@@ -940,7 +940,7 @@ export const presets: PresetFolder = {
                   id: "investor-cap",
                   title: "Investor Cap",
                   color: colors.investorCap,
-                  dataset: params.datasets.dateToInvestorCap,
+                  dataset: params.datasets.dateToInvestorCapitalization,
                 },
                 {
                   id: "realized-cap",
@@ -953,7 +953,7 @@ export const presets: PresetFolder = {
                   id: "market-cap",
                   title: "Market Cap",
                   color: colors.bitcoin,
-                  dataset: params.datasets.dateToMarketCap,
+                  dataset: params.datasets.dateToMarketCapitalization,
                 },
               ],
             });
@@ -1001,7 +1001,7 @@ export const presets: PresetFolder = {
                   id: "investor-cap",
                   title: "Investor Cap",
                   color: colors.investorCap,
-                  dataset: params.datasets.dateToInvestorCap,
+                  dataset: params.datasets.dateToInvestorCapitalization,
                 },
               ],
             });

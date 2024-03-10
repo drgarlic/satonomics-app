@@ -236,7 +236,7 @@ function createAddressPresetFolder({
             name: liquidity.name,
             tree: createCohortPresetList({
               color,
-              datasetKey: `${datasetKey}${liquidity.name}`,
+              datasetKey: `${liquidity.name} ${datasetKey}`,
               id: _id,
             }),
           };
