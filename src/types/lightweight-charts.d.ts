@@ -44,3 +44,18 @@ type AutoscaleInfoProvider = import("lightweight-charts").AutoscaleInfoProvider;
 type PriceScaleOptions = import("lightweight-charts").PriceScaleOptions;
 type LogicalRangeChangeEventHandler =
   import("lightweight-charts").LogicalRangeChangeEventHandler;
+type LineData = import("lightweight-charts").LineData;
+type AreaData = import("lightweight-charts").AreaData;
+type HistogramData = import("lightweight-charts").HistogramData;
+
+type DeepPartialLineOptions = DeepPartial<
+  LineStyleOptions & SeriesOptionsCommon
+>;
+
+type DeepPartialHistogramOptions = DeepPartial<
+  HistogramStyleOptions & SeriesOptionsCommon
+>;
+
+type DeepPartialBaselineOptions = DeepPartial<
+  BaselineStyleOptions & SeriesOptionsCommon
+>;

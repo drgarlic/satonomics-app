@@ -36,12 +36,3 @@ export const createCandlesticksSeries = (
 
   return [candlestickSeries, [upColor, downColor]];
 };
-
-export const convertCandlesticksToSingleValueDataset = (
-  candlesticks?: DatedCandlestickData[] | null,
-): DatedSingleValueData[] =>
-  (candlesticks || []).map(({ date, time, close }) => ({
-    date,
-    time,
-    value: close ?? 0,
-  }));

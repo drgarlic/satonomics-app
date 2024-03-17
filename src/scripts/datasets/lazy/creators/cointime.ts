@@ -9,234 +9,223 @@ import {
   createTransformedLazyDataset,
 } from ".";
 
-export function createCointimeDatasets({
-  resourceDatasets,
-  dateToRealizedPrice,
-  dateToYearlyInflationRate,
-  dateToCumulatedNetRealizedProfitAndLoss,
-  dateToSupplyTotalAtMinus1Block,
-  dateToTransactionVolumeAnnualized,
+export function createCointimeDatasets<
+  Resources extends AnyResourceDatasets,
+  Scale extends ResourceScale = Resources extends DateResourceDatasets
+    ? "date"
+    : "height",
+>({
+  resources,
+  realizedPrice,
+  yearlyInflationRate,
+  cumulatedNetRealizedProfitAndLoss,
+  supplyTotalAtMinus1Block,
+  transactionVolumeAnnualized,
 }: {
-  resourceDatasets: ResourceDatasets;
-  dateToRealizedPrice: Dataset;
-  dateToYearlyInflationRate: Dataset;
-  dateToTransactionVolumeAnnualized: Dataset;
-  dateToSupplyTotalAtMinus1Block: Dataset;
-  dateToCumulatedNetRealizedProfitAndLoss: Dataset;
+  resources: Resources;
+  realizedPrice: Dataset<Scale>;
+  yearlyInflationRate: Dataset<Scale>;
+  transactionVolumeAnnualized: Dataset<Scale>;
+  supplyTotalAtMinus1Block: Dataset<Scale>;
+  cumulatedNetRealizedProfitAndLoss: Dataset<Scale>;
 }) {
-  const dateToCoinblocksCreated = createMultipliedLazyDataset(
-    resourceDatasets.dateToSupplyTotal,
-    resourceDatasets.dateToNewBlocks,
+  const coinblocksCreated = createMultipliedLazyDataset(
+    resources.SupplyTotal,
+    resources.newBlocks,
   );
 
-  const dateToCoinblocksStored = createSubtractedLazyDataset(
-    dateToCoinblocksCreated,
-    resourceDatasets.dateToCoinblocksDestroyed,
+  const coinblocksStored = createSubtractedLazyDataset(
+    coinblocksCreated,
+    resources.coinblocksDestroyed,
   );
 
-  const dateToCumulatedCoinblocksCreated = createCumulatedLazyDataset(
-    dateToCoinblocksCreated,
+  const cumulatedCoinblocksCreated =
+    createCumulatedLazyDataset(coinblocksCreated);
+
+  const cumulatedCoinblocksDestroyed = createCumulatedLazyDataset(
+    resources.coinblocksDestroyed,
   );
 
-  const dateToCumulatedCoinblocksDestroyed = createCumulatedLazyDataset(
-    resourceDatasets.dateToCoinblocksDestroyed,
+  const cumulatedCoinblocksStored =
+    createCumulatedLazyDataset(coinblocksStored);
+
+  const liveliness = createDividedLazyDataset(
+    cumulatedCoinblocksDestroyed,
+    cumulatedCoinblocksCreated,
   );
 
-  const dateToCumulatedCoinblocksStored = createCumulatedLazyDataset(
-    dateToCoinblocksStored,
-  );
-
-  const dateToLiveliness = createDividedLazyDataset(
-    dateToCumulatedCoinblocksDestroyed,
-    dateToCumulatedCoinblocksCreated,
-  );
-
-  const dateToVaultedness = createTransformedLazyDataset(
-    dateToLiveliness,
+  const vaultedness = createTransformedLazyDataset(
+    liveliness,
     (value) => 1 - value,
   );
 
-  const dateToActvityToVaultednessRatio = createDividedLazyDataset(
-    dateToLiveliness,
-    dateToVaultedness,
+  const actvityToVaultednessRatio = createDividedLazyDataset(
+    liveliness,
+    vaultedness,
   );
 
-  const dateToConcurrentLiveliness = createDividedLazyDataset(
-    resourceDatasets.dateToCoinblocksDestroyed,
-    dateToCoinblocksCreated,
+  const concurrentLiveliness = createDividedLazyDataset(
+    resources.coinblocksDestroyed,
+    coinblocksCreated,
   );
 
-  const dateToConcurrentLiveliness14dMedian = createMedianLazyDataset(
-    dateToConcurrentLiveliness,
+  const concurrentLiveliness14dMedian = createMedianLazyDataset(
+    concurrentLiveliness,
     14,
   );
 
-  const dateToLivelinessIncrementalChange =
-    createNetChangeLazyDataset(dateToLiveliness);
+  const livelinessIncrementalChange = createNetChangeLazyDataset(liveliness);
 
-  const dateToLivelinessIncrementalChange14dMedian = createMedianLazyDataset(
-    dateToLivelinessIncrementalChange,
+  const livelinessIncrementalChange14dMedian = createMedianLazyDataset(
+    livelinessIncrementalChange,
     14,
   );
 
-  const dateToVaultedSupply = createMultipliedLazyDataset(
-    dateToVaultedness,
-    resourceDatasets.dateToSupplyTotal,
+  const vaultedSupply = createMultipliedLazyDataset(
+    vaultedness,
+    resources.SupplyTotal,
   );
 
-  const dateToVaultedSupplyNetChange =
-    createNetChangeLazyDataset(dateToVaultedSupply);
+  const vaultedSupplyNetChange = createNetChangeLazyDataset(vaultedSupply);
 
-  const dateToVaultedSupply90dNetChange = createNetChangeLazyDataset(
-    dateToVaultedSupply,
+  const vaultedSupply90dNetChange = createNetChangeLazyDataset(
+    vaultedSupply,
     90,
   );
 
-  const dateToVaultedSupplyNetChangeX365 = createTransformedLazyDataset(
-    dateToVaultedSupplyNetChange,
+  const vaultedSupplyNetChangeX365 = createTransformedLazyDataset(
+    vaultedSupplyNetChange,
     (value) => value * 365,
   );
 
-  const dateToVaultingRate = createDividedLazyDataset(
-    dateToVaultedSupplyNetChangeX365,
-    resourceDatasets.dateToSupplyTotal,
+  const vaultingRate = createDividedLazyDataset(
+    vaultedSupplyNetChangeX365,
+    resources.SupplyTotal,
     true,
   );
 
-  const dateToActiveSupply = createMultipliedLazyDataset(
-    dateToLiveliness,
-    resourceDatasets.dateToSupplyTotal,
+  const activeSupply = createMultipliedLazyDataset(
+    liveliness,
+    resources.SupplyTotal,
   );
 
-  const dateToActiveSupplyNetChange =
-    createNetChangeLazyDataset(dateToActiveSupply);
+  const activeSupplyNetChange = createNetChangeLazyDataset(activeSupply);
 
-  const dateToActiveSupply90dNetChange = createNetChangeLazyDataset(
-    dateToActiveSupply,
-    90,
-  );
+  const activeSupply90dNetChange = createNetChangeLazyDataset(activeSupply, 90);
 
   // TODO: Fix, is always 0, but it shouldn't since some coins (~35 BTC) are lost
   const dateToMinVaultedSupply = createTransformedLazyDataset(
-    resourceDatasets.dateToSupplyTotal,
+    resources.SupplyTotal,
     (value, index) =>
-      value /
-      (dateToCumulatedCoinblocksCreated.values()?.at(index)?.value || 0),
+      value / (cumulatedCoinblocksCreated.values()?.at(index)?.value || 0),
   );
 
   const dateToMaxActiveSupply = createTransformedLazyDataset(
-    resourceDatasets.dateToSupplyTotal,
+    resources.SupplyTotal,
     (value, index) =>
       value *
       (1 -
-        value /
-          (dateToCumulatedCoinblocksCreated.values()?.at(index)?.value || 0)),
+        value / (cumulatedCoinblocksCreated.values()?.at(index)?.value || 0)),
   );
 
-  const dateToCointimeAdjustedYearlyInflationRate = createMultipliedLazyDataset(
-    dateToYearlyInflationRate,
-    dateToActvityToVaultednessRatio,
+  const cointimeAdjustedYearlyInflationRate = createMultipliedLazyDataset(
+    yearlyInflationRate,
+    actvityToVaultednessRatio,
   );
 
-  const dateToCointimeAdjustedVelocity = createDividedLazyDataset(
-    dateToTransactionVolumeAnnualized,
-    dateToActiveSupply,
+  const cointimeAdjustedVelocity = createDividedLazyDataset(
+    transactionVolumeAnnualized,
+    activeSupply,
   );
 
-  const dateToActiveSupplyChangeFromTransactions = createMultipliedLazyDataset(
-    dateToSupplyTotalAtMinus1Block,
-    dateToConcurrentLiveliness,
+  const activeSupplyChangeFromTransactions = createMultipliedLazyDataset(
+    supplyTotalAtMinus1Block,
+    concurrentLiveliness,
   );
 
-  const dateToActiveSupplyChangeFromTransactions90dChange =
-    createNetChangeLazyDataset(dateToActiveSupplyChangeFromTransactions, 90);
+  const activeSupplyChangeFromTransactions90dChange =
+    createNetChangeLazyDataset(activeSupplyChangeFromTransactions, 90);
 
-  const dateToActiveSupplyChangeFromIssuance = createMultipliedLazyDataset(
-    resourceDatasets.dateToLastSubsidy,
-    dateToLiveliness,
+  const activeSupplyChangeFromIssuance = createMultipliedLazyDataset(
+    resources.lastSubsidy,
+    liveliness,
   );
 
-  const dateToThermoCap = createCumulatedLazyDataset(
-    resourceDatasets.dateToSubsidyInDollars,
+  const thermoCap = createCumulatedLazyDataset(resources.subsidyInDollars);
+
+  const investorCapitalization = createSubtractedLazyDataset(
+    cumulatedNetRealizedProfitAndLoss,
+    thermoCap,
   );
 
-  const dateToInvestorCapitalization = createSubtractedLazyDataset(
-    dateToCumulatedNetRealizedProfitAndLoss,
-    dateToThermoCap,
-  );
-
-  const dateToThermoCapToInvestorCapRatio = createDividedLazyDataset(
-    dateToThermoCap,
-    dateToInvestorCapitalization,
+  const thermoCapToInvestorCapRatio = createDividedLazyDataset(
+    thermoCap,
+    investorCapitalization,
     true,
   );
 
-  const dateToActiveSupplyChangeFromIssuance90dChange =
-    createNetChangeLazyDataset(dateToActiveSupplyChangeFromIssuance, 90);
-
-  const dateToActivePrice = createDividedLazyDataset(
-    dateToRealizedPrice,
-    dateToLiveliness,
+  const activeSupplyChangeFromIssuance90dChange = createNetChangeLazyDataset(
+    activeSupplyChangeFromIssuance,
+    90,
   );
 
-  const dateToVaultedPrice = createDividedLazyDataset(
-    dateToRealizedPrice,
-    dateToVaultedness,
-  );
+  const activePrice = createDividedLazyDataset(realizedPrice, liveliness);
 
-  const dateToTrueMarketMean = createDividedLazyDataset(
-    dateToInvestorCapitalization,
-    dateToActiveSupply,
+  const vaultedPrice = createDividedLazyDataset(realizedPrice, vaultedness);
+
+  const trueMarketMean = createDividedLazyDataset(
+    investorCapitalization,
+    activeSupply,
   );
 
   return {
-    dateToActiveSupply,
-    dateToActiveSupply90dNetChange,
-    dateToActiveSupplyChangeFromIssuance,
-    dateToActiveSupplyChangeFromIssuance90dChange,
-    dateToActiveSupplyChangeFromTransactions,
-    dateToActiveSupplyChangeFromTransactions90dChange,
-    dateToActiveSupplyNetChange,
-    dateToActvityToVaultednessRatio,
-    dateToCoinblocksCreated,
-    dateToCoinblocksStored,
-    dateToCointimeAdjustedVelocity,
-    dateToCointimeAdjustedYearlyInflationRate,
-    dateToConcurrentLiveliness,
-    dateToConcurrentLiveliness14dMedian,
-    dateToCumulatedCoinblocksCreated,
-    dateToCumulatedCoinblocksDestroyed,
-    dateToCumulatedCoinblocksStored,
-    dateToLiveliness,
-    dateToLivelinessIncrementalChange,
-    dateToLivelinessIncrementalChange14dMedian,
-    dateToInvestorCapitalization,
+    activeSupply,
+    activeSupply90dNetChange,
+    activeSupplyChangeFromIssuance,
+    activeSupplyChangeFromIssuance90dChange,
+    activeSupplyChangeFromTransactions,
+    activeSupplyChangeFromTransactions90dChange,
+    activeSupplyNetChange,
+    actvityToVaultednessRatio,
+    coinblocksCreated,
+    coinblocksStored,
+    cointimeAdjustedVelocity,
+    cointimeAdjustedYearlyInflationRate,
+    concurrentLiveliness,
+    concurrentLiveliness14dMedian,
+    cumulatedCoinblocksCreated,
+    cumulatedCoinblocksDestroyed,
+    cumulatedCoinblocksStored,
+    liveliness,
+    livelinessIncrementalChange,
+    livelinessIncrementalChange14dMedian,
+    investorCapitalization,
     dateToMaxActiveSupply,
     dateToMinVaultedSupply,
-    dateToVaultedness,
-    dateToVaultedSupply,
-    dateToVaultedSupply90dNetChange,
-    dateToVaultedSupplyNetChange,
-    dateToVaultingRate,
-    dateToThermoCap,
-    dateToThermoCapToInvestorCapRatio,
-    dateToActivePrice,
+    vaultedness,
+    vaultedSupply,
+    vaultedSupply90dNetChange,
+    vaultedSupplyNetChange,
+    vaultingRate,
+    thermoCap,
+    thermoCapToInvestorCapRatio,
+    activePrice,
     ...appendRatioLazyDatasets({
-      sourceDataset: dateToActivePrice,
-      key: "ActivePrice" as const,
-      closes: resourceDatasets.closes,
+      sourceDataset: activePrice,
+      key: "activePrice" as const,
+      price: resources.price,
     }),
-    dateToVaultedPrice,
+    vaultedPrice,
     ...appendRatioLazyDatasets({
-      sourceDataset: dateToVaultedPrice,
-      key: "VaultedPrice" as const,
-      closes: resourceDatasets.closes,
+      sourceDataset: vaultedPrice,
+      key: "vaultedPrice" as const,
+      price: resources.price,
     }),
-    dateToTrueMarketMean,
+    trueMarketMean,
     ...appendRatioLazyDatasets({
-      sourceDataset: dateToTrueMarketMean,
-      key: "TrueMarketMean" as const,
-      closes: resourceDatasets.closes,
+      sourceDataset: trueMarketMean,
+      key: "trueMarketMean" as const,
+      price: resources.price,
     }),
   };
 }

@@ -5,13 +5,13 @@ import {
   updateWhitespaceDataset,
 } from "/src/scripts";
 
-export const whitespaceDataset: DatedWhitespaceData[] = [];
+export const whitespaceDataset: (WhitespaceData & Numbered)[] = [];
 
 let dispose: VoidFunction | undefined = undefined;
 
 export const renderChart = async (params: {
   datasets: Datasets;
-  liveCandle: Accessor<FullCandlestick | null>;
+  liveCandle: Accessor<DatasetCandlestickData | null>;
   legendSetter: Setter<PresetLegend>;
   preset: Preset;
   presets: Presets;
@@ -27,7 +27,7 @@ export const renderChart = async (params: {
 
     const { datasets, liveCandle, legendSetter, presets, preset } = params;
 
-    if (!datasets.candlesticks.values()?.length) return;
+    if (!datasets.date.price.values()?.length) return;
 
     createChart();
 

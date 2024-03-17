@@ -1,4 +1,4 @@
-import { chartState, GENESIS_DAY } from "/src/scripts";
+import { chartState, GENESIS_DAY, ONE_DAY_IN_MS } from "/src/scripts";
 
 export function TimeScale() {
   return (
@@ -17,7 +17,7 @@ export function TimeScale() {
             Math.ceil(
               (new Date().valueOf() -
                 new Date(`${new Date().getUTCFullYear()}-01-01`).valueOf()) /
-                (1000 * 60 * 60 * 24),
+                ONE_DAY_IN_MS,
             ),
           )
         }

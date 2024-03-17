@@ -14,7 +14,7 @@ export function ChartFrame({
 }: {
   presets: Presets;
   resources: Resources;
-  liveCandle: ResourceWS<FullCandlestick>;
+  liveCandle: ResourceWS<DatasetCandlestickData>;
   show: Accessor<boolean>;
   legend: Accessor<PresetLegend>;
   datasets: Datasets;
@@ -41,29 +41,24 @@ export function ChartFrame({
       </div>
       <Show when={show()}>
         <div class="min-h-0 flex-1">
-          <Chart
-            visible={() =>
-              !!resources.http.candlesticks.values()?.length &&
-              !!liveCandle.latest()
-            }
-          />
+          <Chart visible={() => !!datasets.date.price.values()?.length} />
         </div>
       </Show>
 
       <TimeScale />
 
       <div class="flex items-center space-x-3 border-t border-white bg-black px-3 backdrop-blur">
-        <div class="flex flex-1 space-x-1 overflow-y-auto py-1">
+        <div class="flex flex-1 items-center space-x-1 overflow-y-auto py-1">
           <div>Sources:</div>
           <For each={sortedSources()}>
             {([name, source]) => (
               <a
                 style={{
-                  color: source.color,
+                  "background-color": source.color,
                 }}
                 href={source.url}
                 target="_blank"
-                class="hover:underline"
+                class="rounded-full px-1.5 py-0.5 text-xs font-bold text-black hover:underline"
               >
                 {name}
               </a>
@@ -71,7 +66,10 @@ export function ChartFrame({
           </For>
         </div>
         <div class="h-full flex-none border-l border-dashed border-white" />
-        <Network live={liveCandle.live} resources={resources.http} />
+        <Network
+          live={liveCandle.live}
+          // resources={resources.http}
+        />
       </div>
     </div>
   );

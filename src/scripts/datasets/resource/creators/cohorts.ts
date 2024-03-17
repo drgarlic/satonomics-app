@@ -1,4 +1,4 @@
-import { addressCohortsNames, liquidityNames } from "./address";
+import { addressCohortsKeys, liquidities } from "./address";
 import { ageCohortsKeys } from "./age";
 
 export const percentiles = [
@@ -137,7 +137,7 @@ export const percentiles = [
   },
 ] as const;
 
-export const anyCohortAttributes = [
+export const anyCohortDatasets = [
   {
     key: "RealizedCapitalization" as const,
     route: "realized-capitalization",
@@ -177,15 +177,15 @@ export const anyCohortAttributes = [
   ...percentiles,
 ] as const;
 
-export const allCohortNames = [...ageCohortsKeys, ...addressCohortsNames];
+export const allCohortKeys = [...ageCohortsKeys, ...addressCohortsKeys];
 
-export const allPossibleCohortNames: AnyPossibleCohortName[] = [
+export const allPossibleCohortKeys: AnyPossibleCohortKey[] = [
   ...ageCohortsKeys,
-  ...addressCohortsNames,
-  ...addressCohortsNames.flatMap((name) =>
-    liquidityNames.map(
-      (liquidityName): AddressCohortNameSplitByLiquidity =>
-        `${liquidityName} ${name}`,
+  ...addressCohortsKeys,
+  ...addressCohortsKeys.flatMap((name) =>
+    liquidities.map(
+      ({ key: liquidity }): AddressCohortKeySplitByLiquidity =>
+        `${name}${liquidity}`,
     ),
   ),
 ];

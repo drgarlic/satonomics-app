@@ -1,142 +1,98 @@
 import {
-  createAddressesDatasets,
-  createAnyPossibleCohortLazyDatasets,
-  createClosesAveragesDatasets,
-  createCointimeDatasets,
-  createLazyFiatDatasets,
-  createLazyMarketCapDatasets,
-  createLazyMiningDatasets,
-  createTransactionsDatasets,
-  createTransformedLazyDataset,
+  createCommonDataset,
+  createFiatDatasets,
+  createMarketCapDatasets,
+  createPriceAveragesDatasets,
 } from "./creators";
 
 export * from "./creators";
 export * from "./converters";
 
-export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
-  // const satsPrice = createLazyDataset(
-  //   createLazyMemo(() =>
-  //     (candlesticks.values() || [])
-  //       .map(convertNormalCandleToSatCandle)
-  //       .filter(
-  //         ({ open, high, low, close }) =>
-  //           open !== Infinity &&
-  //           high !== Infinity &&
-  //           low !== Infinity &&
-  //           close !== Infinity,
-  //       ),
-  //   ),
-  //   [candlesticks.sources],
-  // );
-
-  // const minersRevenueInDollars = addAverages(
-  //   createLazyDataset(() =>
-  //     (resourceDatasets.minersRevenueInBitcoin.values() || []).map(
-  //       ({ date, time, value }) => ({
-  //         date,
-  //         time,
-  //         value: value * (closesRecord.values()?.[date] || 1),
-  //       }),
-  //     ),
-  //   ),
-  // )
-
-  // const localExtremes = createExtremeQuantilesDataset(() => [
-  //   resourceDatasets.oneMonthRealizedPrice.quantiles,
-  //   resourceDatasets.threeMonthsRealizedPrice.quantiles,
-  //   resourceDatasets.sthRealizedPrice.quantiles,
-  //   resourceDatasets.sixMonthsRealizedPrice.quantiles,
-  //   closes30DMA.quantiles,
-  //   closes7DMA.quantiles,
-  // ])
-
-  // const cycleExtremes = createExtremeQuantilesDataset(() => [
-  //   resourceDatasets.oneYearRealizedPrice.quantiles,
-  //   resourceDatasets.realizedPrice.quantiles,
-  //   resourceDatasets.twoYearsRealizedPrice.quantiles,
-  //   resourceDatasets.lthRealizedPrice.quantiles,
-  //   resourceDatasets.planktonRealizedPrice.quantiles,
-  //   resourceDatasets.shrimpsRealizedPrice.quantiles,
-  //   resourceDatasets.crabsRealizedPrice.quantiles,
-  //   resourceDatasets.fishRealizedPrice.quantiles,
-  //   resourceDatasets.sharksRealizedPrice.quantiles,
-  //   resourceDatasets.whalesRealizedPrice.quantiles,
-  //   resourceDatasets.humpbacksRealizedPrice.quantiles,
-  //   resourceDatasets.balancedPrice.quantiles,
-  //   resourceDatasets.trueMeanPrice.quantiles,
-  //   resourceDatasets.cointimePrice.quantiles,
-  //   resourceDatasets.vaultedPrice.quantiles,
-  //   resourceDatasets.cvdd.quantiles,
-  //   closes365DMA.quantiles,
-  //   resourceDatasets.terminalPrice.quantiles,
-  // ])
-
-  const dateTo50 = createTransformedLazyDataset(
-    resourceDatasets.closes,
-    () => 50,
-  );
-  const dateTo100 = createTransformedLazyDataset(
-    resourceDatasets.closes,
-    () => 100,
-  );
-  const dateTo144 = createTransformedLazyDataset(
-    resourceDatasets.closes,
-    () => 144,
-  );
-
-  const marketCapDatasets = createLazyMarketCapDatasets({
-    resourceDatasets,
-  });
-
-  const anyPossibleCohortLazyDatasets = createAnyPossibleCohortLazyDatasets(
-    resourceDatasets,
-    {
-      dateToMarketCap: marketCapDatasets.dateToMarketCapitalization,
-    },
-  );
-
-  const transactionsDatasets = createTransactionsDatasets({ resourceDatasets });
-
-  const miningDatasets = createLazyMiningDatasets({
-    resourceDatasets,
-  });
+export function createLazyDatasets(resources: ResourceDatasets) {
+  const commonDateDatasets = createCommonDataset(resources.date);
 
   return {
-    dateTo50,
-    dateTo100,
-    dateTo144,
+    date: {
+      ...commonDateDatasets,
+      ...createMarketCapDatasets({
+        resources: resources.date,
+        marketCapitalization:
+          commonDateDatasets.marketCapitalization as Dataset<"date">, // TODO: Fix types
+      }),
+      ...createPriceAveragesDatasets(resources.date),
+      ...createFiatDatasets(resources.date),
+      // } satisfies Record<string, Dataset<"date">>,
+    },
 
-    ...transactionsDatasets,
-    ...anyPossibleCohortLazyDatasets,
-    ...marketCapDatasets,
-    ...miningDatasets,
+    height: {
+      ...createCommonDataset(resources.height),
+      // } satisfies Record<string, Dataset<"height">>,
+    },
 
-    ...createAddressesDatasets({ resourceDatasets }),
+    // const satsPrice = createLazyDataset(
+    //   createLazyMemo(() =>
+    //     (candlesticks.values() || [])
+    //       .map(convertNormalCandleToSatCandle)
+    //       .filter(
+    //         ({ open, high, low, close }) =>
+    //           open !== Infinity &&
+    //           high !== Infinity &&
+    //           low !== Infinity &&
+    //           close !== Infinity,
+    //       ),
+    //   ),
+    //   [candlesticks.sources],
+    // );
 
-    ...createClosesAveragesDatasets({ resourceDatasets }),
+    // const minersRevenueInDollars = addAverages(
+    //   createLazyDataset(() =>
+    //     (resources.minersRevenueInBitcoin.values() || []).map(
+    //       ({ date, time, value }) => ({
+    //         date,
+    //         time,
+    //         value: value * (closesRecord.values()?.[date] || 1),
+    //       }),
+    //     ),
+    //   ),
+    // )
 
-    ...createLazyFiatDatasets({
-      resourceDatasets,
-    }),
+    // const localExtremes = createExtremeQuantilesDataset(() => [
+    //   resources.oneMonthRealizedPrice.quantiles,
+    //   resources.threeMonthsRealizedPrice.quantiles,
+    //   resources.sthRealizedPrice.quantiles,
+    //   resources.sixMonthsRealizedPrice.quantiles,
+    //   closes30DMA.quantiles,
+    //   closes7DMA.quantiles,
+    // ])
 
-    ...createCointimeDatasets({
-      resourceDatasets,
-      dateToCumulatedNetRealizedProfitAndLoss:
-        anyPossibleCohortLazyDatasets.dateToCumulatedNetRealizedProfitAndLoss,
-      dateToRealizedPrice: anyPossibleCohortLazyDatasets.dateToRealizedPrice,
-      dateToSupplyTotalAtMinus1Block:
-        miningDatasets.dateToSupplyTotalAtMinus1Block,
-      dateToYearlyInflationRate: miningDatasets.dateToYearlyInflationRate,
-      dateToTransactionVolumeAnnualized:
-        transactionsDatasets.dateToTransactionVolumeAnnualized,
-    }),
+    // const cycleExtremes = createExtremeQuantilesDataset(() => [
+    //   resources.oneYearRealizedPrice.quantiles,
+    //   resources.realizedPrice.quantiles,
+    //   resources.twoYearsRealizedPrice.quantiles,
+    //   resources.lthRealizedPrice.quantiles,
+    //   resources.planktonRealizedPrice.quantiles,
+    //   resources.shrimpsRealizedPrice.quantiles,
+    //   resources.crabsRealizedPrice.quantiles,
+    //   resources.fishRealizedPrice.quantiles,
+    //   resources.sharksRealizedPrice.quantiles,
+    //   resources.whalesRealizedPrice.quantiles,
+    //   resources.humpbacksRealizedPrice.quantiles,
+    //   resources.balancedPrice.quantiles,
+    //   resources.trueMeanPrice.quantiles,
+    //   resources.cointimePrice.quantiles,
+    //   resources.vaultedPrice.quantiles,
+    //   resources.cvdd.quantiles,
+    //   closes365DMA.quantiles,
+    //   resources.terminalPrice.quantiles,
+    // ])
+
     // satsPrice,
     // satsPriceCloses: createLazyDataset(() =>
     //   convertCandlesticksToSingleValueDataset(satsPrice.values()),
     // ),
     // hashPrice: addAverages(
     //   createLazyDataset(() => {
-    //     const hashRate = resourceDatasets.hashRate.values() || []
+    //     const hashRate = resources.hashRate.values() || []
 
     //     const minersRevenue = minersRevenueInDollars.values() || []
     //     const firstMinersRevenue = minersRevenue.at(0)
@@ -186,4 +142,4 @@ export const createLazyDatasets = (resourceDatasets: ResourceDatasets) => {
     //   }),
     // ),
   };
-};
+}

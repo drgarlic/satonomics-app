@@ -19,6 +19,7 @@ import {
   yellow as yellowTailwind,
 } from "tailwindcss/colors";
 
+const lightRed = redTailwind[300];
 const red = redTailwind[500];
 const darkRed = redTailwind[900];
 const orange = orangeTailwind[500];
@@ -61,7 +62,7 @@ const black = "#000000";
 const white = "#ffffff";
 
 export const convertCandleToCandleColor = (
-  candle: DatedCandlestickData,
+  candle: { close: number; open: number },
   inverse?: boolean,
 ) =>
   (candle.close || 1) > (candle.open || 0)
@@ -73,7 +74,7 @@ export const convertCandleToCandleColor = (
       : green;
 
 export const convertCandleToVolumeColor = (
-  candle: DatedCandlestickData,
+  candle: { close: number; open: number },
   inverse?: boolean,
 ) =>
   (candle.close || 1) > (candle.open || 0)
@@ -98,6 +99,12 @@ export const colors = {
   closes1YMA: red,
   closes2YMA: purple,
   closes4YMA: pink,
+  p2pk: lime,
+  p2pkh: violet,
+  p2sh: emerald,
+  p2wpkh: cyan,
+  p2wsh: pink,
+  p2tr: blue,
   crab: red,
   fish: lime,
   humpback: violet,
@@ -105,6 +112,7 @@ export const colors = {
   shark: cyan,
   shrimp: pink,
   whale: blue,
+  megalodon: purple,
   realizedPrice: orange,
   oneMonthHolders: cyan,
   threeMonthsHolders: lime,
@@ -140,18 +148,32 @@ export const colors = {
   liveliness: rose,
   vaultedness: green,
   activityToVaultednessRatio: violet,
-  from10y: purple,
+  from10yToEnd: purple,
   from7yTo10y: violet,
   from5yTo7y: indigo,
-  from3yTo5y: blue,
-  from2yTo3y: cyan,
+  from3yTo5y: sky,
+  from2yTo3y: teal,
   from1yTo2y: green,
   from6mTo1y: lime,
   from3mTo6m: yellow,
   from1mTo3m: amber,
   from1wTo1m: orange,
   from1dTo1w: red,
-  upTo1d: white,
+  upTo1d: lightRed,
+  upTo1w: red,
+  upTo1m: orange,
+  upTo2m: orange,
+  upTo3m: orange,
+  upTo4m: orange,
+  upTo5m: orange,
+  upTo6m: orange,
+  upTo1y: orange,
+  upTo2y: orange,
+  upTo3y: orange,
+  upTo4y: orange,
+  upTo5y: orange,
+  upTo7y: orange,
+  upTo10y: orange,
   coinblocksCreated: purple,
   coinblocksDestroyed: red,
   coinblocksStored: green,
@@ -162,4 +184,20 @@ export const colors = {
   extremeMax: red,
   extremeMiddle: orange,
   extremeMin: yellow,
+  2009: yellow,
+  2010: yellow,
+  2011: yellow,
+  2012: yellow,
+  2013: yellow,
+  2014: yellow,
+  2015: yellow,
+  2016: yellow,
+  2017: yellow,
+  2018: yellow,
+  2019: yellow,
+  2020: yellow,
+  2021: yellow,
+  2022: yellow,
+  2023: yellow,
+  2024: yellow,
 };

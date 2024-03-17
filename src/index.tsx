@@ -6,7 +6,7 @@ import { render } from "solid-js/web";
 import "./styles/main.css";
 
 import { App } from "./app";
-import { createResources } from "./scripts";
+import { createDatasets } from "./scripts";
 
 const root = document.getElementById("root");
 
@@ -17,7 +17,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 }
 
 render(() => {
-  const resources = createResources();
+  const datasets = createDatasets();
 
   return (
     <MetaProvider>
@@ -26,27 +26,46 @@ render(() => {
           path="/routes"
           component={() => (
             <div class="flex h-dvh flex-col gap-3 overflow-y-auto p-2">
-              <For each={Object.entries(resources.http)}>
-                {([name, resource]) => (
-                  <p>
-                    {name}:
-                    <a
-                      href={resource.url.toString()}
-                      target="_blank"
-                      class="ml-1 break-words text-orange-500 visited:text-orange-700 hover:text-orange-300"
-                    >
-                      {resource.url.toString()}
-                    </a>
-                  </p>
+              <For each={Object.entries(datasets.date)}>
+                {([resourceName, resource]) => (
+                  <Show when={"url" in resource ? resource : undefined}>
+                    {(resource) => (
+                      <p>
+                        {`${"date"} - ${resourceName}`}:
+                        <a
+                          href={resource().url.toString()}
+                          target="_blank"
+                          class="ml-1 break-words text-orange-500 visited:text-orange-700 hover:text-orange-300"
+                        >
+                          {resource().url.toString()}
+                        </a>
+                      </p>
+                    )}
+                  </Show>
+                )}
+              </For>
+              <For each={Object.entries(datasets.height)}>
+                {([resourceName, resource]) => (
+                  <Show when={"url" in resource ? resource : undefined}>
+                    {(resource) => (
+                      <p>
+                        {`${"height"} - ${resourceName}`}:
+                        <a
+                          href={resource().url.toString()}
+                          target="_blank"
+                          class="ml-1 break-words text-orange-500 visited:text-orange-700 hover:text-orange-300"
+                        >
+                          {resource().url.toString()}
+                        </a>
+                      </p>
+                    )}
+                  </Show>
                 )}
               </For>
             </div>
           )}
         />
-        <Route
-          path="/:preset?"
-          component={() => <App resources={resources} />}
-        />
+        <Route path="/:preset?" component={() => <App datasets={datasets} />} />
       </Router>
     </MetaProvider>
   );

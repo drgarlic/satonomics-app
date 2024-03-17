@@ -9,28 +9,31 @@ import {
   createSeriesLegend,
   setMinMaxMarkers,
   setTimeScale,
-  updateLiveCandlestick as updateChartUsingLiveCandle,
+  updateChartUsingLiveCandle,
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 export const PRICE_SCALE_MOMENTUM_ID = "momentum";
 
-export const applyPriceSeries = <T extends DatedSingleValueData[]>({
+export const applyPriceSeries = <
+  Scale extends ResourceScale,
+  T extends SingleValueData,
+>({
+  scale,
   chart,
   datasets,
   liveCandle,
   preset,
   dataset,
   options,
-  presets,
 }: {
+  scale: Scale;
   chart: IChartApi;
   datasets: Datasets;
   preset: Preset;
-  liveCandle?: Accessor<FullCandlestick | null>;
-  dataset?: Dataset<T>;
+  liveCandle?: Accessor<DatasetCandlestickData | null>;
+  dataset?: Dataset<Scale, T>;
   options?: PriceSeriesOptions;
-  presets: Presets;
 }): { sources: Accessor<Sources>; legend: SeriesLegend } => {
   const id = options?.id || "price";
   const title = options?.title || "Price";
@@ -62,7 +65,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
 
     chartState.priceSeries = series;
 
-    createEffect(() => series.setData(datasets.candlesticks.values() || []));
+    createEffect(() => series.setData(datasets[scale].price.values() || []));
   } else {
     color.set(lowerOpacity ? colors.darkWhite : colors.white);
 
@@ -77,7 +80,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
     // TODO: fix types
     createEffect(() =>
       series.setData(
-        dataset?.values() || datasets.closes.values() || ([] as any),
+        dataset?.values() || datasets[scale].price.values() || ([] as any),
       ),
     );
   }
@@ -90,7 +93,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
         {
           updateChartUsingLiveCandle({
             candle:
-              liveCandle() || datasets.candlesticks.values()?.at(-1) || null,
+              liveCandle() || datasets[scale].price.values()?.at(-1) || null,
             datasets,
           });
         }
@@ -122,7 +125,7 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
 
   if (!dataset) {
     setMinMaxMarkers(
-      datasets.candlesticks.values() || [],
+      datasets[scale].price.values() || [],
       chartState.range,
       lowerOpacity,
     );
@@ -130,12 +133,12 @@ export const applyPriceSeries = <T extends DatedSingleValueData[]>({
 
   setTimeScale({
     switchBetweenCandlestickAndLine: !dataset,
-    candlesticks: datasets.candlesticks.values() || [],
+    candlesticks: datasets[scale].price.values() || [],
     lowerOpacity,
   });
 
   return {
-    sources: dataset?.sources || datasets.candlesticks.sources,
+    sources: dataset?.sources || datasets[scale].price.sources,
     legend: createSeriesLegend({
       id,
       presetId: preset.id,

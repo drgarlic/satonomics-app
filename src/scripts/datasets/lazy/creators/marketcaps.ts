@@ -5,36 +5,25 @@ import {
   createSubtractedLazyDataset,
 } from "./base";
 
-export function createLazyMarketCapDatasets({
-  resourceDatasets,
+export function createMarketCapDatasets({
+  resources,
+  marketCapitalization,
 }: {
-  resourceDatasets: ResourceDatasets;
+  marketCapitalization: Dataset<"date">;
+  resources: DateResourceDatasets;
 }) {
-  const dateToMarketCapitalization = createMultipliedLazyDataset(
-    resourceDatasets.dateToSupplyTotal,
-    resourceDatasets.closes,
-  );
-
-  const dateToScamcoinsMarketCap = createSubtractedLazyDataset(
-    resourceDatasets.dateToAltcoinsMarketCapitalization,
-    resourceDatasets.dateToStablecoinsMarketCapitalization,
-  );
-
-  const dateToCryptoMarketCapitalization = createAddedLazyDataset(
-    dateToMarketCapitalization,
-    resourceDatasets.dateToAltcoinsMarketCapitalization,
-  );
-
-  const dateToStablecoinsMarketCapitalization30dChange =
-    createNetChangeLazyDataset(
-      resourceDatasets.dateToStablecoinsMarketCapitalization,
-      30,
-    );
-
   return {
-    dateToMarketCapitalization,
-    dateToScamcoinsMarketCap,
-    dateToCryptoMarketCapitalization,
-    dateToStablecoinsMarketCapitalization30dChange,
+    scamcoinsMarketCap: createSubtractedLazyDataset(
+      resources.altcoinsMarketCapitalization,
+      resources.stablecoinsMarketCapitalization,
+    ),
+    cryptoMarketCapitalization: createAddedLazyDataset(
+      marketCapitalization,
+      resources.altcoinsMarketCapitalization,
+    ),
+    stablecoinsMarketCapitalization30dChange: createNetChangeLazyDataset(
+      resources.stablecoinsMarketCapitalization,
+      30,
+    ),
   };
 }

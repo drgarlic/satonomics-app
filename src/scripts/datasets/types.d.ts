@@ -1,6 +1,17 @@
-interface Dataset<T = DatedSingleValueData[]> {
+interface Dataset<
+  Scale extends ResourceScale,
+  T extends SingleValueData = SingleValueData,
+  Value = DatasetValue<T>,
+> {
+  scale: Scale;
   sources: Accessor<Sources>;
-  values: Accessor<T | null>;
+  values: Accessor<Value[]>;
 }
 
-type Datasets = Awaited<ReturnType<typeof import("./index").createDatasets>>;
+type DatasetValue<T> = T & Numbered & Valued;
+
+type Datasets = ReturnType<typeof import("./index").createDatasets>;
+
+type DateDatasets = Datasets["date"];
+type HeightDatasets = Datasets["height"];
+type AnyDatasets = DateDatasets | HeightDatasets;

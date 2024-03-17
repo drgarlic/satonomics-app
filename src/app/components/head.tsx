@@ -3,7 +3,11 @@ import { Meta, Title } from "@solidjs/meta";
 import packageJSON from "/src/../package.json";
 import { priceToUSLocale, run } from "/src/scripts";
 
-export function Head({ last }: { last: Accessor<FullCandlestick | null> }) {
+export function Head({
+  last,
+}: {
+  last: Accessor<DatasetCandlestickData | null>;
+}) {
   return (
     <>
       <Title>

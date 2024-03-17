@@ -1,21 +1,22 @@
 import {
   chartState,
   colors,
-  computeNumberOfDaysBetweenTwoDates,
+  ONE_DAY_IN_MS,
   priceToUSLocale,
-  sortWhitespaceDataArray,
   WHITEPAPER_DAY,
 } from "/src/scripts";
 
 export const setMinMaxMarkers = (
-  candlesticks: DatedCandlestickData[],
+  candlesticks: DatasetCandlestickData[],
   range: LogicalRange | null,
   lowerOpacity: boolean,
 ) => {
-  const offset = computeNumberOfDaysBetweenTwoDates(
-    new Date(candlesticks.at(0)?.date || 0),
-    new Date(WHITEPAPER_DAY),
-  );
+  const first = candlesticks.at(0);
+
+  if (!first) return;
+
+  const offset =
+    first.number - new Date(WHITEPAPER_DAY).valueOf() / ONE_DAY_IN_MS;
 
   const slicedDataList = range
     ? candlesticks.slice(
@@ -29,7 +30,7 @@ export const setMinMaxMarkers = (
   if (!series) return;
 
   if (slicedDataList.length) {
-    const markers: (SeriesMarker<Time> & Dated)[] = [];
+    const markers: (SeriesMarker<Time> & Numbered)[] = [];
 
     const seriesIsCandlestick = series.seriesType() === "Candlestick";
 
@@ -80,7 +81,8 @@ export const setMinMaxMarkers = (
           candle &&
           markers.push({
             ...markerOptions,
-            date: candle.date,
+            // date: candle.date,
+            number: candle.number,
             time: candle.time,
             color: lowerOpacity ? colors.darkWhite : colors.white,
             size: 0,
@@ -93,3 +95,9 @@ export const setMinMaxMarkers = (
     series.setMarkers(sortWhitespaceDataArray(markers));
   }
 };
+
+function sortWhitespaceDataArray<T extends WhitespaceData & Numbered>(
+  array: T[],
+) {
+  return array.sort(({ number: a }, { number: b }) => a - b);
+}

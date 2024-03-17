@@ -1,7 +1,9 @@
-import { dateToString } from "/src/scripts";
+import { dateToString, ONE_DAY_IN_MS } from "/src/scripts";
 
 export const krakenAPI = {
-  createLiveCandleWebsocket(callback: (candle: FullCandlestick) => void) {
+  createLiveCandleWebsocket(
+    callback: (candle: DatasetCandlestickData) => void,
+  ) {
     const ws = new WebSocket("wss://ws.kraken.com");
 
     ws.addEventListener("open", () => {
@@ -26,14 +28,16 @@ export const krakenAPI = {
 
       const dateStr = dateToString(new Date(Number(timestamp) * 1000));
 
-      const candle: FullCandlestick = {
-        date: dateStr,
+      const candle: DatasetCandlestickData = {
+        // date: dateStr,
+        number: new Date(dateStr).valueOf() / ONE_DAY_IN_MS,
         time: dateStr,
         open: Number(open),
         high: Number(high),
         low: Number(low),
         close: Number(close),
-        volume: Number(volume),
+        value: Number(close),
+        // volume: Number(volume),
       };
 
       candle && callback({ ...candle });

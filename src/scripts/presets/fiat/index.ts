@@ -1,6 +1,6 @@
 import { PriceScaleMode } from "lightweight-charts";
 
-import { applyMultipleSeries, applyPriceSeries } from "/src/scripts";
+import { applyMultipleSeries } from "/src/scripts";
 
 export const presets: PresetFolder = {
   id: "fiat",
@@ -10,330 +10,363 @@ export const presets: PresetFolder = {
       id: "aed",
       icon: IconTablerCurrencyDirham,
       name: "United Arab Emirates Dirham",
-      getPriceDataset: (datasets) => datasets.priceInUnitedArabEmiratesDirham,
+      getPriceDataset: (datasets) =>
+        datasets.date.priceInUnitedArabEmiratesDirham,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToUnitedArabEmiratesDirhamMarketCap,
+        datasets.date.marketCapitalizationInUnitedArabEmiratesDirham,
     }),
     createPresetFolder({
       id: "ars",
       icon: IconTablerCurrencyDollar,
       name: "Argentine Peso",
-      getPriceDataset: (datasets) => datasets.priceInArgentinePeso,
-      getMarketCapDataset: (datasets) => datasets.dateToArgentinePesoMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInArgentinePeso,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInArgentinePeso,
     }),
     createPresetFolder({
       id: "aud",
       icon: IconTablerCurrencyDollarAustralian,
       name: "Australian Dollar",
-      getPriceDataset: (datasets) => datasets.priceInAustralianDollar,
+      getPriceDataset: (datasets) => datasets.date.priceInAustralianDollar,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToAustralianDollarMarketCap,
+        datasets.date.marketCapitalizationInAustralianDollar,
     }),
     createPresetFolder({
       id: "bdt",
       icon: IconTablerCurrencyTaka,
       name: "Bangladeshi Taka",
-      getPriceDataset: (datasets) => datasets.priceInBangladeshiTaka,
+      getPriceDataset: (datasets) => datasets.date.priceInBangladeshiTaka,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToBangladeshiTakaMarketCap,
+        datasets.date.marketCapitalizationInBangladeshiTaka,
     }),
     createPresetFolder({
       id: "bhd",
       icon: IconTablerCurrencyBahraini,
       name: "Bahraini Dinar",
-      getPriceDataset: (datasets) => datasets.priceInBahrainiDinar,
-      getMarketCapDataset: (datasets) => datasets.dateToBahrainiDinarMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInBahrainiDinar,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInBahrainiDinar,
     }),
     createPresetFolder({
       id: "bmd",
       icon: IconTablerCurrencyDollar,
       name: "Bermudian Dollar",
-      getPriceDataset: (datasets) => datasets.priceInBermudianDollar,
+      getPriceDataset: (datasets) => datasets.date.priceInBermudianDollar,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToBermudianDollarMarketCap,
+        datasets.date.marketCapitalizationInBermudianDollar,
     }),
     createPresetFolder({
       id: "brl",
       icon: IconTablerCurrencyReal,
       name: "Brazil Real",
-      getPriceDataset: (datasets) => datasets.priceInBrazilReal,
-      getMarketCapDataset: (datasets) => datasets.dateToBrazilRealMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInBrazilReal,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInBrazilReal,
     }),
     createPresetFolder({
       id: "cad",
       icon: IconTablerCurrencyDollarCanadian,
       name: "Canadian Dollar",
-      getPriceDataset: (datasets) => datasets.priceInCanadianDollar,
-      getMarketCapDataset: (datasets) => datasets.dateToCanadianDollarMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInCanadianDollar,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInCanadianDollar,
     }),
     createPresetFolder({
       id: "chf",
       icon: IconTablerCurrencyFrank,
       name: "Swiss Franc",
-      getPriceDataset: (datasets) => datasets.priceInSwissFranc,
-      getMarketCapDataset: (datasets) => datasets.dateToSwissFrancMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInSwissFranc,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInSwissFranc,
     }),
     createPresetFolder({
       id: "clp",
       icon: IconTablerCurrencyPeso,
       name: "Chilean Peso",
-      getPriceDataset: (datasets) => datasets.priceInChileanPeso,
-      getMarketCapDataset: (datasets) => datasets.dateToChileanPesoMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInChileanPeso,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInChileanPeso,
     }),
     createPresetFolder({
       id: "cny",
       icon: IconTablerCurrencyYuan,
       name: "Chinese Yuan",
-      getPriceDataset: (datasets) => datasets.priceInChineseYuan,
-      getMarketCapDataset: (datasets) => datasets.dateToChineseYuanMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInChineseYuan,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInChineseYuan,
     }),
     createPresetFolder({
       id: "czk",
       icon: IconTablerCurrencyKroneCzech,
       name: "Czech Koruna",
-      getPriceDataset: (datasets) => datasets.priceInCzechKoruna,
-      getMarketCapDataset: (datasets) => datasets.dateToCzechKorunaMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInCzechKoruna,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInCzechKoruna,
     }),
     createPresetFolder({
       id: "dkk",
       icon: IconTablerCurrencyKroneDanish,
       name: "Danish Krone",
-      getPriceDataset: (datasets) => datasets.priceInDanishKrone,
-      getMarketCapDataset: (datasets) => datasets.dateToDanishKroneMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInDanishKrone,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInDanishKrone,
     }),
     createPresetFolder({
       id: "eur",
       icon: IconTablerCurrencyEuro,
       name: "Euro",
-      getPriceDataset: (datasets) => datasets.priceInEuro,
-      getMarketCapDataset: (datasets) => datasets.dateToEuroMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInEuro,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInEuro,
     }),
     createPresetFolder({
       id: "gbp",
       icon: IconTablerCurrencyPound,
       name: "British Pound Sterling",
-      getPriceDataset: (datasets) => datasets.priceInBritishPoundSterling,
+      getPriceDataset: (datasets) => datasets.date.priceInBritishPoundSterling,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToBritishPoundSterlingMarketCap,
+        datasets.date.marketCapitalizationInBritishPoundSterling,
     }),
     createPresetFolder({
       id: "gel",
       icon: IconTablerCurrencyLari,
       name: "Georgian Lari",
-      getPriceDataset: (datasets) => datasets.priceInGeorgianLari,
-      getMarketCapDataset: (datasets) => datasets.dateToGeorgianLariMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInGeorgianLari,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInGeorgianLari,
     }),
     createPresetFolder({
       id: "hkd",
       icon: IconTablerCurrencyDollar,
       name: "Hong Kong Dollar",
-      getPriceDataset: (datasets) => datasets.priceInHongKongDollar,
-      getMarketCapDataset: (datasets) => datasets.dateToHongKongDollarMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInHongKongDollar,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInHongKongDollar,
     }),
     createPresetFolder({
       id: "huf",
       icon: IconTablerCurrencyForint,
       name: "Hungarian Forint",
-      getPriceDataset: (datasets) => datasets.priceInHungarianForint,
+      getPriceDataset: (datasets) => datasets.date.priceInHungarianForint,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToHungarianForintMarketCap,
+        datasets.date.marketCapitalizationInHungarianForint,
     }),
     createPresetFolder({
       id: "idr",
       icon: IconTablerLetterR,
       name: "Indonesian Rupiah",
-      getPriceDataset: (datasets) => datasets.priceInIndonesianRupiah,
-      getMarketCapDataset: (datasets) => datasets.dateToIndianRupeeMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInIndonesianRupiah,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInIndianRupee,
     }),
     createPresetFolder({
       id: "ils",
       icon: IconTablerCurrencyShekel,
       name: "Israeli New Shekel",
-      getPriceDataset: (datasets) => datasets.priceInIsraeliNewShekel,
+      getPriceDataset: (datasets) => datasets.date.priceInIsraeliNewShekel,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToIsraeliNewShekelMarketCap,
+        datasets.date.marketCapitalizationInIsraeliNewShekel,
     }),
     createPresetFolder({
       id: "inr",
       icon: IconTablerCurrencyRupee,
       name: "Indian Rupee",
-      getPriceDataset: (datasets) => datasets.priceInIndianRupee,
-      getMarketCapDataset: (datasets) => datasets.dateToIndianRupeeMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInIndianRupee,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInIndianRupee,
     }),
     createPresetFolder({
       id: "jpy",
       icon: IconTablerCurrencyYen,
       name: "Japanese Yen",
-      getPriceDataset: (datasets) => datasets.priceInJapaneseYen,
-      getMarketCapDataset: (datasets) => datasets.dateToJapaneseYenMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInJapaneseYen,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInJapaneseYen,
     }),
     createPresetFolder({
       id: "krw",
       icon: IconTablerCurrencyWon,
       name: "South Korean Won",
-      getPriceDataset: (datasets) => datasets.priceInSouthKoreanWon,
-      getMarketCapDataset: (datasets) => datasets.dateToSouthKoreanWonMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInSouthKoreanWon,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInSouthKoreanWon,
     }),
     createPresetFolder({
       id: "kwd",
       icon: IconTablerCurrencyDinar,
       name: "Kuwaiti Dinar",
-      getPriceDataset: (datasets) => datasets.priceInKuwaitiDinar,
-      getMarketCapDataset: (datasets) => datasets.dateToKuwaitiDinarMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInKuwaitiDinar,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInKuwaitiDinar,
     }),
     createPresetFolder({
       id: "lkr",
       icon: IconTablerLetterR,
       name: "SriLankan Rupee",
-      getPriceDataset: (datasets) => datasets.priceInSriLankanRupee,
-      getMarketCapDataset: (datasets) => datasets.dateToSriLankanRupeeMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInSriLankanRupee,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInSriLankanRupee,
     }),
     createPresetFolder({
       id: "mmk",
       icon: IconTablerLetterK,
       name: "Burmese Kyat",
-      getPriceDataset: (datasets) => datasets.priceInBurmeseKyat,
-      getMarketCapDataset: (datasets) => datasets.dateToBurmeseKyatMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInBurmeseKyat,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInBurmeseKyat,
     }),
     createPresetFolder({
       id: "mxn",
       icon: IconTablerCurrencyPeso,
       name: "Mexican Peso",
-      getPriceDataset: (datasets) => datasets.priceInMexicanPeso,
-      getMarketCapDataset: (datasets) => datasets.dateToMexicanPesoMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInMexicanPeso,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInMexicanPeso,
     }),
     createPresetFolder({
       id: "myr",
       icon: IconTablerLetterR,
       name: "Malaysian Ringgit",
-      getPriceDataset: (datasets) => datasets.priceInMalaysianRinggit,
+      getPriceDataset: (datasets) => datasets.date.priceInMalaysianRinggit,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToMalaysianRinggitMarketCap,
+        datasets.date.marketCapitalizationInMalaysianRinggit,
     }),
     createPresetFolder({
       id: "ngn",
       icon: IconTablerCurrencyNaira,
       name: "Nigerian Naira",
-      getPriceDataset: (datasets) => datasets.priceInNigerianNaira,
-      getMarketCapDataset: (datasets) => datasets.dateToNigerianNairaMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInNigerianNaira,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInNigerianNaira,
     }),
     createPresetFolder({
       id: "nok",
       icon: IconTablerLetterK,
       name: "Norwegian Krone",
-      getPriceDataset: (datasets) => datasets.priceInNorwegianKrone,
-      getMarketCapDataset: (datasets) => datasets.dateToNorwegianKroneMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInNorwegianKrone,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInNorwegianKrone,
     }),
     createPresetFolder({
       id: "nzd",
       icon: IconTablerLetterN,
       name: "New Zealand Dollar",
-      getPriceDataset: (datasets) => datasets.priceInNewZealandDollar,
+      getPriceDataset: (datasets) => datasets.date.priceInNewZealandDollar,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToNewZealandDollarMarketCap,
+        datasets.date.marketCapitalizationInNewZealandDollar,
     }),
     createPresetFolder({
       id: "php",
       icon: IconTablerCurrencyPeso,
       name: "Philippine Peso",
-      getPriceDataset: (datasets) => datasets.priceInPhilippinePeso,
-      getMarketCapDataset: (datasets) => datasets.dateToPhilippinePesoMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInPhilippinePeso,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInPhilippinePeso,
     }),
     createPresetFolder({
       id: "pkr",
       icon: IconTablerLetterR,
       name: "Pakistani Rupee",
-      getPriceDataset: (datasets) => datasets.priceInPakistaniRupee,
-      getMarketCapDataset: (datasets) => datasets.dateToPakistaniRupeeMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInPakistaniRupee,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInPakistaniRupee,
     }),
     createPresetFolder({
       id: "pln",
       icon: IconTablerCurrencyZloty,
       name: "Polish Zloty",
-      getPriceDataset: (datasets) => datasets.priceInPolishZloty,
-      getMarketCapDataset: (datasets) => datasets.dateToPolishZlotyMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInPolishZloty,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInPolishZloty,
     }),
     createPresetFolder({
       id: "rub",
       icon: IconTablerCurrencyRubel,
       name: "Russian Ruble",
-      getPriceDataset: (datasets) => datasets.priceInRussianRuble,
-      getMarketCapDataset: (datasets) => datasets.dateToRussianRubleMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInRussianRuble,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInRussianRuble,
     }),
     createPresetFolder({
       id: "sar",
       icon: IconTablerCurrencyRiyal,
       name: "Saudi Riyal",
-      getPriceDataset: (datasets) => datasets.priceInSaudiRiyal,
-      getMarketCapDataset: (datasets) => datasets.dateToSaudiRiyalMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInSaudiRiyal,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInSaudiRiyal,
     }),
     createPresetFolder({
       id: "sek",
       icon: IconTablerCurrencyKroneSwedish,
       name: "Swedish Krona",
-      getPriceDataset: (datasets) => datasets.priceInSwedishKrona,
-      getMarketCapDataset: (datasets) => datasets.dateToSwedishKronaMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInSwedishKrona,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInSwedishKrona,
     }),
     createPresetFolder({
       id: "sgd",
       icon: IconTablerCurrencyDollarSingapore,
       name: "Singapore Dollar",
-      getPriceDataset: (datasets) => datasets.priceInSingaporeDollar,
+      getPriceDataset: (datasets) => datasets.date.priceInSingaporeDollar,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToSingaporeDollarMarketCap,
+        datasets.date.marketCapitalizationInSingaporeDollar,
     }),
     createPresetFolder({
       id: "thb",
       icon: IconTablerCurrencyBaht,
       name: "Thai Baht",
-      getPriceDataset: (datasets) => datasets.priceInThaiBaht,
-      getMarketCapDataset: (datasets) => datasets.dateToThaiBahtMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInThaiBaht,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInThaiBaht,
     }),
     createPresetFolder({
       id: "try",
       icon: IconTablerCurrencyLira,
       name: "Turkish Lira",
-      getPriceDataset: (datasets) => datasets.priceInTurkishLira,
-      getMarketCapDataset: (datasets) => datasets.dateToTurkishLiraMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInTurkishLira,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInTurkishLira,
     }),
     createPresetFolder({
       id: "twd",
       icon: IconTablerCurrencyDollar,
       name: "New Taiwan Dollar",
-      getPriceDataset: (datasets) => datasets.priceInNewTaiwanDollar,
+      getPriceDataset: (datasets) => datasets.date.priceInNewTaiwanDollar,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToNewTaiwanDollarMarketCap,
+        datasets.date.marketCapitalizationInNewTaiwanDollar,
     }),
     createPresetFolder({
       id: "uah",
       icon: IconTablerCurrencyHryvnia,
       name: "Ukrainian Hryvnia",
-      getPriceDataset: (datasets) => datasets.priceInUkrainianHryvnia,
+      getPriceDataset: (datasets) => datasets.date.priceInUkrainianHryvnia,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToUkrainianHryvniaMarketCap,
+        datasets.date.marketCapitalizationInUkrainianHryvnia,
     }),
     createPresetFolder({
       id: "vef",
       icon: IconTablerLetterB,
       name: "Venezuelan Bolivar Fuerte",
-      getPriceDataset: (datasets) => datasets.priceInVenezuelanBolivarFuerte,
+      getPriceDataset: (datasets) =>
+        datasets.date.priceInVenezuelanBolivarFuerte,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToVenezuelanBolivarFuerteMarketCap,
+        datasets.date.marketCapitalizationInVenezuelanBolivarFuerte,
     }),
     createPresetFolder({
       id: "vnd",
       icon: IconTablerCurrencyDong,
       name: "Vietnamese Dong",
-      getPriceDataset: (datasets) => datasets.priceInVietnameseDong,
-      getMarketCapDataset: (datasets) => datasets.dateToVietnameseDongMarketCap,
+      getPriceDataset: (datasets) => datasets.date.priceInVietnameseDong,
+      getMarketCapDataset: (datasets) =>
+        datasets.date.marketCapitalizationInVietnameseDong,
     }),
     createPresetFolder({
       id: "zar",
       icon: IconTablerLetterR,
       name: "South African Rand",
-      getPriceDataset: (datasets) => datasets.priceInSouthAfricanRand,
+      getPriceDataset: (datasets) => datasets.date.priceInSouthAfricanRand,
       getMarketCapDataset: (datasets) =>
-        datasets.dateToSouthAfricanRandMarketCap,
+        datasets.date.marketCapitalizationInSouthAfricanRand,
     }),
   ],
 };
@@ -348,8 +381,8 @@ function createPresetFolder({
   id: string;
   name: string;
   icon: JSXElement;
-  getPriceDataset: (datasets: Datasets) => Dataset;
-  getMarketCapDataset: (datasets: Datasets) => Dataset;
+  getPriceDataset: (datasets: Datasets) => Dataset<"date">;
+  getMarketCapDataset: (datasets: Datasets) => Dataset<"date">;
 }): PresetFolder {
   return {
     id: `currency-${id}`,
@@ -363,6 +396,7 @@ function createPresetFolder({
         title: `Bitcoin Price In ${name}`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             priceDataset: getPriceDataset(params.datasets),
           });
@@ -376,6 +410,7 @@ function createPresetFolder({
         title: `Bitcoin ${name} Performance`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             priceDataset: getPriceDataset(params.datasets),
             priceOptions: {
@@ -396,6 +431,7 @@ function createPresetFolder({
         title: `Bitcoin ${name} Market Capitalization`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             priceDataset: getMarketCapDataset(params.datasets),
             priceOptions: {

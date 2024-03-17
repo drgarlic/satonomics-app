@@ -1,21 +1,19 @@
 import { createAnnualizedLazyDataset, createDividedLazyDataset } from "./base";
 
-export function createTransactionsDatasets({
-  resourceDatasets,
-}: {
-  resourceDatasets: ResourceDatasets;
-}) {
-  const dateToTransactionVolumeAnnualized = createAnnualizedLazyDataset(
-    resourceDatasets.dateToTransactionVolume,
+export function createTransactionsDatasets<
+  Resources extends AnyResourceDatasets,
+>(resources: Resources) {
+  const transactionVolumeAnnualized = createAnnualizedLazyDataset(
+    resources.transactionVolume,
   );
 
-  const dateToTransactionsVelocity = createDividedLazyDataset(
-    dateToTransactionVolumeAnnualized,
-    resourceDatasets.dateToSupplyTotal,
+  const transactionsVelocity = createDividedLazyDataset(
+    transactionVolumeAnnualized,
+    resources.SupplyTotal,
   );
 
   return {
-    dateToTransactionVolumeAnnualized,
-    dateToTransactionsVelocity,
+    transactionVolumeAnnualized,
+    transactionsVelocity,
   };
 }

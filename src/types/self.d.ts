@@ -1,31 +1,31 @@
-interface FullCandlestick extends DatedCandlestickData {
-  volume: number;
-}
-
-type FetchedCandlestick = Omit<FullCandlestick, "time">;
+// interface FullCandlestick extends DatedCandlestickData {
+//   volume: number;
+// }
 
 interface Dated {
   date: string;
 }
 
-type DatedWhitespaceData = WhitespaceData & Dated;
-type DatedSingleValueData = SingleValueData & Dated;
-type DatedCandlestickData = CandlestickData & Dated;
-type DatedLineData = import("lightweight-charts").LineData & Dated;
-type DatedAreaData = import("lightweight-charts").AreaData & Dated;
-type DatedHistogramData = import("lightweight-charts").HistogramData & Dated;
+interface Heighted {
+  height: number;
+}
 
-type DeepPartialLineOptions = DeepPartial<
-  LineStyleOptions & SeriesOptionsCommon
->;
+interface Numbered {
+  number: number;
+}
 
-type DeepPartialHistogramOptions = DeepPartial<
-  HistogramStyleOptions & SeriesOptionsCommon
->;
+interface Valued {
+  value: number;
+}
 
-type DeepPartialBaselineOptions = DeepPartial<
-  BaselineStyleOptions & SeriesOptionsCommon
->;
+type DatasetCandlestickData = DatasetValue<CandlestickData>;
+
+// type DatedWhitespaceData = WhitespaceData & Dated;
+// type DatedSingleValueData = SingleValueData & Dated;
+// type DatedCandlestickData = CandlestickData & Dated;
+// type DatedLineData = LineData & Dated;
+// type DatedAreaData = AreaData & Dated;
+// type DatedHistogramData = HistogramData & Dated;
 
 type Entries<T> = {
   [K in keyof T]: [K, T[K]];

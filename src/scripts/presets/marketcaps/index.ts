@@ -1,5 +1,3 @@
-import { LineStyle } from "lightweight-charts";
-
 import { applyMultipleSeries, colors, SeriesType } from "/src/scripts";
 
 export const presets: PresetFolder = {
@@ -14,6 +12,7 @@ export const presets: PresetFolder = {
       description: "",
       applyPreset(params) {
         return applyMultipleSeries({
+          scale: "date",
           ...params,
           priceScaleOptions: {
             halved: true,
@@ -23,25 +22,25 @@ export const presets: PresetFolder = {
               id: "all",
               title: "Combined",
               color: colors.white,
-              dataset: params.datasets.dateToCryptoMarketCapitalization,
+              dataset: params.datasets.date.cryptoMarketCapitalization,
             },
             {
               id: "bitcoin",
               title: "Bitcoin's Market Cap.",
               color: colors.bitcoin,
-              dataset: params.datasets.dateToMarketCapitalization,
+              dataset: params.datasets.date.marketCapitalization,
             },
             {
               id: "scamcoins",
               title: "Scamcoins' Market Cap.",
               color: colors.ethereum,
-              dataset: params.datasets.dateToScamcoinsMarketCap,
+              dataset: params.datasets.date.scamcoinsMarketCap,
             },
             {
               id: "fiatcoins",
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
-              dataset: params.datasets.dateToStablecoinsMarketCapitalization,
+              dataset: params.datasets.date.stablecoinsMarketCapitalization,
             },
           ],
         });
@@ -55,6 +54,7 @@ export const presets: PresetFolder = {
       description: "",
       applyPreset(params) {
         return applyMultipleSeries({
+          scale: "date",
           ...params,
           priceScaleOptions: {
             halved: true,
@@ -65,7 +65,7 @@ export const presets: PresetFolder = {
               title: "Bitcoin's Market Cap.",
               color: colors.bitcoin,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.dateToMarketCapitalization,
+              dataset: params.datasets.date.marketCapitalization,
             },
           ],
         });
@@ -79,6 +79,7 @@ export const presets: PresetFolder = {
       description: "",
       applyPreset(params) {
         return applyMultipleSeries({
+          scale: "date",
           ...params,
           priceScaleOptions: {
             halved: true,
@@ -89,7 +90,7 @@ export const presets: PresetFolder = {
               title: "Scamcoins' Market Cap.",
               color: colors.ethereum,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.dateToScamcoinsMarketCap,
+              dataset: params.datasets.date.scamcoinsMarketCap,
             },
           ],
         });
@@ -103,6 +104,7 @@ export const presets: PresetFolder = {
       description: "",
       applyPreset(params) {
         return applyMultipleSeries({
+          scale: "date",
           ...params,
           priceScaleOptions: {
             halved: true,
@@ -113,7 +115,7 @@ export const presets: PresetFolder = {
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.dateToStablecoinsMarketCapitalization,
+              dataset: params.datasets.date.stablecoinsMarketCapitalization,
             },
           ],
         });
@@ -127,6 +129,7 @@ export const presets: PresetFolder = {
       description: "",
       applyPreset(params) {
         return applyMultipleSeries({
+          scale: "date",
           ...params,
           priceScaleOptions: {
             halved: true,
@@ -137,7 +140,7 @@ export const presets: PresetFolder = {
               title: "30 Day Change",
               seriesType: SeriesType.Based,
               dataset:
-                params.datasets.dateToStablecoinsMarketCapitalization30dChange,
+                params.datasets.date.stablecoinsMarketCapitalization30dChange,
             },
           ],
         });

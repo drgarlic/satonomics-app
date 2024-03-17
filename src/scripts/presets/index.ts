@@ -1,18 +1,18 @@
 import { colors, random, replaceHistory, resetURLParams } from "/src/scripts";
 import { createASS } from "/src/solid";
 
-import { presets as addressesPresets } from "./addresses";
+import { createPresets as createAddressesPresets } from "./addresses";
 import { presets as averagesPresets } from "./averages";
-import { presets as blocksPresets } from "./blocks";
-import { presets as coinblocksPresets } from "./coinblocks";
+import { createPresets as createBlocksPresets } from "./blocks";
+import { createPresets as createCoinblocksPresets } from "./coinblocks";
 import { presets as fiatPresets } from "./fiat";
-import { presets as hodlersPresets } from "./hodlers";
+import { createPresets as createHodlersPresets } from "./hodlers";
 import { presets as marketcapsPresets } from "./marketcaps";
 import { presets as metalsPresets } from "./metals";
-import { presets as minersPresets } from "./miners";
+import { createPresets as createMinersPresets } from "./miners";
 import { createCohortPresetList } from "./templates";
-import { presets as transactionsPresets } from "./transactions";
-import { presets as usdPresets } from "./usd";
+import { createPresets as createTransactionsPresets } from "./transactions";
+import { createPresets as createUSDPresets } from "./usd";
 
 export * from "./templates";
 
@@ -23,22 +23,48 @@ export const LOCAL_STORAGE_FOLDERS_KEY = "folders";
 
 export function createPresets(): Presets {
   const tree: PresetTree = [
-    usdPresets,
-    blocksPresets,
-    minersPresets,
-    transactionsPresets,
-    ...createCohortPresetList({
-      id: "all",
-      color: colors.bitcoin,
-      datasetKey: "",
-    }),
-    hodlersPresets,
-    addressesPresets,
-    averagesPresets,
-    coinblocksPresets,
-    marketcapsPresets,
-    fiatPresets,
-    metalsPresets,
+    {
+      id: "date",
+      name: "Date",
+      tree: [
+        createUSDPresets("date"),
+        createBlocksPresets("date"),
+        createMinersPresets("date"),
+        createTransactionsPresets("date"),
+        ...createCohortPresetList({
+          scale: "date",
+          id: "all",
+          color: colors.bitcoin,
+          datasetKey: "",
+        }),
+        createHodlersPresets("date"),
+        createAddressesPresets("date"),
+        averagesPresets,
+        createCoinblocksPresets("date"),
+        marketcapsPresets,
+        fiatPresets,
+        metalsPresets,
+      ],
+    },
+    {
+      id: "height",
+      name: "Height",
+      tree: [
+        createUSDPresets("height"),
+        createBlocksPresets("height"),
+        createMinersPresets("height"),
+        createTransactionsPresets("height"),
+        ...createCohortPresetList({
+          scale: "height",
+          id: "all",
+          color: colors.bitcoin,
+          datasetKey: "",
+        }),
+        createHodlersPresets("height"),
+        createAddressesPresets("height"),
+        createCoinblocksPresets("height"),
+      ],
+    },
   ];
 
   const { list, ids } = flatten(tree);

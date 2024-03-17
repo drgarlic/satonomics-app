@@ -33,8 +33,8 @@
     "solid-js": "^1.8.15"
   },
   "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.1.1",
-    "@iconify-json/tabler": "^1.1.106",
+    "@ianvs/prettier-plugin-sort-imports": "^4.2.0",
+    "@iconify-json/tabler": "^1.1.108",
     "@tailwindcss/container-queries": "^0.1.1",
     "@vite-pwa/assets-generator": "^0.2.4",
     "autoprefixer": "^10.4.18",
@@ -47,9 +47,9 @@
     "typescript": "^5.4.2",
     "unplugin-auto-import": "^0.17.5",
     "unplugin-icons": "^0.18.5",
-    "vite": "^5.1.5",
-    "vite-plugin-pwa": "^0.19.2",
-    "vite-plugin-solid": "^2.10.1",
+    "vite": "^5.1.6",
+    "vite-plugin-pwa": "^0.19.4",
+    "vite-plugin-solid": "^2.10.2",
     "workbox-window": "^7.0.0"
   }
 }

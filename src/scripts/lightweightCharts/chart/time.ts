@@ -27,7 +27,7 @@ export const setTimeScale = ({
   candlesticks,
 }: {
   switchBetweenCandlestickAndLine: boolean;
-  candlesticks: DatedCandlestickData[];
+  candlesticks: DatasetCandlestickData[];
   lowerOpacity: boolean;
 }) => {
   if (switchBetweenCandlestickAndLine) {

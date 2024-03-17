@@ -42,11 +42,7 @@ export function TreeFrame({
           />
         </div>
         <div class="border-t border-dashed border-white" />
-        <Anchor
-          href="/routes"
-          primary="API Routes"
-          secondary="Free & Unlimited"
-        />
+        <Anchor href="/routes" primary="API" secondary="Cloudflared" />
         <div class="border-t border-dashed border-white/25" />
         <Anchor
           href="https://primal.net/p/npub1jagmm3x39lmwfnrtvxcs9ac7g300y3dusv9lgzhk2e4x5frpxlrqa73v44"
@@ -69,7 +65,7 @@ export function TreeFrame({
         <Anchor
           href="https://counter.dev/dashboard.html?user=wjfpwo2032fk&token=GAP9y3FM4o0%3D"
           primary="Analytics"
-          secondary="Privacy Friendly"
+          secondary="Counter.dev"
         />
       </ScrollableFrame>
       <div class="flex w-full border-t border-dashed border-white bg-black">

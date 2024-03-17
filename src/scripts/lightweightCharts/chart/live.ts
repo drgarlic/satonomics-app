@@ -2,18 +2,17 @@ import {
   chartState,
   colors,
   convertCandleToCandleColor,
-  convertNormalCandleToGoldPerBitcoinCandle,
-  convertNormalCandleToSatCandle,
-  run,
+  // convertNormalCandleToGoldPerBitcoinCandle,
+  // convertNormalCandleToSatCandle,
 } from "/src/scripts";
 
-export const updateLiveCandlestick = ({
+export function updateChartUsingLiveCandle({
   candle,
   datasets,
 }: {
-  candle: DatedCandlestickData | null;
+  candle: DatasetCandlestickData | null;
   datasets: Datasets;
-}) => {
+}) {
   if (!candle || !chartState.chart) return;
 
   // const priceMode = chartState.priceMode
@@ -55,4 +54,4 @@ export const updateLiveCandlestick = ({
           : colors.white,
     });
   } catch {}
-};
+}

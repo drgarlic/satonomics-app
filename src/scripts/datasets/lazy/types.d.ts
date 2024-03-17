@@ -6,9 +6,7 @@ type RatioKey =
   | `Ratio`
   | `Ratio7DayMovingAverage`
   | `Ratio1YearMovingAverage`
-  | `RatioMomentum`
-  | `RatioMomentumBLSHBitcoinReturns`
-  | `RatioMomentumBLSHDollarReturns`
+  | `Ratio${MomentumKey}`
   | `Ratio99.9Percentile`
   | `Ratio99.5Percentile`
   | `Ratio99Percentile`
@@ -21,3 +19,8 @@ type RatioKey =
   | `Ratio1Price`
   | `Ratio0.5Price`
   | `Ratio0.1Price`;
+
+type MomentumKey =
+  | `Momentum`
+  | `MomentumBLSHBitcoinReturns`
+  | `MomentumBLSHDollarReturns`;

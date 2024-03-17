@@ -1,6 +1,6 @@
 import { PriceScaleMode } from "lightweight-charts";
 
-import { applyMultipleSeries, applyPriceSeries } from "/src/scripts";
+import { applyMultipleSeries } from "/src/scripts";
 
 export const presets: PresetFolder = {
   id: "metals",
@@ -10,13 +10,13 @@ export const presets: PresetFolder = {
       id: "xau",
       icon: IconTablerLetterG,
       name: "Gold",
-      getDataset: (datasets) => datasets.priceInGold,
+      getDataset: (datasets) => datasets.date.priceInGold,
     }),
     createPresetFolder({
       id: "xag",
       icon: IconTablerLetterS,
       name: "Silver",
-      getDataset: (datasets) => datasets.priceInSilver,
+      getDataset: (datasets) => datasets.date.priceInSilver,
     }),
   ],
 };
@@ -30,7 +30,7 @@ function createPresetFolder({
   id: string;
   name: string;
   icon: JSXElement;
-  getDataset: (datasets: Datasets) => Dataset;
+  getDataset: (datasets: Datasets) => Dataset<"date">;
 }): PresetFolder {
   return {
     id: `currency-${id}`,
@@ -44,6 +44,7 @@ function createPresetFolder({
         title: `Bitcoin Price In ${name} (Troy Ounce)`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             priceDataset: getDataset(params.datasets),
           });
@@ -57,6 +58,7 @@ function createPresetFolder({
         title: `Bitcoin ${name} (Troy Ounce) Performance`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             priceDataset: getDataset(params.datasets),
             priceOptions: {

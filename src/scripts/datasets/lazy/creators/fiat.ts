@@ -1,22 +1,22 @@
-import { currencies } from "/src/scripts/resources";
+import { currencies } from "/src/scripts";
 
 import { createMultipliedLazyDataset } from "./base";
 
-export function createLazyFiatDatasets({
-  resourceDatasets,
-}: {
-  resourceDatasets: ResourceDatasets;
-}) {
-  type LazyCurrencyDatasets = Record<`dateTo${CurrencyName}MarketCap`, Dataset>;
+export function createFiatDatasets(resources: DateResourceDatasets) {
+  type LazyCurrencyDatasets = Record<
+    `marketCapitalizationIn${CurrencyName}`,
+    Dataset<"date">
+  >;
 
   const partialCurrencyDatasets: Partial<LazyCurrencyDatasets> = {};
 
   currencies.forEach(({ name }) => {
-    partialCurrencyDatasets[`dateTo${name}MarketCap`] =
-      createMultipliedLazyDataset(
-        resourceDatasets.dateToSupplyTotal,
-        resourceDatasets[`priceIn${name}`],
-      );
+    const marketCap = createMultipliedLazyDataset(
+      resources.SupplyTotal,
+      resources[`priceIn${name}`],
+    );
+
+    partialCurrencyDatasets[`marketCapitalizationIn${name}`] = marketCap;
   });
 
   return partialCurrencyDatasets as LazyCurrencyDatasets;

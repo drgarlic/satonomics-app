@@ -1,13 +1,16 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 
 import {
-  allPossibleCohortNames,
+  allPossibleCohortKeys,
   colors,
-  computeWeeklyMovingAverage,
-  computeYearlyMovingAverage,
+  computeMovingAverage,
+  sortedInsert,
 } from "/src/scripts";
 
-import { createLazyPercentileDataset, createLazyRatioDataset } from "./ratio";
+import { appendRatioLazyDatasets } from "./ratio";
+
+const MEDIAN = 0.5;
+const FIRST_USABLE_MEAN_RATIO_DATE = "2012-01-01";
 
 export enum Momentum {
   red = 1,
@@ -15,11 +18,16 @@ export enum Momentum {
   green = 3,
 }
 
-export function createLazyDataset<T>(
-  calc: () => T,
+function createLazyDataset<
+  Scale extends ResourceScale,
+  T extends SingleValueData = SingleValueData,
+>(
+  scale: Scale,
+  calc: () => DatasetValue<T>[],
   sourcesList: Accessor<Sources>[],
-): Dataset<T> {
+): Dataset<Scale, T> {
   return {
+    scale,
     values: createLazyMemo(calc),
     sources: createLazyMemo(() => {
       const map = new Map<string, Source>();
@@ -33,28 +41,35 @@ export function createLazyDataset<T>(
   };
 }
 
-export function createTransformedLazyDataset<T = undefined>(
-  dataset: Dataset,
+export function createTransformedLazyDataset<
+  Scale extends ResourceScale,
+  T = undefined,
+>(
+  dataset: Dataset<Scale>,
   transform: (
     value: number,
     index: number,
-    array: DatedSingleValueData[],
+    array: SingleValueData[],
     state?: T,
   ) => number,
   state?: T,
 ) {
   return createLazyDataset(
+    dataset.scale,
     () =>
-      (dataset.values() || []).map(({ date, value }, index, array) => ({
-        date,
-        time: date,
+      (dataset.values() || []).map(({ time, number, value }, index, array) => ({
+        number,
+        time,
         value: transform(value, index, array, state),
       })),
     [dataset.sources],
   );
 }
 
-export function createNetChangeLazyDataset(dataset: Dataset, days = 1) {
+export function createNetChangeLazyDataset<Scale extends ResourceScale>(
+  dataset: Dataset<Scale>,
+  days = 1,
+) {
   return createTransformedLazyDataset(
     dataset,
     (value, index, array) =>
@@ -62,7 +77,9 @@ export function createNetChangeLazyDataset(dataset: Dataset, days = 1) {
   );
 }
 
-export function createAnnualizedLazyDataset(dataset: Dataset) {
+export function createAnnualizedLazyDataset<Scale extends ResourceScale>(
+  dataset: Dataset<Scale>,
+) {
   return createTransformedLazyDataset(
     dataset,
     (value, _, __, state) => {
@@ -85,7 +102,10 @@ export function createAnnualizedLazyDataset(dataset: Dataset) {
   );
 }
 
-export function createMedianLazyDataset(dataset: Dataset, number: number) {
+export function createMedianLazyDataset<Scale extends ResourceScale>(
+  dataset: Dataset<Scale>,
+  number: number,
+) {
   if (!number) {
     throw Error("Median cannot be less than 1");
   }
@@ -113,71 +133,88 @@ export function createMedianLazyDataset(dataset: Dataset, number: number) {
   );
 }
 
-function createLazyOffset(source: Dataset, toOffset: Dataset) {
+function createLazyOffset<Scale extends ResourceScale>(
+  source: Dataset<Scale>,
+  toOffset: Dataset<Scale>,
+) {
   return createLazyMemo(() => {
     const offset = toOffset
       .values()
-      ?.findIndex(({ date }) => date === source.values()?.at(0)?.date);
+      ?.findIndex(({ number }) => number === source.values()?.at(0)?.number);
 
     return !offset || offset === -1 ? 0 : offset;
   });
 }
 
-export function createAddedLazyDataset(
-  datasetRef: Dataset,
-  datasetToAdd: Dataset,
+export function createAddedLazyDataset<Scale extends ResourceScale>(
+  datasetRef: Dataset<Scale>,
+  datasetToAdd: Dataset<Scale>,
 ) {
   const offset = createLazyOffset(datasetRef, datasetToAdd);
 
-  return createLazyDataset(() => {
-    let secondValue = 0;
-    let index = offset();
+  return createLazyDataset(
+    datasetRef.scale,
+    () => {
+      let secondValue = 0;
+      let index = offset();
 
-    return (datasetRef.values() || []).map(({ date, value }) => {
-      const data = datasetToAdd.values()?.at(index);
-      if (date === data?.date) {
-        secondValue = data.value;
-        index += 1;
-      }
+      const adders = datasetToAdd.values();
 
-      return {
-        date,
-        time: date,
-        value: value + secondValue,
-      };
-    });
-  }, [datasetRef.sources, datasetToAdd.sources]);
+      return (datasetRef.values() || []).map(({ number, time, value }) => {
+        const data = adders?.at(index);
+        if (number === data?.number) {
+          secondValue = data.value;
+          index += 1;
+        }
+
+        return {
+          number,
+          time,
+          value: value + secondValue,
+        };
+      });
+    },
+    [datasetRef.sources, datasetToAdd.sources],
+  );
 }
 
-export function createSubtractedLazyDataset(
-  datasetRef: Dataset,
-  datasetToSubtract: Dataset,
+export function createSubtractedLazyDataset<Scale extends ResourceScale>(
+  datasetRef: Dataset<Scale>,
+  datasetToSubtract: Dataset<Scale>,
 ) {
   const offset = createLazyOffset(datasetRef, datasetToSubtract);
 
-  return createLazyDataset(() => {
-    let secondValue = 0;
-    let index = offset();
+  return createLazyDataset(
+    datasetRef.scale,
+    () => {
+      let toSubtract = 0;
 
-    return (datasetRef.values() || []).map(({ date, value }) => {
-      const data = datasetToSubtract.values()?.at(index);
-      if (date === data?.date) {
-        secondValue = data.value;
-        index += 1;
-      }
+      let index = offset();
 
-      return {
-        date,
-        time: date,
-        value: value - secondValue,
-      };
-    });
-  }, [datasetRef.sources, datasetToSubtract.sources]);
+      const subtracters = datasetToSubtract.values();
+
+      return (datasetRef.values() || []).map(({ time, value, number }) => {
+        const data = subtracters?.at(index);
+
+        if (number === data?.number) {
+          toSubtract = data.value;
+          index += 1;
+        }
+
+        return {
+          number,
+          time,
+          value: value - toSubtract,
+        };
+      });
+    },
+    [datasetRef.sources, datasetToSubtract.sources],
+  );
 }
 
-export function createMultipliedLazyDataset(
-  datasetRef: Dataset,
-  multiplierDataset: Dataset,
+export function createMultipliedLazyDataset<Scale extends ResourceScale>(
+  datasetRef: Dataset<Scale>,
+  multiplierDataset: Dataset<Scale>,
   defaultMultiplier = 1,
 ) {
   const offsetRef = createLazyOffset(multiplierDataset, datasetRef);
@@ -185,25 +222,28 @@ export function createMultipliedLazyDataset(
   const offsetMultiplier = createLazyOffset(datasetRef, multiplierDataset);
 
   return createLazyDataset(
-    () =>
-      (datasetRef.values() || [])
+    datasetRef.scale,
+    () => {
+      const multipliers = multiplierDataset.values();
+
+      return (datasetRef.values() || [])
         .slice(offsetRef())
-        .map(({ date, value }, index) => ({
-          date,
-          time: date,
+        .map(({ number, time, value }, index) => ({
+          number,
+          time,
           value:
             value *
-            // TODO: Move `multiplierDataset.values()` to call once, for all lazy datasets !!
-            (multiplierDataset.values()?.at(index + offsetMultiplier())
-              ?.value || defaultMultiplier),
-        })),
+            (multipliers?.at(index + offsetMultiplier())?.value ||
+              defaultMultiplier),
+        }));
+    },
     [datasetRef.sources, multiplierDataset.sources],
   );
 }
 
-export const createDividedLazyDataset = (
-  datasetRef: Dataset,
-  dividerDataset: Dataset,
+export const createDividedLazyDataset = <Scale extends ResourceScale>(
+  datasetRef: Dataset<Scale>,
+  dividerDataset: Dataset<Scale>,
   isPercentage?: boolean,
 ) => {
   const offsetRef = createLazyOffset(dividerDataset, datasetRef);
@@ -211,197 +251,233 @@ export const createDividedLazyDataset = (
   const offsetDivider = createLazyOffset(datasetRef, dividerDataset);
 
   return createLazyDataset(
-    () =>
-      (datasetRef.values() || [])
+    datasetRef.scale,
+    () => {
+      const dividers = dividerDataset.values();
+
+      return (datasetRef.values() || [])
         .slice(offsetRef())
-        .map(({ date, value }, index) => ({
-          date,
-          time: date,
+        .map(({ number, time, value }, index) => ({
+          number,
+          time,
           value:
-            (value /
-              (dividerDataset.values()?.at(index + offsetDivider())?.value ||
-                1)) *
+            (value / (dividers?.at(index + offsetDivider())?.value || 1)) *
             (isPercentage ? 100 : 1),
-        })),
+        }));
+    },
     [datasetRef.sources, dividerDataset.sources],
   );
 };
 
-export const createCumulatedLazyDataset = (dataset: Dataset) =>
-  createLazyDataset(() => {
-    let sum = 0;
+export const createCumulatedLazyDataset = <Scale extends ResourceScale>(
+  dataset: Dataset<Scale>,
+) =>
+  createLazyDataset(
+    dataset.scale,
+    () => {
+      let sum = 0;
 
-    return (dataset.values() || []).map(({ date, value }) => {
-      sum += value;
+      return (dataset.values() || []).map(({ number, time, value }) => {
+        sum += value;
 
-      return {
-        date,
-        time: date,
-        value: sum,
-      };
-    });
-  }, [dataset.sources]);
+        return {
+          number,
+          time,
+          value: sum,
+        };
+      });
+    },
+    [dataset.sources],
+  );
 
-export function createPercentageMomentumLazyDataset(dataset: Dataset) {
-  return createLazyDataset(() => {
-    let momentum = Momentum.green;
+export function createPercentageMomentumLazyDataset<
+  Scale extends ResourceScale,
+>(dataset: Dataset<Scale>) {
+  return createLazyDataset(
+    dataset.scale,
+    () => {
+      let momentum = Momentum.green;
 
-    return (dataset.values() || []).map(({ date, value }) => {
-      let _value: Momentum;
+      return (dataset.values() || []).map(({ number, time, value }) => {
+        let _value: Momentum;
 
-      if (momentum === Momentum.green) {
-        if (value <= 45) {
-          momentum = Momentum.red;
-          _value = momentum;
-        } else if (value < 50) {
-          _value = Momentum.yellow;
-        } else {
-          _value = momentum;
-        }
-      } else {
-        if (value >= 55) {
-          momentum = Momentum.green;
-          _value = momentum;
-        } else if (value > 50) {
-          _value = Momentum.yellow;
-        } else {
-          _value = momentum;
-        }
-      }
-
-      return {
-        date,
-        time: date,
-        value: _value,
-        color:
-          _value === Momentum.green
-            ? colors.momentumGreen
-            : _value === Momentum.yellow
-              ? colors.momentumYellow
-              : colors.momentumRed,
-      };
-    });
-  }, [dataset.sources]);
-}
-
-export function createBLSHBitcoinReturnsLazyDataset({
-  momentumDataset,
-  closes,
-}: {
-  momentumDataset: Dataset;
-  closes: Dataset;
-}) {
-  return createLazyDataset(() => {
-    let fiatAmount = 0;
-    let btcAmount = 0;
-    let dcaAmount = 100;
-    let momentum = Momentum.green;
-
-    const offset = createLazyMemo(() => {
-      const offset = momentumDataset
-        .values()
-        ?.findIndex((data) => data.date === closes.values()?.[0]?.date);
-
-      return !offset || offset === -1 ? 0 : offset;
-    });
-
-    return (closes.values() || []).map(
-      ({ date, value: currentPrice }, index) => {
-        const momentumI =
-          momentumDataset.values()?.[index + offset()]?.value || Momentum.green;
-
-        if (momentum !== momentumI) {
-          if (momentumI === Momentum.green) {
-            momentum = momentumI;
-            btcAmount = (fiatAmount + dcaAmount) / currentPrice;
-            fiatAmount = 0;
-          } else if (momentumI === Momentum.red) {
-            momentum = momentumI;
-            fiatAmount = btcAmount * currentPrice + dcaAmount;
-            btcAmount = 0;
+        if (momentum === Momentum.green) {
+          if (value <= 45) {
+            momentum = Momentum.red;
+            _value = momentum;
+          } else if (value < 50) {
+            _value = Momentum.yellow;
+          } else {
+            _value = momentum;
           }
         } else {
-          if (momentum === Momentum.green) {
-            btcAmount += dcaAmount / currentPrice;
-          } else if (momentum === Momentum.red) {
-            fiatAmount += dcaAmount;
+          if (value >= 55) {
+            momentum = Momentum.green;
+            _value = momentum;
+          } else if (value > 50) {
+            _value = Momentum.yellow;
           } else {
-            throw Error("Unreachable");
+            _value = momentum;
           }
         }
 
         return {
-          date,
-          time: date,
-          value: btcAmount + fiatAmount / currentPrice,
-          fiat: fiatAmount + btcAmount * currentPrice,
+          number,
+          time,
+          value: _value,
+          color:
+            _value === Momentum.green
+              ? colors.momentumGreen
+              : _value === Momentum.yellow
+                ? colors.momentumYellow
+                : colors.momentumRed,
         };
-      },
-    );
-  }, [momentumDataset.sources, closes.sources]);
+      });
+    },
+    [dataset.sources],
+  );
 }
 
-export function createBLSHDollarReturnsLazyDataset({
-  bitcoinReturns,
+export function createBLSHBitcoinReturnsLazyDataset<
+  Scale extends ResourceScale,
+>({
+  momentumDataset,
+  price,
 }: {
-  bitcoinReturns: ReturnType<typeof createBLSHBitcoinReturnsLazyDataset>;
+  momentumDataset: Dataset<Scale>;
+  price: Dataset<Scale, DatasetCandlestickData>;
 }) {
   return createLazyDataset(
+    momentumDataset.scale,
+    () => {
+      let fiatAmount = 0;
+      let btcAmount = 0;
+      let dcaAmount = 100;
+      let momentum = Momentum.green;
+
+      const offset = createLazyOffset(price, momentumDataset);
+
+      return (price.values() || []).map(
+        ({ number, time, value: currentPrice }, index) => {
+          const momentumI =
+            momentumDataset.values()?.[index + offset()]?.value ||
+            Momentum.green;
+
+          if (momentum !== momentumI) {
+            if (momentumI === Momentum.green) {
+              momentum = momentumI;
+              btcAmount = (fiatAmount + dcaAmount) / currentPrice;
+              fiatAmount = 0;
+            } else if (momentumI === Momentum.red) {
+              momentum = momentumI;
+              fiatAmount = btcAmount * currentPrice + dcaAmount;
+              btcAmount = 0;
+            }
+          } else {
+            if (momentum === Momentum.green) {
+              btcAmount += dcaAmount / currentPrice;
+            } else if (momentum === Momentum.red) {
+              fiatAmount += dcaAmount;
+            } else {
+              throw Error("Unreachable");
+            }
+          }
+
+          return {
+            number,
+            time,
+            value: btcAmount + fiatAmount / currentPrice,
+            fiat: fiatAmount + btcAmount * currentPrice,
+          };
+        },
+      );
+    },
+    [momentumDataset.sources, price.sources],
+  );
+}
+
+export function createBLSHDollarReturnsLazyDataset<
+  Scale extends ResourceScale,
+>({
+  bitcoinReturns,
+}: {
+  bitcoinReturns: ReturnType<typeof createBLSHBitcoinReturnsLazyDataset<Scale>>;
+}) {
+  return createLazyDataset(
+    bitcoinReturns.scale,
     () =>
-      bitcoinReturns.values()?.map(({ date, fiat: value }) => ({
-        date,
-        time: date,
+      bitcoinReturns.values()?.map(({ number, time, fiat: value }) => ({
+        number,
+        time,
         value,
       })) || [],
     [bitcoinReturns.sources],
   );
 }
 
-export const createAnyPossibleCohortLazyDatasets = (
-  // scale: Scale,
-  resourceDatasets: ResourceDatasets,
-  { dateToMarketCap }: { dateToMarketCap: Dataset },
-) => {
+export const createAnyPossibleCohortLazyDatasets = <
+  Resources extends AnyResourceDatasets,
+  Scale extends ResourceScale = Resources extends DateResourceDatasets
+    ? "date"
+    : "height",
+>({
+  resources,
+  marketCapitalization,
+}: {
+  marketCapitalization: Dataset<Scale>;
+  resources: Resources;
+}) => {
   type PossibleKeys =
-    | `dateTo${AnyPossibleCohortName}PricePaidMean`
-    | `dateTo${AnyPossibleCohortName}RealizedPrice`
-    | `dateTo${AnyPossibleCohortName}RealizedCapitalization30dChange`
-    | `dateTo${AnyPossibleCohortName}UnrealizedLossNegative`
-    | `dateTo${AnyPossibleCohortName}NetUnrealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}RelativeNetUnrealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}RealizedLossNegative`
-    | `dateTo${AnyPossibleCohortName}NetRealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}RelativeNetRealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}CumulatedRealizedProfit`
-    | `dateTo${AnyPossibleCohortName}CumulatedRealizedLoss`
-    | `dateTo${AnyPossibleCohortName}CumulatedNetRealizedProfitAndLoss`
-    | `dateTo${AnyPossibleCohortName}CumulatedNetRealizedProfitAndLoss30dChange`
-    | `dateTo${AnyPossibleCohortName}SupplyInLoss`
-    | `dateTo${AnyPossibleCohortName}SupplyInLoss%Self`
-    | `dateTo${AnyPossibleCohortName}SupplyInLoss%All`
-    | `dateTo${AnyPossibleCohortName}SupplyInProfit%Self`
-    | `dateTo${AnyPossibleCohortName}SupplyInProfit%All`
-    | `dateTo${AnyPossibleCohortName}SupplyPNL%SelfMomentum`
-    | `dateTo${AnyPossibleCohortName}SupplyPNL%SelfMomentumBLSHBitcoinReturns`
-    | `dateTo${AnyPossibleCohortName}SupplyPNL%SelfMomentumBLSHDollarReturns`
-    | `dateTo${AnyPossibleCohortName}SupplyTotal75Percent`
-    | `dateTo${AnyPossibleCohortName}SupplyTotal50Percent`
-    | `dateTo${AnyPossibleCohortName}SupplyTotal25Percent`
-    | `dateTo${AnyPossibleCohortName}SupplyTotal%All`
-    | `dateTo${AnyPossibleCohortName}RealizedPrice${RatioKey}`;
+    | `${AnyPossibleCohortKey}PricePaidMean`
+    | `${AnyPossibleCohortKey}RealizedPrice`
+    | `${AnyPossibleCohortKey}RealizedCapitalization30dChange`
+    | `${AnyPossibleCohortKey}UnrealizedLossNegative`
+    | `${AnyPossibleCohortKey}NetUnrealizedProfitAndLoss`
+    | `${AnyPossibleCohortKey}RelativeNetUnrealizedProfitAndLoss`
+    | `${AnyPossibleCohortKey}RealizedLossNegative`
+    | `${AnyPossibleCohortKey}NetRealizedProfitAndLoss`
+    | `${AnyPossibleCohortKey}RelativeNetRealizedProfitAndLoss`
+    | `${AnyPossibleCohortKey}CumulatedRealizedProfit`
+    | `${AnyPossibleCohortKey}CumulatedRealizedLoss`
+    | `${AnyPossibleCohortKey}CumulatedNetRealizedProfitAndLoss`
+    | `${AnyPossibleCohortKey}CumulatedNetRealizedProfitAndLoss30dChange`
+    | `${AnyPossibleCohortKey}SupplyInLoss`
+    | `${AnyPossibleCohortKey}SupplyInLoss%Self`
+    | `${AnyPossibleCohortKey}SupplyInLoss%All`
+    | `${AnyPossibleCohortKey}SupplyInProfit%Self`
+    | `${AnyPossibleCohortKey}SupplyInProfit%All`
+    | `${AnyPossibleCohortKey}SupplyPNL%Self${MomentumKey}`
+    | `${AnyPossibleCohortKey}SupplyTotal75Percent`
+    | `${AnyPossibleCohortKey}SupplyTotal50Percent`
+    | `${AnyPossibleCohortKey}SupplyTotal25Percent`
+    | `${AnyPossibleCohortKey}SupplyTotal%All`
+    | `${AnyPossibleCohortKey}RealizedPrice${RatioKey}`;
 
-  const datasets: Partial<Record<PossibleKeys, Dataset>> = {};
+  const datasets: Partial<Record<PossibleKeys, Dataset<Scale>>> = {};
 
-  allPossibleCohortNames.forEach((name) => {
-    const allSupplyTotal = resourceDatasets[`dateToSupplyTotal`];
-    const supplyTotal = resourceDatasets[`dateTo${name}SupplyTotal`];
-    const supplyInProfit = resourceDatasets[`dateTo${name}SupplyInProfit`];
-    const realizedLoss = resourceDatasets[`dateTo${name}RealizedLoss`];
-    const realizedProfit = resourceDatasets[`dateTo${name}RealizedProfit`];
-    const unrealizedLoss = resourceDatasets[`dateTo${name}UnrealizedLoss`];
-    const unrealizedProfit = resourceDatasets[`dateTo${name}UnrealizedProfit`];
-    const realizedCapitalization =
-      resourceDatasets[`dateTo${name}RealizedCapitalization`];
+  allPossibleCohortKeys.forEach((name) => {
+    const supplyTotal = resources.SupplyTotal as ResourceDataset<Scale>;
+    const cohortSupplyTotal = resources[
+      `${name}SupplyTotal`
+    ] as ResourceDataset<Scale>;
+    const supplyInProfit = resources[
+      `${name}SupplyInProfit`
+    ] as ResourceDataset<Scale>;
+    const realizedLoss = resources[
+      `${name}RealizedLoss`
+    ] as ResourceDataset<Scale>;
+    const realizedProfit = resources[
+      `${name}RealizedProfit`
+    ] as ResourceDataset<Scale>;
+    const unrealizedLoss = resources[
+      `${name}UnrealizedLoss`
+    ] as ResourceDataset<Scale>;
+    const unrealizedProfit = resources[
+      `${name}UnrealizedProfit`
+    ] as ResourceDataset<Scale>;
+    const realizedCapitalization = resources[
+      `${name}RealizedCapitalization`
+    ] as ResourceDataset<Scale>;
 
     const realizedNet = createSubtractedLazyDataset(
       realizedProfit,
@@ -412,64 +488,67 @@ export const createAnyPossibleCohortLazyDatasets = (
       unrealizedLoss,
     );
     const supplyInLoss = createSubtractedLazyDataset(
-      supplyTotal,
+      cohortSupplyTotal,
       supplyInProfit,
     );
     const supplyInProfitPercentageSelf = createDividedLazyDataset(
       supplyInProfit,
-      supplyTotal,
+      cohortSupplyTotal,
       true,
     );
     const cumulatedNetRealized = createCumulatedLazyDataset(realizedNet);
     const realizedPrice = createDividedLazyDataset(
       realizedCapitalization,
-      supplyTotal,
+      cohortSupplyTotal,
     );
 
-    datasets[`dateTo${name}RealizedLossNegative`] =
-      createTransformedLazyDataset(realizedLoss, (v) => -v);
+    datasets[`${name}RealizedLossNegative`] = createTransformedLazyDataset(
+      realizedLoss,
+      (v) => -v,
+    );
 
-    datasets[`dateTo${name}UnrealizedLossNegative`] =
-      createTransformedLazyDataset(unrealizedLoss, (v) => -v);
+    datasets[`${name}UnrealizedLossNegative`] = createTransformedLazyDataset(
+      unrealizedLoss,
+      (v) => -v,
+    );
 
-    datasets[`dateTo${name}CumulatedRealizedProfit`] =
+    datasets[`${name}CumulatedRealizedProfit`] =
       createCumulatedLazyDataset(realizedProfit);
 
-    datasets[`dateTo${name}CumulatedRealizedLoss`] =
+    datasets[`${name}CumulatedRealizedLoss`] =
       createCumulatedLazyDataset(realizedLoss);
 
-    datasets[`dateTo${name}NetRealizedProfitAndLoss`] = realizedNet;
-    datasets[`dateTo${name}RelativeNetRealizedProfitAndLoss`] =
-      createDividedLazyDataset(realizedNet, dateToMarketCap);
+    datasets[`${name}NetRealizedProfitAndLoss`] = realizedNet;
+    datasets[`${name}RelativeNetRealizedProfitAndLoss`] =
+      createDividedLazyDataset(realizedNet, marketCapitalization);
 
-    datasets[`dateTo${name}CumulatedNetRealizedProfitAndLoss`] =
-      cumulatedNetRealized;
-    datasets[`dateTo${name}CumulatedNetRealizedProfitAndLoss30dChange`] =
+    datasets[`${name}CumulatedNetRealizedProfitAndLoss`] = cumulatedNetRealized;
+    datasets[`${name}CumulatedNetRealizedProfitAndLoss30dChange`] =
       createNetChangeLazyDataset(cumulatedNetRealized, 30);
 
-    datasets[`dateTo${name}NetUnrealizedProfitAndLoss`] = unrealizedNet;
-    datasets[`dateTo${name}RelativeNetUnrealizedProfitAndLoss`] =
-      createDividedLazyDataset(unrealizedNet, dateToMarketCap);
+    datasets[`${name}NetUnrealizedProfitAndLoss`] = unrealizedNet;
+    datasets[`${name}RelativeNetUnrealizedProfitAndLoss`] =
+      createDividedLazyDataset(unrealizedNet, marketCapitalization);
 
-    datasets[`dateTo${name}SupplyTotal%All`] = createDividedLazyDataset(
+    datasets[`${name}SupplyTotal%All`] = createDividedLazyDataset(
+      cohortSupplyTotal,
       supplyTotal,
-      allSupplyTotal,
       true,
     );
 
-    datasets[`dateTo${name}SupplyInProfit%All`] = createDividedLazyDataset(
+    datasets[`${name}SupplyInProfit%All`] = createDividedLazyDataset(
       supplyInProfit,
-      allSupplyTotal,
+      supplyTotal,
       true,
     );
 
-    datasets[`dateTo${name}SupplyInProfit%Self`] = supplyInProfitPercentageSelf;
+    datasets[`${name}SupplyInProfit%Self`] = supplyInProfitPercentageSelf;
 
-    datasets[`dateTo${name}SupplyInLoss`] = supplyInLoss;
+    datasets[`${name}SupplyInLoss`] = supplyInLoss;
 
-    datasets[`dateTo${name}SupplyInLoss%All`] = createDividedLazyDataset(
+    datasets[`${name}SupplyInLoss%All`] = createDividedLazyDataset(
       supplyInLoss,
-      allSupplyTotal,
+      supplyTotal,
       true,
     );
 
@@ -477,100 +556,150 @@ export const createAnyPossibleCohortLazyDatasets = (
       supplyInProfitPercentageSelf,
     );
 
-    datasets[`dateTo${name}SupplyPNL%SelfMomentum`] = percentageMomentum;
+    datasets[`${name}SupplyPNL%SelfMomentum`] = percentageMomentum;
 
     const percentageMomentumBLSHBitcoinReturns =
       createBLSHBitcoinReturnsLazyDataset({
         momentumDataset: percentageMomentum,
-        closes: resourceDatasets.closes,
+        // TODO: Fix types
+        price: resources.price as any as Dataset<Scale, DatasetCandlestickData>,
       });
 
-    datasets[`dateTo${name}SupplyPNL%SelfMomentumBLSHBitcoinReturns`] =
+    datasets[`${name}SupplyPNL%SelfMomentumBLSHBitcoinReturns`] =
       percentageMomentumBLSHBitcoinReturns;
 
-    datasets[`dateTo${name}SupplyPNL%SelfMomentumBLSHDollarReturns`] =
+    datasets[`${name}SupplyPNL%SelfMomentumBLSHDollarReturns`] =
       createBLSHDollarReturnsLazyDataset({
         bitcoinReturns: percentageMomentumBLSHBitcoinReturns,
       });
 
-    datasets[`dateTo${name}SupplyInLoss%Self`] = createDividedLazyDataset(
+    datasets[`${name}SupplyInLoss%Self`] = createDividedLazyDataset(
       supplyInLoss,
-      supplyTotal,
+      cohortSupplyTotal,
       true,
     );
 
-    datasets[`dateTo${name}SupplyTotal75Percent`] =
-      createTransformedLazyDataset(supplyTotal, (v) => v * 0.75);
-    datasets[`dateTo${name}SupplyTotal50Percent`] =
-      createTransformedLazyDataset(supplyTotal, (v) => v * 0.5);
-    datasets[`dateTo${name}SupplyTotal25Percent`] =
-      createTransformedLazyDataset(supplyTotal, (v) => v * 0.25);
+    datasets[`${name}SupplyTotal75Percent`] = createTransformedLazyDataset(
+      cohortSupplyTotal,
+      (v) => v * 0.75,
+    );
 
-    datasets[`dateTo${name}RealizedPrice`] = realizedPrice;
-    datasets[`dateTo${name}PricePaidMean`] = realizedPrice;
+    datasets[`${name}SupplyTotal50Percent`] = createTransformedLazyDataset(
+      cohortSupplyTotal,
+      (v) => v * 0.5,
+    );
 
-    datasets[`dateTo${name}RealizedCapitalization30dChange`] =
-      createNetChangeLazyDataset(
-        resourceDatasets.dateToRealizedCapitalization,
-        30,
-      );
+    datasets[`${name}SupplyTotal25Percent`] = createTransformedLazyDataset(
+      cohortSupplyTotal,
+      (v) => v * 0.25,
+    );
 
-    appendRatioLazyDatasets<`${AnyPossibleCohortName}RealizedPrice`>({
+    datasets[`${name}RealizedPrice`] = realizedPrice;
+    datasets[`${name}PricePaidMean`] = realizedPrice;
+
+    datasets[`${name}RealizedCapitalization30dChange`] =
+      createNetChangeLazyDataset(realizedCapitalization, 30);
+
+    // TODO: Fix `ResourceScale`
+    appendRatioLazyDatasets<
+      `${AnyPossibleCohortKey}RealizedPrice`,
+      ResourceScale
+    >({
       datasets,
       sourceDataset: realizedPrice,
-      closes: resourceDatasets.closes,
+      price: resources.price,
       key: `${name}RealizedPrice`,
     });
   });
 
-  return datasets as Record<PossibleKeys, Dataset>;
+  return datasets as Record<PossibleKeys, Dataset<Scale>>;
 };
 
-export function appendRatioLazyDatasets<
-  // Key extends `${AnyPossibleCohortName}PricePaidMean`,
-  Key extends
-    | `${AnyPossibleCohortName}RealizedPrice`
-    | `Closes${AverageName}MA`
-    | "ActivePrice"
-    | "VaultedPrice"
-    | "TrueMarketMean",
->({
-  datasets = {},
-  sourceDataset,
-  closes,
-  key,
-}: {
-  datasets?: Partial<Record<`dateTo${Key}${RatioKey}`, Dataset>>;
-  key: Key;
-  sourceDataset: Dataset;
-  closes: Dataset;
-}) {
-  const ratio = createLazyRatioDataset(sourceDataset, closes);
+export function createLazyAverageDataset<Scale extends ResourceScale>(
+  dataset: Dataset<Scale>,
+  days: number,
+) {
+  return createLazyDataset(
+    dataset.scale,
+    () => computeMovingAverage(dataset.values(), days),
+    [dataset.sources],
+  );
+}
 
-  const ratio7DMA = createLazyDataset(
-    () => computeWeeklyMovingAverage(ratio.values()),
+export function createLazyPercentileDataset<Scale extends ResourceScale>(
+  ratio: Dataset<Scale>,
+  quantile: number,
+) {
+  return createLazyDataset(
+    ratio.scale,
+    () => {
+      const ratioValues = ratio.values();
+
+      if (!ratioValues?.length) return [];
+
+      let sortedRatios: number[] = [];
+
+      // const index = ratioValues.findIndex(
+      //   ({ date }) => date === FIRST_USABLE_MEAN_RATIO_DATE,
+      // );
+      const index = 0;
+
+      // if (index === -1) return [];
+
+      return ratioValues
+        .slice(index)
+        .map(({ number, time, value: ratio }, dataIndex) => {
+          sortedInsert(sortedRatios, ratio);
+
+          const length = dataIndex + 1;
+
+          const quantileValue = quantile / 100;
+
+          let value: number;
+
+          if (quantileValue !== MEDIAN || length % 2 !== 0) {
+            const sortedIndex = Math.floor(length * quantileValue);
+
+            value = sortedRatios[sortedIndex];
+          } else {
+            const mid = Math.floor(length / 2);
+
+            value = (sortedRatios[mid - 1] + sortedRatios[mid]) / 2;
+          }
+
+          return {
+            number,
+            time,
+            value,
+          };
+        });
+    },
     [ratio.sources],
   );
+}
 
-  const ratio1YMA = createLazyDataset(
-    () => computeYearlyMovingAverage(ratio.values()),
-    [ratio.sources],
-  );
-
-  const ratioMomentum = createLazyDataset(
+export function createLazyMomentumDataset<Scale extends ResourceScale>(
+  raw: Dataset<Scale>,
+  smoothed: Dataset<Scale>,
+  extraSmoothed: Dataset<Scale>,
+) {
+  return createLazyDataset(
+    raw.scale,
     () =>
-      (ratio1YMA.values() || []).map(({ date, value }, index) => {
-        const ratioValue = ratio.values()?.[index].value || 0;
-        const ratio7DMAValue = ratio7DMA.values()?.[index].value || 0;
+      (extraSmoothed.values() || []).map(({ number, time, value }, index) => {
+        const rawValue = raw.values()?.[index].value || 0;
+        const smoothedValue = smoothed.values()?.[index].value || 0;
+
         const momentum =
-          ratio7DMAValue >= value && ratioValue >= value
+          smoothedValue >= value && rawValue >= value
             ? Momentum.green
-            : ratio7DMAValue < value && ratioValue < value
+            : smoothedValue < value && rawValue < value
               ? Momentum.red
               : Momentum.yellow;
+
         return {
-          date,
-          time: date,
+          number,
+          time,
           value: momentum,
           color:
             momentum === Momentum.green
@@ -580,65 +709,6 @@ export function appendRatioLazyDatasets<
                 : colors.momentumYellow,
         };
       }),
-    [ratio.sources],
+    [raw.sources],
   );
-
-  const ratioMomentumBLSHBitcoinReturns = createBLSHBitcoinReturnsLazyDataset({
-    momentumDataset: ratioMomentum,
-    closes,
-  });
-
-  const ratio99p9Percentile = createLazyPercentileDataset(ratio, 99.9);
-
-  const ratio99p5Percentile = createLazyPercentileDataset(ratio, 99.5);
-
-  const ratio99Percentile = createLazyPercentileDataset(ratio, 99);
-
-  const ratio1Percentile = createLazyPercentileDataset(ratio, 1);
-
-  const ratio0p5Percentile = createLazyPercentileDataset(ratio, 0.5);
-
-  const ratio0p1Percentile = createLazyPercentileDataset(ratio, 0.1);
-
-  // Create an object first to be sure that we didn't forget anything
-  const ratioDatasets: Record<RatioKey, Dataset> = {
-    Ratio: ratio,
-    Ratio7DayMovingAverage: ratio7DMA,
-    Ratio1YearMovingAverage: ratio1YMA,
-    RatioMomentum: ratioMomentum,
-    RatioMomentumBLSHBitcoinReturns: ratioMomentumBLSHBitcoinReturns,
-    RatioMomentumBLSHDollarReturns: createBLSHDollarReturnsLazyDataset({
-      bitcoinReturns: ratioMomentumBLSHBitcoinReturns,
-    }),
-    "Ratio99.9Percentile": ratio99p9Percentile,
-    "Ratio99.5Percentile": ratio99p5Percentile,
-    Ratio99Percentile: ratio99Percentile,
-    Ratio1Percentile: ratio1Percentile,
-    "Ratio0.5Percentile": ratio0p5Percentile,
-    "Ratio0.1Percentile": ratio0p1Percentile,
-    "Ratio99.9Price": createMultipliedLazyDataset(
-      ratio99p9Percentile,
-      sourceDataset,
-    ),
-    "Ratio99.5Price": createMultipliedLazyDataset(
-      ratio99p5Percentile,
-      sourceDataset,
-    ),
-    Ratio99Price: createMultipliedLazyDataset(ratio99Percentile, sourceDataset),
-    Ratio1Price: createMultipliedLazyDataset(ratio1Percentile, sourceDataset),
-    "Ratio0.5Price": createMultipliedLazyDataset(
-      ratio0p5Percentile,
-      sourceDataset,
-    ),
-    "Ratio0.1Price": createMultipliedLazyDataset(
-      ratio0p1Percentile,
-      sourceDataset,
-    ),
-  };
-
-  for (const [ratioKey, value] of Object.entries(ratioDatasets)) {
-    datasets[`dateTo${key}${ratioKey as RatioKey}`] = value;
-  }
-
-  return datasets as Record<`dateTo${Key}${RatioKey}`, Dataset>;
 }

@@ -42,23 +42,25 @@ function createPresetFolder({
         title: `${name} Moving Average`,
         applyPreset(params) {
           return applyMultipleSeries({
+            scale: "date",
             ...params,
             list: [
               {
                 id,
                 title: `${name} Moving Average`,
                 color,
-                dataset: params.datasets[`dateToCloses${key}MA`],
+                dataset: params.datasets.date[`price${key}MA`],
               },
             ],
           });
         },
       },
       createRatioPresetFolder({
+        scale: "date",
         id,
         color,
         title: `${name} Moving Average`,
-        datasetKey: `Closes${key}MA`,
+        datasetKey: `price${key}MA`,
       }),
     ],
   };

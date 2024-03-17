@@ -1,103 +1,112 @@
 import { createLazyMemo } from "@solid-primitives/memo";
 
-import { convertCandlesticksToSingleValueDataset } from "/src/scripts";
+import { ONE_DAY_IN_MS } from "/src/scripts";
 import { createASS } from "/src/solid";
 
-import { createLazyDataset } from "../lazy";
-import { createResourceDataset } from "./creators";
+import {
+  _createResourceDataset,
+  createAddressResources,
+  createAgeResources,
+  createCommonResources,
+  createCurrencyResources,
+  createResourceDataset,
+} from "./creators";
 
-export function createResourceDatasets(resources: ResourcesHTTP) {
-  const cachedCandlesticks = createASS<FetchedCandlestick[] | null>(null);
+export * from "./creators";
+
+export const scales = ["date" as const, "height" as const];
+
+function transform(values: FetchedCandlestickData[] | null) {
+  return (values || []).map((value) => ({
+    ...value,
+    number: new Date(value.date).valueOf() / ONE_DAY_IN_MS,
+    value: value.close,
+    time: value.date,
+  }));
+}
+
+export function createResourceDatasets() {
+  const dateToCachedPrice = createASS<DatasetCandlestickData[] | null>(null);
+
+  const dateToFetchedPrice = _createResourceDataset<
+    "date",
+    FetchedCandlestickData[],
+    DatasetCandlestickData
+  >({
+    scale: "date",
+    path: "/ohlcv",
+    autoFetch: false,
+    transform,
+  });
 
   import("/src/assets/data/btcusd.json").then((candlesticks) => {
-    cachedCandlesticks.set(candlesticks.default);
+    dateToCachedPrice.set(transform(candlesticks.default));
 
-    resources.candlesticks.url.searchParams.set(
+    dateToFetchedPrice.url.searchParams.set(
       "since",
       (
         new Date(candlesticks.default.at(-1)?.date || 0).valueOf() / 1000
       ).toString(),
     );
 
-    resources.candlesticks.fetch();
+    dateToFetchedPrice.fetch();
   });
 
-  const candlestickValues = createLazyMemo(() =>
-    [
-      ...(cachedCandlesticks() || []),
-      ...(resources.candlesticks.values() || []),
-    ].map(
-      (candle): FullCandlestick => ({
-        ...candle,
-        time: candle.date,
-      }),
-    ),
-  );
+  const dateToCandlestick = createLazyMemo(() => [
+    ...(dateToCachedPrice() || []),
+    ...(dateToFetchedPrice.values() || []),
+  ]);
 
-  const candlesticks = createResourceDataset({
-    fetch: resources.candlesticks.fetch,
-    source: resources.candlesticks.source,
-    values: candlestickValues,
-    autoFetch: false,
-  });
-
-  const closes = createLazyDataset(
-    () => convertCandlesticksToSingleValueDataset(candlesticks.values()),
-    [candlesticks.sources],
-  );
-
-  const partialDatasets = {
-    candlesticks,
-    closes,
-    // fundingRates: createResourceDataset({
-    //   fetch: resources.fundingRates.fetch,
-    //   values: createLazyMemo(() =>
-    //     (resources.fundingRates.values() || []).map(
-    //       ({ date, time, value }) => ({
-    //         date,
-    //         time,
-    //         value: value * 100,
-    //         color: value >= 0 ? colors.green : colors.red,
-    //       }),
-    //     ),
-    //   ),
-    // }),
-    // vddMultiple: createResourceDataset({
-    //   fetch: resources.vddMultiple.fetch,
-    //   values: createLazyMemo(() =>
-    //     (resources.vddMultiple.values() || []).map(({ date, time, value }) => {
-    //       const color =
-    //         value >= 3 ? colors.red : value >= 1 ? colors.orange : colors.green;
-
-    //       return {
-    //         date,
-    //         time,
-    //         value: value * 100,
-    //         color: color,
-    //       };
-    //     }),
-    //   ),
-    // }),
+  const dateToPrice = {
+    scale: "date" as const,
+    values: dateToCandlestick,
+    sources: dateToFetchedPrice.sources,
+    url: dateToFetchedPrice.url,
   };
 
-  type PartialKeys = keyof typeof partialDatasets;
-  type MissingKeys = Exclude<ResourcesHTTPKeys, PartialKeys>;
-  type PartialDatasets = typeof partialDatasets &
-    Partial<Record<MissingKeys, Dataset>>;
+  const heightToPrice = {
+    scale: "height" as const,
+    values: () => [] as DatasetCandlestickData[],
+    sources: dateToFetchedPrice.sources,
+    url: dateToFetchedPrice.url,
+  };
 
-  for (const resource in resources) {
-    if (!(resource in partialDatasets)) {
-      const _resource = resource as MissingKeys;
+  return {
+    // usdtMarketCap: createResourceHTTP(`/usdt-marketcap`),
+    // usdcMarketCap: createResourceHTTP(`/usdc-marketcap`),
 
-      const _partialDatasets = partialDatasets as PartialDatasets;
+    // sopr: createResourceHTTP(`/sopr`),
+    // terminalPrice: createResourceHTTP(`/terminal-price`),
+    // balancedPrice: createResourceHTTP(`/balanced-price`),
+    // cointimePrice: createResourceHTTP(`/cointime-price`),
+    // cvdd: createResourceHTTP(`/cvdd`),
+    // fundingRates: createResourceHTTP(`/funding-rates`),
+    // vddMultiple: createResourceHTTP(`/vdd-multiple`),
 
-      const dataset = createResourceDataset(resources[_resource]);
-      _partialDatasets[_resource] = dataset;
-    }
-  }
-
-  const datasets = partialDatasets as typeof partialDatasets &
-    Record<MissingKeys, Dataset>;
-
-  return datasets;
+    date: {
+      price: dateToPrice,
+      altcoinsMarketCapitalization: createResourceDataset({
+        scale: "date",
+        path: `/date-to-altcoins-marketcap`,
+      }),
+      stablecoinsMarketCapitalization: createResourceDataset({
+        scale: "date",
+        path: `/date-to-stablecoins-marketcap`,
+      }),
+      ...createCurrencyResources(),
+      ...createCommonResources("date"),
+      ...createAgeResources("date"),
+      ...createAddressResources("date"),
+    } satisfies Record<string, Dataset<"date">>,
+    height: {
+      price: heightToPrice,
+      timestamp: createResourceDataset({
+        scale: "height",
+        path: `/height-to-timestamp`,
+      }),
+      ...createCommonResources("height"),
+      ...createAgeResources("height"),
+      ...createAddressResources("height"),
+    } satisfies Record<string, Dataset<"height">>,
+  };
 }

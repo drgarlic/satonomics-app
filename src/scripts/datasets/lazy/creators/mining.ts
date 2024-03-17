@@ -1,63 +1,34 @@
 import {
-  computeMonthlyMovingAverage,
-  computeWeeklyMovingAverage,
-} from "/src/scripts";
-
-import {
   createAnnualizedLazyDataset,
   createCumulatedLazyDataset,
   createDividedLazyDataset,
-  createLazyDataset,
+  createLazyAverageDataset,
   createMultipliedLazyDataset,
   createSubtractedLazyDataset,
 } from "./base";
 
-export function createLazyMiningDatasets({
-  resourceDatasets,
-}: {
-  resourceDatasets: ResourceDatasets;
-}) {
-  const dateToIssuanceAnnualized = createAnnualizedLazyDataset(
-    resourceDatasets.dateToSubsidy,
-  );
-
-  const dateToYearlyInflationRate = createDividedLazyDataset(
-    dateToIssuanceAnnualized,
-    resourceDatasets.dateToSupplyTotal,
-    true,
-  );
-
-  const dateToSupplyTotalAtMinus1Block = createSubtractedLazyDataset(
-    resourceDatasets.dateToSupplyTotal,
-    resourceDatasets.dateToLastSubsidy,
-  );
-
-  const dateToNewBlocks7dSMA = createLazyDataset(
-    () => computeWeeklyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
-    [resourceDatasets.dateToNewBlocks.sources],
-  );
-
-  const dateToNewBlocks30dSMA = createLazyDataset(
-    () =>
-      computeMonthlyMovingAverage(resourceDatasets.dateToNewBlocks.values()),
-    [resourceDatasets.dateToNewBlocks.sources],
-  );
-
-  const dateToBlocksTotal = createCumulatedLazyDataset(
-    resourceDatasets.dateToNewBlocks,
-  );
-
-  const dateToLastSubsidyInDollars = createMultipliedLazyDataset(
-    resourceDatasets.dateToLastSubsidy,
-    resourceDatasets.closes,
-  );
+export function createLazyMiningDatasets<Resources extends AnyResourceDatasets>(
+  resources: Resources,
+) {
+  const issuanceAnnualized = createAnnualizedLazyDataset(resources.subsidy);
 
   return {
-    dateToSupplyTotalAtMinus1Block,
-    dateToYearlyInflationRate,
-    dateToNewBlocks7dSMA,
-    dateToNewBlocks30dSMA,
-    dateToLastSubsidyInDollars,
-    dateToBlocksTotal,
+    issuanceAnnualized,
+    yearlyInflationRate: createDividedLazyDataset(
+      issuanceAnnualized,
+      resources.SupplyTotal,
+      true,
+    ),
+    supplyTotalAtMinus1Block: createSubtractedLazyDataset(
+      resources.SupplyTotal,
+      resources.lastSubsidy,
+    ),
+    newBlocks7dSMA: createLazyAverageDataset(resources.newBlocks, 7),
+    newBlocks30dSMA: createLazyAverageDataset(resources.newBlocks, 30),
+    blocksTotal: createCumulatedLazyDataset(resources.newBlocks),
+    lastSubsidyInDollars: createMultipliedLazyDataset(
+      resources.lastSubsidy,
+      resources.price,
+    ),
   };
 }

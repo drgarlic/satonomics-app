@@ -1,19 +1,33 @@
 import { createLazyDatasets } from "./lazy";
 import { createResourceDatasets } from "./resource";
 
-export {
-  convertNormalCandleToGoldPerBitcoinCandle,
-  convertNormalCandleToSatCandle,
-  createLazyDataset,
-} from "./lazy";
+export * from "./resource";
 
-export function createDatasets(resources: ResourcesHTTP) {
-  const resourceDatasets = createResourceDatasets(resources);
+export function createDatasets() {
+  const resources = createResourceDatasets();
 
-  const lazyDatasets = createLazyDatasets(resourceDatasets);
+  const lazyDatasets = createLazyDatasets(resources);
 
-  return {
-    ...resourceDatasets,
-    ...lazyDatasets,
+  const datasets = {
+    date: {
+      ...resources.date,
+      ...lazyDatasets.date,
+    },
+    height: {
+      ...resources.height,
+      ...lazyDatasets.height,
+    },
   };
+
+  t({ datasets: datasets.date, key: "price7DMA" });
+
+  function t<Datasets extends AnyDatasets, Key extends keyof Datasets>({
+    datasets,
+    key,
+  }: {
+    datasets: Datasets;
+    key: Key;
+  }) {}
+
+  return datasets;
 }

@@ -20,7 +20,8 @@ export enum SeriesType {
   Histogram,
 }
 
-export const applyMultipleSeries = ({
+export const applyMultipleSeries = <Scale extends ResourceScale>({
+  scale,
   chart,
   list = [],
   liveCandle,
@@ -31,16 +32,20 @@ export const applyMultipleSeries = ({
   priceOptions,
   presets,
 }: {
+  // TODO: Fix types
+  // scale: Scale;
+  scale: ResourceScale;
   chart: IChartApi;
   preset: Preset;
-  priceDataset?: Dataset;
+  priceDataset?: Dataset<Scale>;
   priceOptions?: PriceSeriesOptions;
   priceScaleOptions?: FullPriceScaleOptions;
-  liveCandle?: Accessor<FullCandlestick | null>;
+  liveCandle?: Accessor<DatasetCandlestickData | null>;
   list?: (
     | {
         id: string;
-        dataset: Dataset;
+        dataset: Dataset<ResourceScale>;
+        // dataset: Dataset<Scale>;
         color?: string;
         colors?: undefined;
         seriesType: SeriesType.Based;
@@ -54,7 +59,8 @@ export const applyMultipleSeries = ({
       }
     | {
         id: string;
-        dataset: Dataset;
+        dataset: Dataset<ResourceScale>;
+        // dataset: Dataset<Scale>;
         color: string;
         lineColor?: string;
         areaColor?: string;
@@ -68,7 +74,8 @@ export const applyMultipleSeries = ({
       }
     | {
         id: string;
-        dataset: Dataset;
+        dataset: Dataset<ResourceScale>;
+        // dataset: Dataset<Scale>;
         color?: string;
         colors?: string[];
         showPriceLine?: boolean;
@@ -79,7 +86,8 @@ export const applyMultipleSeries = ({
       }
     | {
         id: string;
-        dataset: Dataset;
+        dataset: Dataset<ResourceScale>;
+        // dataset: Dataset<Scale>;
         color: string;
         colors?: undefined;
         showPriceLine?: boolean;
@@ -99,9 +107,9 @@ export const applyMultipleSeries = ({
 
   const legend: PresetLegend = [];
 
-  const isAnyBased = list.find(
-    (config) => config.seriesType === SeriesType.Based,
-  );
+  // const isAnyBased = list.find(
+  //   (config) => config.seriesType === SeriesType.Based,
+  // );
 
   const isAnyArea = list.find(
     (config) => config.seriesType === SeriesType.Area,
@@ -152,8 +160,8 @@ export const applyMultipleSeries = ({
 
     createEffect(() =>
       series.setData(
-        (stacked.at(0)?.dataset.values() || []).map(({ date }, index) => ({
-          time: date,
+        (stacked.at(0)?.dataset.values() || []).map(({ time }, index) => ({
+          time,
           values: stacked.map(
             ({ dataset }) => dataset.values()?.at(index)?.value,
           ),
@@ -238,11 +246,11 @@ export const applyMultipleSeries = ({
     );
 
   const { sources: priceSources, legend: priceLegend } = applyPriceSeries({
+    scale,
     chart,
     datasets,
     liveCandle,
     preset,
-    presets,
     dataset: priceDataset,
     options: {
       ...priceOptions,

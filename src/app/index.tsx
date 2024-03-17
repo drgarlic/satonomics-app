@@ -5,6 +5,7 @@ import {
   cleanChart,
   createDatasets,
   createPresets,
+  createResources,
   renderChart,
   sleep,
 } from "/src/scripts";
@@ -28,7 +29,7 @@ import { registerServiceWorker } from "./scripts";
 
 const LOCAL_STORAGE_BAR_KEY = "bar-width";
 
-export function App({ resources }: { resources: Resources }) {
+export function App({ datasets }: { datasets: Datasets }) {
   const { needRefresh, updateServiceWorker } = registerServiceWorker();
 
   const tabFocused = createASS(true);
@@ -81,6 +82,8 @@ export function App({ resources }: { resources: Resources }) {
 
   const resizingBar = createASS(false);
 
+  const resources = createResources()
+  
   const { liveCandle } = resources.ws;
 
   createEffect(() => {
@@ -99,12 +102,10 @@ export function App({ resources }: { resources: Resources }) {
     },
   );
 
-  const datasets = createDatasets(resources.http);
-
   createEffect(() => {
     const preset = presets.selected();
 
-    if (datasets.candlesticks.values()?.length) {
+    if (datasets.date.price.values()?.length) {
       untrack(() =>
         renderChart({
           datasets,

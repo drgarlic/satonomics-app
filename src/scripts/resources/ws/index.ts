@@ -1,6 +1,5 @@
-import { krakenAPI } from "/src/scripts";
-
 import { createResourceWS } from "./base";
+import { krakenAPI } from "./kraken";
 
 export const createResourcesWS = () => {
   const resources: ResourcesWS = {
