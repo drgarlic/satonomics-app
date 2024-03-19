@@ -7,10 +7,10 @@ import { Tree } from "./components";
 
 export function TreeFrame({
   presets,
-  visibleFrame,
+  selectedFrame,
 }: {
   presets: Presets;
-  visibleFrame: Accessor<FrameName>;
+  selectedFrame: Accessor<FrameName>;
 }) {
   const div = createASS<HTMLDivElement | undefined>(undefined);
 
@@ -22,7 +22,7 @@ export function TreeFrame({
     <div
       class="flex max-h-full min-h-0 flex-1 flex-col border-b border-white"
       style={{
-        display: visibleFrame() !== "Tree" ? "none" : undefined,
+        display: selectedFrame() !== "Tree" ? "none" : undefined,
       }}
     >
       <ScrollableFrame>
@@ -42,7 +42,7 @@ export function TreeFrame({
           />
         </div>
         <div class="border-t border-dashed border-white" />
-        <Anchor href="/routes" primary="API" secondary="Cloudflared" />
+        <Anchor href="/routes" primary="API" secondary="Satonomics" />
         <div class="border-t border-dashed border-white/25" />
         <Anchor
           href="https://primal.net/p/npub1jagmm3x39lmwfnrtvxcs9ac7g300y3dusv9lgzhk2e4x5frpxlrqa73v44"

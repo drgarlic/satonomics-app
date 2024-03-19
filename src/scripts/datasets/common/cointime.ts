@@ -1,50 +1,57 @@
 import {
-  appendRatioLazyDatasets,
   createCumulatedLazyDataset,
   createDividedLazyDataset,
   createMedianLazyDataset,
   createMultipliedLazyDataset,
   createNetChangeLazyDataset,
+  createRatioDatasets,
+  createResourceDataset,
   createSubtractedLazyDataset,
   createTransformedLazyDataset,
-} from ".";
+} from "../base";
 
-export function createCointimeDatasets<
-  Resources extends AnyResourceDatasets,
-  Scale extends ResourceScale = Resources extends DateResourceDatasets
-    ? "date"
-    : "height",
->({
-  resources,
+export function createCointimeDatasets<Scale extends ResourceScale>({
+  price,
+  supplyTotal,
+  lastSubsidy,
+  subsidyInDollars,
+  newBlocks,
   realizedPrice,
   yearlyInflationRate,
   cumulatedNetRealizedProfitAndLoss,
   supplyTotalAtMinus1Block,
   transactionVolumeAnnualized,
 }: {
-  resources: Resources;
+  price: Dataset<Scale>;
+  supplyTotal: Dataset<Scale>;
+  lastSubsidy: Dataset<Scale>;
+  subsidyInDollars: Dataset<Scale>;
+  newBlocks: Dataset<Scale>;
   realizedPrice: Dataset<Scale>;
   yearlyInflationRate: Dataset<Scale>;
   transactionVolumeAnnualized: Dataset<Scale>;
   supplyTotalAtMinus1Block: Dataset<Scale>;
   cumulatedNetRealizedProfitAndLoss: Dataset<Scale>;
 }) {
-  const coinblocksCreated = createMultipliedLazyDataset(
-    resources.SupplyTotal,
-    resources.newBlocks,
-  );
+  const scale = price.scale;
+
+  const coinblocksDestroyed = createResourceDataset({
+    scale,
+    path: `/${scale}-to-coinblocks-destroyed`,
+  });
+
+  const coinblocksCreated = createMultipliedLazyDataset(supplyTotal, newBlocks);
 
   const coinblocksStored = createSubtractedLazyDataset(
     coinblocksCreated,
-    resources.coinblocksDestroyed,
+    coinblocksDestroyed,
   );
 
   const cumulatedCoinblocksCreated =
     createCumulatedLazyDataset(coinblocksCreated);
 
-  const cumulatedCoinblocksDestroyed = createCumulatedLazyDataset(
-    resources.coinblocksDestroyed,
-  );
+  const cumulatedCoinblocksDestroyed =
+    createCumulatedLazyDataset(coinblocksDestroyed);
 
   const cumulatedCoinblocksStored =
     createCumulatedLazyDataset(coinblocksStored);
@@ -59,13 +66,13 @@ export function createCointimeDatasets<
     (value) => 1 - value,
   );
 
-  const actvityToVaultednessRatio = createDividedLazyDataset(
+  const activityToVaultednessRatio = createDividedLazyDataset(
     liveliness,
     vaultedness,
   );
 
   const concurrentLiveliness = createDividedLazyDataset(
-    resources.coinblocksDestroyed,
+    coinblocksDestroyed,
     coinblocksCreated,
   );
 
@@ -81,10 +88,7 @@ export function createCointimeDatasets<
     14,
   );
 
-  const vaultedSupply = createMultipliedLazyDataset(
-    vaultedness,
-    resources.SupplyTotal,
-  );
+  const vaultedSupply = createMultipliedLazyDataset(vaultedness, supplyTotal);
 
   const vaultedSupplyNetChange = createNetChangeLazyDataset(vaultedSupply);
 
@@ -100,14 +104,11 @@ export function createCointimeDatasets<
 
   const vaultingRate = createDividedLazyDataset(
     vaultedSupplyNetChangeX365,
-    resources.SupplyTotal,
+    supplyTotal,
     true,
   );
 
-  const activeSupply = createMultipliedLazyDataset(
-    liveliness,
-    resources.SupplyTotal,
-  );
+  const activeSupply = createMultipliedLazyDataset(liveliness, supplyTotal);
 
   const activeSupplyNetChange = createNetChangeLazyDataset(activeSupply);
 
@@ -115,13 +116,13 @@ export function createCointimeDatasets<
 
   // TODO: Fix, is always 0, but it shouldn't since some coins (~35 BTC) are lost
   const dateToMinVaultedSupply = createTransformedLazyDataset(
-    resources.SupplyTotal,
+    supplyTotal,
     (value, index) =>
       value / (cumulatedCoinblocksCreated.values()?.at(index)?.value || 0),
   );
 
   const dateToMaxActiveSupply = createTransformedLazyDataset(
-    resources.SupplyTotal,
+    supplyTotal,
     (value, index) =>
       value *
       (1 -
@@ -130,7 +131,7 @@ export function createCointimeDatasets<
 
   const cointimeAdjustedYearlyInflationRate = createMultipliedLazyDataset(
     yearlyInflationRate,
-    actvityToVaultednessRatio,
+    activityToVaultednessRatio,
   );
 
   const cointimeAdjustedVelocity = createDividedLazyDataset(
@@ -147,11 +148,11 @@ export function createCointimeDatasets<
     createNetChangeLazyDataset(activeSupplyChangeFromTransactions, 90);
 
   const activeSupplyChangeFromIssuance = createMultipliedLazyDataset(
-    resources.lastSubsidy,
+    lastSubsidy,
     liveliness,
   );
 
-  const thermoCap = createCumulatedLazyDataset(resources.subsidyInDollars);
+  const thermoCap = createCumulatedLazyDataset(subsidyInDollars);
 
   const investorCapitalization = createSubtractedLazyDataset(
     cumulatedNetRealizedProfitAndLoss,
@@ -179,6 +180,7 @@ export function createCointimeDatasets<
   );
 
   return {
+    coinblocksDestroyed,
     activeSupply,
     activeSupply90dNetChange,
     activeSupplyChangeFromIssuance,
@@ -186,7 +188,7 @@ export function createCointimeDatasets<
     activeSupplyChangeFromTransactions,
     activeSupplyChangeFromTransactions90dChange,
     activeSupplyNetChange,
-    actvityToVaultednessRatio,
+    activityToVaultednessRatio,
     coinblocksCreated,
     coinblocksStored,
     cointimeAdjustedVelocity,
@@ -210,22 +212,22 @@ export function createCointimeDatasets<
     thermoCap,
     thermoCapToInvestorCapRatio,
     activePrice,
-    ...appendRatioLazyDatasets({
+    ...createRatioDatasets({
       sourceDataset: activePrice,
       key: "activePrice" as const,
-      price: resources.price,
+      price,
     }),
     vaultedPrice,
-    ...appendRatioLazyDatasets({
+    ...createRatioDatasets({
       sourceDataset: vaultedPrice,
       key: "vaultedPrice" as const,
-      price: resources.price,
+      price,
     }),
     trueMarketMean,
-    ...appendRatioLazyDatasets({
+    ...createRatioDatasets({
       sourceDataset: trueMarketMean,
       key: "trueMarketMean" as const,
-      price: resources.price,
+      price,
     }),
   };
 }

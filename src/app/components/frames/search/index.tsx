@@ -15,10 +15,10 @@ export const INPUT_PRESET_SEARCH_ID = "input-search-preset";
 
 export function SearchFrame({
   presets,
-  visibleFrame,
+  selectedFrame,
 }: {
   presets: Presets;
-  visibleFrame: Accessor<FrameName>;
+  selectedFrame: Accessor<FrameName>;
 }) {
   const counterRef = createASS<HTMLDivElement | undefined>(undefined);
 
@@ -122,7 +122,7 @@ export function SearchFrame({
     <div
       class="flex max-h-full min-h-0 flex-1 flex-col border-b border-white"
       style={{
-        display: visibleFrame() !== "Search" ? "none" : undefined,
+        display: selectedFrame() !== "Search" ? "none" : undefined,
       }}
     >
       <div

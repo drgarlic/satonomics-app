@@ -1,17 +1,20 @@
 import {
+  addressCohortsBySize,
+  addressCohortsByType,
   applyMultipleSeries,
   colors,
   createCohortPresetList,
+  liquidities,
   SeriesType,
 } from "/src/scripts";
 
-import {
-  addressCohortsBySize,
-  addressCohortsByType,
-  liquidities,
-} from "../../datasets/resource";
-
-export function createPresets(scale: ResourceScale) {
+export function createPresets({
+  scale,
+  datasets,
+}: {
+  scale: ResourceScale;
+  datasets: Datasets;
+}): PresetFolder {
   return {
     id: `${scale}-addresses`,
     name: "Addresses",
@@ -120,6 +123,7 @@ export function createPresets(scale: ResourceScale) {
         name: "By Size",
         tree: addressCohortsBySize.map(({ key, name }) =>
           createAddressPresetFolder({
+            datasets,
             scale,
             id: key,
             color: colors[key],
@@ -133,6 +137,7 @@ export function createPresets(scale: ResourceScale) {
         name: "By Type",
         tree: addressCohortsByType.map(({ key, name }) =>
           createAddressPresetFolder({
+            datasets,
             scale,
             id: key,
             color: colors[key],
@@ -146,12 +151,14 @@ export function createPresets(scale: ResourceScale) {
 }
 
 function createAddressPresetFolder<Scale extends ResourceScale>({
+  datasets,
   scale,
   id,
   color,
   name,
   datasetKey,
 }: {
+  datasets: Datasets;
   scale: Scale;
   id: string;
   name: string;
@@ -164,6 +171,7 @@ function createAddressPresetFolder<Scale extends ResourceScale>({
     tree: [
       createAddressCountPreset({ scale, id, name, datasetKey, color }),
       ...createCohortPresetList({
+        datasets,
         scale,
         color,
         datasetKey,
@@ -179,6 +187,7 @@ function createAddressPresetFolder<Scale extends ResourceScale>({
             id: _id,
             name: liquidity.name,
             tree: createCohortPresetList({
+              datasets,
               scale,
               color,
               datasetKey: `${datasetKey}${liquidity.key}`,

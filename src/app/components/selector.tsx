@@ -2,13 +2,11 @@ import { env } from "/src/env";
 import { classPropToString } from "/src/solid";
 
 export function Selector({
-  activeButton,
-  onClick,
-  presets,
+  selected,
+  setSelected,
 }: {
-  activeButton: Accessor<FrameName>;
-  onClick: Setter<FrameName>;
-  presets: Presets;
+  selected: Accessor<FrameName>;
+  setSelected: Setter<FrameName>;
 }) {
   return (
     <div
@@ -19,10 +17,10 @@ export function Selector({
     >
       <Button
         name="Chart"
-        selected={activeButton}
-        setSelected={onClick}
+        selected={selected}
+        setSelected={setSelected}
         icon={() =>
-          activeButton() === "Chart"
+          selected() === "Chart"
             ? IconTablerChartAreaFilled
             : IconTablerChartLine
         }
@@ -30,84 +28,36 @@ export function Selector({
       />
       <Button
         name="Tree"
-        selected={activeButton}
-        setSelected={onClick}
+        selected={selected}
+        setSelected={setSelected}
         icon={() =>
-          activeButton() === "Tree" ? IconTablerCactusFilled : IconTablerCactus
+          selected() === "Tree" ? IconTablerFolderFilled : IconTablerFolder
         }
       />
       <Button
         name="Favorites"
-        selected={activeButton}
-        setSelected={onClick}
+        selected={selected}
+        setSelected={setSelected}
         icon={() =>
-          activeButton() === "Favorites" ? IconTablerStarFilled : IconTablerStar
+          selected() === "Favorites" ? IconTablerStarFilled : IconTablerStar
         }
       />
       <Button
         name="Search"
-        selected={activeButton}
-        setSelected={onClick}
+        selected={selected}
+        setSelected={setSelected}
         icon={() =>
-          activeButton() === "Search" ? IconTablerZoomFilled : IconTablerSearch
+          selected() === "Search" ? IconTablerZoomFilled : IconTablerSearch
         }
       />
       <Button
-        name="Shuffle"
-        selected={activeButton}
-        setSelected={onClick}
-        icon={() => {
-          const dice =
-            (Math.round(
-              presets.selected().name.length * Math.PI +
-                presets.selected().id.length * Math.PI +
-                presets.selected().title.length * Math.PI,
-            ) %
-              6) +
-            1;
-
-          if (activeButton() === "Shuffle") {
-            switch (dice) {
-              case 1:
-                return IconTablerDice1Filled;
-              case 2:
-                return IconTablerDice2Filled;
-              case 3:
-                return IconTablerDice3Filled;
-              case 4:
-                return IconTablerDice4Filled;
-              case 5:
-                return IconTablerDice5Filled;
-              default:
-                return IconTablerDice6Filled;
-            }
-          } else {
-            switch (dice) {
-              case 1:
-                return IconTablerDice1;
-              case 2:
-                return IconTablerDice2;
-              case 3:
-                return IconTablerDice3;
-              case 4:
-                return IconTablerDice4;
-              case 5:
-                return IconTablerDice5;
-              default:
-                return IconTablerDice6;
-            }
-          }
-        }}
-        onClick={presets.selectRandom}
-      />
-      <Button
         name="Settings"
-        selected={activeButton}
-        setSelected={onClick}
+        selected={selected}
+        setSelected={setSelected}
         icon={() =>
-          activeButton() === "Settings"
-            ? IconTablerSettingsFilled
-            : IconTablerSettings
+          selected() === "Settings"
+            ? IconTablerAssemblyFilled
+            : IconTablerAssembly
         }
       />
     </div>

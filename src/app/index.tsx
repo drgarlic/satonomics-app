@@ -3,7 +3,6 @@ import { useWindowSize } from "@solid-primitives/resize-observer";
 
 import {
   cleanChart,
-  createDatasets,
   createPresets,
   createResources,
   renderChart,
@@ -51,39 +50,21 @@ export function App({ datasets }: { datasets: Datasets }) {
   });
 
   const _selectedFrame = createASS<FrameName>("Chart");
-  const activeFrameButton = createMemo(() =>
+
+  const selectedFrame = createMemo(() =>
     windowSizeIsAtLeastMedium() && _selectedFrame() === "Chart"
       ? "Tree"
       : _selectedFrame(),
   );
 
-  const visibleFrame = createMemo(
-    (previous: VisibleFrameName): VisibleFrameName => {
-      let activeButton = activeFrameButton();
-
-      if (activeButton === "Shuffle") {
-        if (!windowSizeIsAtLeastMedium()) {
-          return "Chart";
-        } else if (previous === "Chart") {
-          return "Tree";
-        } else {
-          return previous;
-        }
-      }
-
-      return activeButton;
-    },
-    "Tree" as VisibleFrameName,
-  );
-
-  const presets = createPresets();
+  const presets = createPresets(datasets);
 
   const marquee = createASS(!!localStorage.getItem(LOCAL_STORAGE_MARQUEE_KEY));
 
   const resizingBar = createASS(false);
 
-  const resources = createResources()
-  
+  const resources = createResources();
+
   const { liveCandle } = resources.ws;
 
   createEffect(() => {
@@ -195,22 +176,27 @@ export function App({ datasets }: { datasets: Datasets }) {
                   liveCandle={liveCandle}
                   resources={resources}
                   show={() =>
-                    !windowSizeIsAtLeastMedium() && visibleFrame() === "Chart"
+                    !windowSizeIsAtLeastMedium() && selectedFrame() === "Chart"
                   }
                   legend={legend}
                   datasets={datasets}
                   qrcode={qrcode}
                 />
-                <TreeFrame presets={presets} visibleFrame={visibleFrame} />
-                <FavoritesFrame presets={presets} visibleFrame={visibleFrame} />
-                <SearchFrame presets={presets} visibleFrame={visibleFrame} />
-                <SettingsFrame marquee={marquee} visibleFrame={visibleFrame} />
+                <TreeFrame presets={presets} selectedFrame={selectedFrame} />
+                <FavoritesFrame
+                  presets={presets}
+                  selectedFrame={selectedFrame}
+                />
+                <SearchFrame presets={presets} selectedFrame={selectedFrame} />
+                <SettingsFrame
+                  marquee={marquee}
+                  selectedFrame={selectedFrame}
+                />
               </div>
 
               <Selector
-                presets={presets}
-                activeButton={activeFrameButton}
-                onClick={_selectedFrame.set}
+                selected={selectedFrame}
+                setSelected={_selectedFrame.set}
               />
             </div>
 

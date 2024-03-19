@@ -10,12 +10,14 @@ import {
 } from "/src/scripts";
 
 export function createCohortPresetFolder<Scale extends ResourceScale>({
+  datasets,
   scale,
   id,
   color,
   name,
   datasetKey,
 }: {
+  datasets: Datasets;
   scale: Scale;
   id: string;
   name: string;
@@ -26,6 +28,7 @@ export function createCohortPresetFolder<Scale extends ResourceScale>({
     id: `${scale}-cohort-${id}`,
     name,
     tree: createCohortPresetList({
+      datasets,
       scale,
       color,
       datasetKey,
@@ -35,11 +38,13 @@ export function createCohortPresetFolder<Scale extends ResourceScale>({
 }
 
 export function createCohortPresetList<Scale extends ResourceScale>({
+  datasets,
   scale,
   id,
   color,
   datasetKey,
 }: {
+  datasets: Datasets;
   scale: Scale;
   id: string;
   datasetKey: AnyPossibleCohortKey;
@@ -174,8 +179,9 @@ export function createCohortPresetList<Scale extends ResourceScale>({
               description: "",
             },
             createRatioPresetFolder({
+              datasets: datasets[scale],
               scale,
-              id: `${scale}-${id}-realized-price`,
+              id: `${id}-realized-price`,
               color,
               title: `${datasetKey} Realized Price`,
               datasetKey: `${datasetKey}RealizedPrice`,
@@ -1126,6 +1132,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                   description: "",
                 },
                 createMomentumPresetFolder({
+                  datasets: datasets[scale],
                   scale,
                   id: `${scale}-${id}-supply-in-profit-and-loss-percentage-self`,
                   title: `${datasetKey} Supply In Profit And Loss (% Self)`,

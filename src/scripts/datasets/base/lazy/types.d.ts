@@ -1,12 +1,17 @@
-type LazyDatasets = ReturnType<typeof import("./index").createLazyDatasets>;
-
-type AverageName = (typeof import("./index").averages)[number]["key"];
+interface Dataset<
+  Scale extends ResourceScale,
+  T extends SingleValueData = SingleValueData,
+  Value = DatasetValue<T>,
+> {
+  scale: Scale;
+  sources: Accessor<Sources>;
+  values: Accessor<Value[] | null>;
+}
 
 type RatioKey =
   | `Ratio`
   | `Ratio7DayMovingAverage`
   | `Ratio1YearMovingAverage`
-  | `Ratio${MomentumKey}`
   | `Ratio99.9Percentile`
   | `Ratio99.5Percentile`
   | `Ratio99Percentile`
@@ -18,7 +23,8 @@ type RatioKey =
   | `Ratio99Price`
   | `Ratio1Price`
   | `Ratio0.5Price`
-  | `Ratio0.1Price`;
+  | `Ratio0.1Price`
+  | `Ratio${MomentumKey}`;
 
 type MomentumKey =
   | `Momentum`

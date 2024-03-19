@@ -4,13 +4,13 @@ import { Line } from "./tree/components";
 
 export function FavoritesFrame({
   presets,
-  visibleFrame,
+  selectedFrame,
 }: {
   presets: Presets;
-  visibleFrame: Accessor<FrameName>;
+  selectedFrame: Accessor<FrameName>;
 }) {
   return (
-    <ScrollableFrame hidden={() => visibleFrame() !== "Favorites"}>
+    <ScrollableFrame hidden={() => selectedFrame() !== "Favorites"}>
       <Counter count={() => presets.favorites().length} name="favorites" />
       <div
         class="py-1"

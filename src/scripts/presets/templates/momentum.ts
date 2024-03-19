@@ -7,26 +7,26 @@ import {
   SeriesType,
 } from "/src/scripts";
 
-type HeightMomentumKey =
-  | `${AnyPossibleCohortKey}SupplyPNL%Self`
-  | `${AnyPossibleCohortKey}RealizedPriceRatio`
-  | "activePriceRatio"
-  | "vaultedPriceRatio"
-  | "trueMarketMeanRatio";
+// type HeightMomentumKey =
+//   | `${AnyPossibleCohortKey}SupplyPNL%Self`
+//   | `${AnyPossibleCohortKey}RealizedPriceRatio`
+//   | "activePriceRatio"
+//   | "vaultedPriceRatio"
+//   | "trueMarketMeanRatio";
 
-type DateMomentumKey = HeightMomentumKey | `price${AverageName}MARatio`;
+// type DateMomentumKey = HeightMomentumKey | `price${AverageName}MARatio`;
 
 export function createMomentumPresetFolder<
   Scale extends ResourceScale,
-  Key extends DateMomentumKey = Scale extends "date"
-    ? DateMomentumKey
-    : HeightMomentumKey,
+  Key extends string,
 >({
+  datasets,
   scale,
   id,
   title,
   datasetKey,
 }: {
+  datasets: Record<`${Key}${MomentumKey}`, Dataset<ResourceScale>>;
   scale: Scale;
   id: string;
   title: string;
@@ -51,7 +51,7 @@ export function createMomentumPresetFolder<
                 title: "Momentum",
                 colors: colors.momentum,
                 seriesType: SeriesType.Histogram,
-                dataset: params.datasets[scale][`${datasetKey}Momentum`],
+                dataset: datasets[`${datasetKey}Momentum`],
                 options: {
                   priceScaleId: PRICE_SCALE_MOMENTUM_ID,
                   lastValueVisible: false,
@@ -84,9 +84,7 @@ export function createMomentumPresetFolder<
                     id: "bitcoin-returns",
                     title: "Bitcoin Returns",
                     dataset:
-                      params.datasets[scale][
-                        `${datasetKey}MomentumBLSHBitcoinReturns`
-                      ],
+                      datasets[`${datasetKey}MomentumBLSHBitcoinReturns`],
                     color: colors.bitcoin,
                     showPriceLine: true,
                   },
@@ -112,10 +110,7 @@ export function createMomentumPresetFolder<
                   {
                     id: "dollar-returns",
                     title: "Dollar Returns",
-                    dataset:
-                      params.datasets[scale][
-                        `${datasetKey}MomentumBLSHDollarReturns`
-                      ],
+                    dataset: datasets[`${datasetKey}MomentumBLSHDollarReturns`],
                     color: colors.dollars,
                     showPriceLine: true,
                   },

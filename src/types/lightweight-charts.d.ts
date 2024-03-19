@@ -59,3 +59,5 @@ type DeepPartialHistogramOptions = DeepPartial<
 type DeepPartialBaselineOptions = DeepPartial<
   BaselineStyleOptions & SeriesOptionsCommon
 >;
+
+type DeepPartialChartOptions = DeepPartial<ChartOptions>;

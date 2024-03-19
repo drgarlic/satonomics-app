@@ -1,6 +1,3 @@
-import { addressCohortsKeys, liquidities } from "./address";
-import { ageCohortsKeys } from "./age";
-
 export const percentiles = [
   {
     key: "PricePaidMedian" as const,
@@ -177,15 +174,15 @@ export const anyCohortDatasets = [
   ...percentiles,
 ] as const;
 
-export const allCohortKeys = [...ageCohortsKeys, ...addressCohortsKeys];
+// export const allCohortKeys = [...ageCohortsKeys, ...addressCohortsKeys];
 
-export const allPossibleCohortKeys: AnyPossibleCohortKey[] = [
-  ...ageCohortsKeys,
-  ...addressCohortsKeys,
-  ...addressCohortsKeys.flatMap((name) =>
-    liquidities.map(
-      ({ key: liquidity }): AddressCohortKeySplitByLiquidity =>
-        `${name}${liquidity}`,
-    ),
-  ),
-];
+// export const allPossibleCohortKeys: AnyPossibleCohortKey[] = [
+//   ...ageCohortsKeys,
+//   ...addressCohortsKeys,
+//   ...addressCohortsKeys.flatMap((name) =>
+//     liquidities.map(
+//       ({ key: liquidity }): AddressCohortKeySplitByLiquidity =>
+//         `${name}${liquidity}`,
+//     ),
+//   ),
+// ];

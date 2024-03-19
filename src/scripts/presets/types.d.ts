@@ -11,6 +11,7 @@ interface Preset extends PartialPreset {
   path: FilePath;
   isFavorite: ASS<boolean>;
   visited: ASS<boolean>;
+  scale: ResourceScale;
 }
 
 type FilePath = {
@@ -29,6 +30,7 @@ type ApplyPreset = (params: {
 type ApplyPresetReturn = PresetLegend;
 
 type PresetFolder = {
+  scale?: ResourceScale;
   id: string;
   name: string;
   tree: PresetTree;

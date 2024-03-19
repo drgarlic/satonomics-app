@@ -1,11 +1,4 @@
-import {
-  chartState,
-  createChart,
-  createLineSeries,
-  updateWhitespaceDataset,
-} from "/src/scripts";
-
-export const whitespaceDataset: (WhitespaceData & Numbered)[] = [];
+import { chartState, createChart, setWhitespace } from "/src/scripts";
 
 let dispose: VoidFunction | undefined = undefined;
 
@@ -29,18 +22,16 @@ export const renderChart = async (params: {
 
     if (!datasets.date.price.values()?.length) return;
 
-    createChart();
+    const { scale } = preset;
+
+    createChart(scale);
 
     const { chart } = chartState;
 
     if (!chart) return;
 
     try {
-      const whitespaceSeries = createLineSeries(chart);
-
-      updateWhitespaceDataset(whitespaceDataset);
-
-      whitespaceSeries.setData(whitespaceDataset.map((data) => ({ ...data })));
+      setWhitespace(chart, scale);
 
       console.log(`preset: ${preset.id}`);
 

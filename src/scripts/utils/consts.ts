@@ -1,1 +1,0 @@
-export const SATS_PER_BITCOIN = 100_000_000;

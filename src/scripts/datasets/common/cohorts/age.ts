@@ -1,35 +1,83 @@
-import { anyCohortDatasets, createResourceDataset } from ".";
+import { anyCohortDatasets } from ".";
+import { createMultipliedLazyDataset, createResourceDataset } from "../../base";
+import { createLazyCommonCohortDatasets } from "./addons";
 
-export function createAgeResources<Scale extends ResourceScale>(scale: Scale) {
+export function createAgeCohortDatasets<Scale extends ResourceScale>({
+  scale,
+  price,
+}: {
+  scale: Scale;
+  price: Dataset<Scale>;
+}) {
   const ageDatasets = [...anyCohortDatasets];
 
-  type Key = ReturnType<typeof computeAgeKey>;
+  type ResourceDatasets = Record<
+    `${AgeCohortKey}${AgeCohortDatasetKey}`,
+    ResourceDataset<Scale>
+  >;
 
-  type Resources = Record<Key, ResourceDataset<Scale>>;
+  type LazyDatasets = Record<
+    `${AgeCohortKey}${LazyCohortDataset}`,
+    Dataset<Scale>
+  >;
 
-  const partialResources: Partial<Resources> = {};
+  const resourcePartials: Partial<ResourceDatasets> = {};
+  const lazyPartials: Partial<LazyDatasets> = {};
 
   ageCohorts.forEach(({ key: ageKey, route: ageRoute }) => {
-    ageDatasets.forEach(({ key: datasetKey, route: datasetRoute }) => {
-      const attributeName = computeAgeKey(ageKey, datasetKey);
+    type CohortDatasets = Record<
+      `${typeof ageKey}${AgeCohortDatasetKey}`,
+      ResourceDataset<Scale>
+    >;
+
+    const partial: Partial<CohortDatasets> = {};
+
+    ageDatasets.forEach(({ key: cohortKey, route: cohortRoute }) => {
+      const attributeName = `${ageKey}${cohortKey}` as const;
 
       const resource = createResourceDataset({
         scale,
-        path: `/${scale}-to-${ageRoute ? ageRoute + "-" : ""}${datasetRoute}`,
+        path: `/${scale}-to-${ageRoute ? ageRoute + "-" : ""}${cohortRoute}`,
       });
 
-      partialResources[attributeName] = resource;
+      partial[attributeName] = resource;
     });
+
+    const fullResources = partial as CohortDatasets;
+    Object.assign(resourcePartials, fullResources);
   });
 
-  return partialResources as Resources;
-}
+  const resources = resourcePartials as ResourceDatasets;
 
-function computeAgeKey(
-  ageKey: AgeCohortKey,
-  datasetKey: AgeCohortDatasetKey,
-): `${AgeCohortKey}${AgeCohortDatasetKey}` {
-  return `${ageKey}${datasetKey}`;
+  const supplyTotal = resources.SupplyTotal;
+
+  const marketCapitalization = createMultipliedLazyDataset(supplyTotal, price);
+
+  ageCohorts.forEach(({ key: ageKey, route: ageRoute }) => {
+    const key = ageKey;
+
+    const lazyDatasets = createLazyCommonCohortDatasets({
+      key,
+      price,
+      marketCapitalization,
+      supplyTotal,
+      cohortSupplyTotal: resources[`${key}SupplyTotal`],
+      supplyInProfit: resources[`${key}SupplyInProfit`],
+      realizedLoss: resources[`${key}RealizedLoss`],
+      realizedProfit: resources[`${key}RealizedProfit`],
+      unrealizedLoss: resources[`${key}UnrealizedLoss`],
+      unrealizedProfit: resources[`${key}UnrealizedProfit`],
+      realizedCapitalization: resources[`${key}RealizedCapitalization`],
+    });
+
+    Object.assign(lazyPartials, lazyDatasets);
+  });
+
+  return {
+    marketCapitalization,
+    ...resources,
+    ...(lazyPartials as LazyDatasets),
+  };
 }
 
 export const xthCohorts = [
@@ -138,5 +186,3 @@ export const ageCohorts = [
   ...fromXToYCohorts,
   ...yearCohorts,
 ] as const;
-
-export const ageCohortsKeys = ageCohorts.map(({ key }) => key);

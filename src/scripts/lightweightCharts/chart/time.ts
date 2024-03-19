@@ -23,12 +23,12 @@ const debouncedUpdateURLParams = debounce((range: LogicalRange | null) => {
 
 export const setTimeScale = ({
   switchBetweenCandlestickAndLine,
-  lowerOpacity,
-  candlesticks,
+  // lowerOpacity,
+  // candlesticks,
 }: {
   switchBetweenCandlestickAndLine: boolean;
-  candlesticks: DatasetCandlestickData[];
-  lowerOpacity: boolean;
+  // candlesticks: DatasetCandlestickData[];
+  // lowerOpacity: boolean;
 }) => {
   if (switchBetweenCandlestickAndLine) {
     const debouncedCallback = debounce((range: LogicalRange | null) => {
@@ -50,7 +50,7 @@ export const setTimeScale = ({
 
           chartState.reset?.();
         } else {
-          setMinMaxMarkers(candlesticks, range, lowerOpacity);
+          // setMinMaxMarkers(candlesticks, range, lowerOpacity);
         }
       } catch {}
     }, 50);

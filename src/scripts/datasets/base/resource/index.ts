@@ -81,20 +81,6 @@ export function _createResourceDataset<
 
       try {
         cache = await caches.open("resources");
-
-        const cachedResponse = await cache.match(url.toString());
-
-        if (cachedResponse) {
-          const _values = await convertResponseToValues<T>(
-            cachedResponse,
-            source.set,
-          );
-
-          if (_values) {
-            console.log(`values: setting cached...`);
-            fetchedValues.set(() => _values);
-          }
-        }
       } catch {}
 
       try {
@@ -110,15 +96,31 @@ export function _createResourceDataset<
         if (_values) {
           lastSuccessfulFetch = new Date();
 
-          if (cache) {
-            await cache.put(url, clonedResponse);
-          }
-
           console.log("values: setting fetched...");
 
           fetchedValues.set(() => _values);
+
+          if (cache) {
+            cache.put(url, clonedResponse);
+          }
         }
-      } catch {}
+      } catch {
+        if (!cache) return;
+
+        const cachedResponse = await cache.match(url.toString());
+
+        if (cachedResponse) {
+          const _values = await convertResponseToValues<T>(
+            cachedResponse,
+            source.set,
+          );
+
+          if (_values) {
+            console.log(`values: setting cached...`);
+            fetchedValues.set(() => _values);
+          }
+        }
+      }
 
       loading.set(false);
     },

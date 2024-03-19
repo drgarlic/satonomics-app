@@ -9,7 +9,13 @@ import {
   yearCohorts,
 } from "/src/scripts";
 
-export function createPresets(scale: ResourceScale) {
+export function createPresets({
+  scale,
+  datasets,
+}: {
+  scale: ResourceScale;
+  datasets: Datasets;
+}) {
   return {
     id: `${scale}-hodlers`,
     name: "Hodlers",
@@ -118,6 +124,7 @@ export function createPresets(scale: ResourceScale) {
       },
       ...xthCohorts.map(({ key, name }) =>
         createCohortPresetFolder({
+          datasets,
           scale,
           id: key,
           color: colors[key],
@@ -130,6 +137,7 @@ export function createPresets(scale: ResourceScale) {
         name: "Up To X",
         tree: upToCohorts.map(({ key, name }) =>
           createCohortPresetFolder({
+            datasets,
             scale,
             id: key,
             color: colors[key],
@@ -143,6 +151,7 @@ export function createPresets(scale: ResourceScale) {
         name: "From X To Y",
         tree: fromXToYCohorts.map(({ key, name }) =>
           createCohortPresetFolder({
+            datasets,
             scale,
             id: key,
             color: colors[key],
@@ -156,6 +165,7 @@ export function createPresets(scale: ResourceScale) {
         name: "Years",
         tree: yearCohorts.map(({ key, name }) =>
           createCohortPresetFolder({
+            datasets,
             scale,
             id: key,
             color: colors[key],

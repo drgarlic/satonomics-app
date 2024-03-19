@@ -2,15 +2,15 @@ import { ScrollableFrame } from "./scrollable";
 
 export function SettingsFrame({
   marquee,
-  visibleFrame,
+  selectedFrame,
 }: {
   marquee: ASS<boolean>;
-  visibleFrame: Accessor<FrameName>;
+  selectedFrame: Accessor<FrameName>;
 }) {
   const value = marquee();
 
   return (
-    <ScrollableFrame hidden={() => visibleFrame() !== "Settings"}>
+    <ScrollableFrame hidden={() => selectedFrame() !== "Settings"}>
       <div class="space-y-4 p-3">
         <div>settings</div>
         <div>

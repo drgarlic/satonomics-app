@@ -22,7 +22,7 @@ export const presets: PresetFolder = {
               id: "all",
               title: "Combined",
               color: colors.white,
-              dataset: params.datasets.date.cryptoMarketCapitalization,
+              dataset: params.datasets.date.combinedMarketCapitalizations,
             },
             {
               id: "bitcoin",
@@ -34,13 +34,13 @@ export const presets: PresetFolder = {
               id: "scamcoins",
               title: "Scamcoins' Market Cap.",
               color: colors.ethereum,
-              dataset: params.datasets.date.scamcoinsMarketCap,
+              dataset: params.datasets.date.scamcoinsMarketCapitalization,
             },
             {
               id: "fiatcoins",
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
-              dataset: params.datasets.date.stablecoinsMarketCapitalization,
+              dataset: params.datasets.date.fiatcoinsMarketCapitalization,
             },
           ],
         });
@@ -90,7 +90,7 @@ export const presets: PresetFolder = {
               title: "Scamcoins' Market Cap.",
               color: colors.ethereum,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.date.scamcoinsMarketCap,
+              dataset: params.datasets.date.scamcoinsMarketCapitalization,
             },
           ],
         });
@@ -115,7 +115,7 @@ export const presets: PresetFolder = {
               title: "Fiatcoins' Market Cap.",
               color: colors.dollars,
               seriesType: SeriesType.Area,
-              dataset: params.datasets.date.stablecoinsMarketCapitalization,
+              dataset: params.datasets.date.fiatcoinsMarketCapitalization,
             },
           ],
         });
@@ -140,7 +140,7 @@ export const presets: PresetFolder = {
               title: "30 Day Change",
               seriesType: SeriesType.Based,
               dataset:
-                params.datasets.date.stablecoinsMarketCapitalization30dChange,
+                params.datasets.date.fiatcoinsMarketCapitalization30dChange,
             },
           ],
         });

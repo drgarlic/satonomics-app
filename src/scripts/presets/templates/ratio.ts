@@ -5,29 +5,28 @@ import {
   SeriesType,
 } from "/src/scripts";
 
-type HeightRatioKey =
-  | `${AnyPossibleCohortKey}RealizedPrice`
-  | "activePrice"
-  | "vaultedPrice"
-  | "trueMarketMean";
+// type HeightRatioKey =
+//   | `${AnyPossibleCohortKey}RealizedPrice`
+//   | "activePrice"
+//   | "vaultedPrice"
+//   | "trueMarketMean";
 
-// type DateRatioKey = HeightRatioKey;
-type DateRatioKey = HeightRatioKey | `price${AverageName}MA`;
+// // type DateRatioKey = HeightRatioKey;
+// type DateRatioKey = HeightRatioKey | `price${AverageName}MA`;
 
 export function createRatioPresetFolder<
   Scale extends ResourceScale,
-  Key extends DateRatioKey = Scale extends "date"
-    ? DateRatioKey
-    : HeightRatioKey,
+  Key extends string,
 >({
+  datasets,
   scale,
   id,
   title,
   datasetKey,
   color,
 }: {
-  // scale: Scale;
-  scale: ResourceScale;
+  datasets: Record<`${Key}${RatioKey}`, Dataset<ResourceScale>>;
+  scale: Scale;
   id: string;
   title: string;
   color: string;
@@ -54,7 +53,7 @@ export function createRatioPresetFolder<
                 id: "ratio",
                 title: "Ratio",
                 seriesType: SeriesType.Based,
-                dataset: params.datasets[scale][`${datasetKey}Ratio`],
+                dataset: datasets[`${datasetKey}Ratio`],
                 options: {
                   base: 1,
                 },
@@ -86,7 +85,7 @@ export function createRatioPresetFolder<
                     title: "Ratio",
                     seriesType: SeriesType.Based,
                     color: colors.gray,
-                    dataset: params.datasets[scale][`${datasetKey}Ratio`],
+                    dataset: datasets[`${datasetKey}Ratio`],
                     options: {
                       base: 1,
                     },
@@ -95,19 +94,13 @@ export function createRatioPresetFolder<
                     id: "7d",
                     title: "7 Day Moving Average",
                     color: colors.closes7DMA,
-                    dataset:
-                      params.datasets[scale][
-                        `${datasetKey}Ratio7DayMovingAverage`
-                      ],
+                    dataset: datasets[`${datasetKey}Ratio7DayMovingAverage`],
                   },
                   {
                     id: "1y",
                     title: "1 Year Moving Average",
                     color: colors.closes1YMA,
-                    dataset:
-                      params.datasets[scale][
-                        `${datasetKey}Ratio1YearMovingAverage`
-                      ],
+                    dataset: datasets[`${datasetKey}Ratio1YearMovingAverage`],
                   },
                 ],
               });
@@ -115,6 +108,7 @@ export function createRatioPresetFolder<
             description: "",
           },
           createMomentumPresetFolder({
+            datasets,
             scale,
             id: `${scale}-${id}-ratio-averages`,
             title: `${datasetKey} Ratio Moving Averages`,
@@ -145,7 +139,7 @@ export function createRatioPresetFolder<
                     title: "Ratio",
                     color: colors.white,
                     seriesType: SeriesType.Based,
-                    dataset: params.datasets[scale][`${datasetKey}Ratio`],
+                    dataset: datasets[`${datasetKey}Ratio`],
                     options: {
                       base: 1,
                       options: {
@@ -157,27 +151,20 @@ export function createRatioPresetFolder<
                   {
                     id: "99.9-percentile",
                     title: "99.9th Percentile",
-                    dataset:
-                      params.datasets[scale][
-                        `${datasetKey}Ratio99.9Percentile`
-                      ],
+                    dataset: datasets[`${datasetKey}Ratio99.9Percentile`],
                     color: colors.extremeMax,
                   },
                   {
                     id: "99.5-percentile",
                     title: "99.5th Percentile",
                     color: colors.extremeMiddle,
-                    dataset:
-                      params.datasets[scale][
-                        `${datasetKey}Ratio99.5Percentile`
-                      ],
+                    dataset: datasets[`${datasetKey}Ratio99.5Percentile`],
                   },
                   {
                     id: "99-percentile",
                     title: "99th Percentile",
                     color: colors.extremeMin,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio99Percentile`],
+                    dataset: datasets[`${datasetKey}Ratio99Percentile`],
                   },
                 ],
               });
@@ -202,7 +189,7 @@ export function createRatioPresetFolder<
                     title: "Ratio",
                     color: colors.white,
                     seriesType: SeriesType.Based,
-                    dataset: params.datasets[scale][`${datasetKey}Ratio`],
+                    dataset: datasets[`${datasetKey}Ratio`],
                     options: {
                       base: 1,
                       options: {
@@ -215,22 +202,19 @@ export function createRatioPresetFolder<
                     id: "1-percentile",
                     title: "1st Percentile",
                     color: colors.extremeMin,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio1Percentile`],
+                    dataset: datasets[`${datasetKey}Ratio1Percentile`],
                   },
                   {
                     id: "0.5-percentile",
                     title: "0.5th Percentile",
                     color: colors.extremeMiddle,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio0.5Percentile`],
+                    dataset: datasets[`${datasetKey}Ratio0.5Percentile`],
                   },
                   {
                     id: "0.1-percentile",
                     title: "0.1th Percentile",
                     color: colors.extremeMax,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio0.1Percentile`],
+                    dataset: datasets[`${datasetKey}Ratio0.1Percentile`],
                   },
                 ],
               });
@@ -251,22 +235,19 @@ export function createRatioPresetFolder<
                     id: "99.9-percentile",
                     title: "99.9th Percentile",
                     color: colors.extremeMax,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio99.9Price`],
+                    dataset: datasets[`${datasetKey}Ratio99.9Price`],
                   },
                   {
                     id: "99.5-percentile",
                     title: "99.5th Percentile",
                     color: colors.extremeMiddle,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio99.5Price`],
+                    dataset: datasets[`${datasetKey}Ratio99.5Price`],
                   },
                   {
                     id: "99-percentile",
                     title: "99th Percentile",
                     color: colors.extremeMin,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio99Price`],
+                    dataset: datasets[`${datasetKey}Ratio99Price`],
                   },
                 ],
               });
@@ -287,21 +268,19 @@ export function createRatioPresetFolder<
                     id: "1-percentile",
                     title: "1st Percentile",
                     color: colors.extremeMin,
-                    dataset: params.datasets[scale][`${datasetKey}Ratio1Price`],
+                    dataset: datasets[`${datasetKey}Ratio1Price`],
                   },
                   {
                     id: "0.5-percentile",
                     title: "0.5th Percentile",
                     color: colors.extremeMiddle,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio0.5Price`],
+                    dataset: datasets[`${datasetKey}Ratio0.5Price`],
                   },
                   {
                     id: "0.1-percentile",
                     title: "0.1th Percentile",
                     color: colors.extremeMax,
-                    dataset:
-                      params.datasets[scale][`${datasetKey}Ratio0.1Price`],
+                    dataset: datasets[`${datasetKey}Ratio0.1Price`],
                   },
                 ],
               });

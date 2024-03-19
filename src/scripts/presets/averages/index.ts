@@ -1,30 +1,34 @@
 import {
   applyMultipleSeries,
+  averages,
   colors,
   createRatioPresetFolder,
 } from "/src/scripts";
 
-import { averages } from "../../datasets/lazy";
-
-export const presets: PresetFolder = {
-  id: "averages",
-  name: "Averages",
-  tree: averages.map(({ name, key }) =>
-    createPresetFolder({
-      id: `${key.toLowerCase()}-sma`,
-      color: colors[`closes${key}MA`],
-      name,
-      key,
-    }),
-  ),
-};
+export function createPresets(datasets: Datasets): PresetFolder {
+  return {
+    id: "averages",
+    name: "Averages",
+    tree: averages.map(({ name, key }) =>
+      createPresetFolder({
+        datasets,
+        id: `${key.toLowerCase()}-sma`,
+        color: colors[`closes${key}MA`],
+        name,
+        key,
+      }),
+    ),
+  };
+}
 
 function createPresetFolder({
+  datasets,
   id,
   color,
   name,
   key,
 }: {
+  datasets: Datasets;
   id: string;
   color: string;
   name: string;
@@ -56,6 +60,7 @@ function createPresetFolder({
         },
       },
       createRatioPresetFolder({
+        datasets: datasets.date,
         scale: "date",
         id,
         color,

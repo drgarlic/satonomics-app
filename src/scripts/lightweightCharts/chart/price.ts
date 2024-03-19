@@ -54,7 +54,7 @@ export const applyPriceSeries = <
 
   const color = createASS<string | string[]>("");
 
-  if (!dataset && seriesType === "Candlestick") {
+  if (!dataset && seriesType === "Candlestick" && preset.scale === "date") {
     const [series, colors] = createCandlesticksSeries(chart, {
       ...options,
       // inverseColors: options?.inverseColors ?? priceMode === 'sats',
@@ -89,14 +89,12 @@ export const applyPriceSeries = <
     chartState.priceLine = createPriceLine(chartState.priceSeries);
 
     createEffect(() => {
-      if (!dataset && liveCandle) {
-        {
-          updateChartUsingLiveCandle({
-            candle:
-              liveCandle() || datasets[scale].price.values()?.at(-1) || null,
-            datasets,
-          });
-        }
+      if (!dataset && liveCandle && scale === "date") {
+        // updateChartUsingLiveCandle({
+        //   candle:
+        //     liveCandle() || datasets[scale].price.values()?.at(-1) || null,
+        //   datasets,
+        // });
       } else {
         chartState.priceLine?.applyOptions({
           color: colors.white,
@@ -124,17 +122,17 @@ export const applyPriceSeries = <
   });
 
   if (!dataset) {
-    setMinMaxMarkers(
-      datasets[scale].price.values() || [],
-      chartState.range,
-      lowerOpacity,
-    );
+    // setMinMaxMarkers(
+    //   datasets[scale].price.values() || [],
+    //   chartState.range,
+    //   lowerOpacity,
+    // );
   }
 
   setTimeScale({
-    switchBetweenCandlestickAndLine: !dataset,
-    candlesticks: datasets[scale].price.values() || [],
-    lowerOpacity,
+    switchBetweenCandlestickAndLine: !dataset && scale === "date",
+    // candlesticks: datasets[scale].price.values() || [],
+    // lowerOpacity,
   });
 
   return {

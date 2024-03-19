@@ -15,7 +15,8 @@ export function Counter({
         "border-style": count() ? "dashed" : "none",
       }}
     >
-      Counted <span class="font-bold">{count()}</span> {name}
+      Counted <span class="font-bold">{count().toLocaleString("en-us")}</span>{" "}
+      {name}
     </div>
   );
 }

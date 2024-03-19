@@ -9,7 +9,7 @@ export const computeMovingAverage = <
   dataset: T[] | null,
   interval: number,
 ) => {
-  if (!dataset?.length) return [];
+  if (!dataset?.length) return null;
 
   return dataset.map((data, index) => ({
     ...data,

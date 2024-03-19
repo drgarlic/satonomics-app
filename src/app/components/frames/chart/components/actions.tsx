@@ -4,6 +4,11 @@ export function Actions({ presets }: { presets: Presets }) {
   return (
     <div class="flex">
       <Button
+        icon={() => IconTablerArrowsShuffle2}
+        onClick={presets.selectRandom}
+      />
+      <span class="border-r border-dashed border-white" />
+      <Button
         disabled={() => !presets.undoPossible()}
         icon={() => IconTablerArrowBack}
         onClick={presets.undo}

@@ -2,7 +2,7 @@ import { colors, random, replaceHistory, resetURLParams } from "/src/scripts";
 import { createASS } from "/src/solid";
 
 import { createPresets as createAddressesPresets } from "./addresses";
-import { presets as averagesPresets } from "./averages";
+import { createPresets as createAveragesPresets } from "./averages";
 import { createPresets as createBlocksPresets } from "./blocks";
 import { createPresets as createCoinblocksPresets } from "./coinblocks";
 import { presets as fiatPresets } from "./fiat";
@@ -21,9 +21,10 @@ export const LOCAL_STORAGE_VISITED_KEY = "visited";
 export const LOCAL_STORAGE_SELECTED_KEY = "preset";
 export const LOCAL_STORAGE_FOLDERS_KEY = "folders";
 
-export function createPresets(): Presets {
+export function createPresets(datasets: Datasets): Presets {
   const tree: PresetTree = [
     {
+      scale: "date",
       id: "date",
       name: "Date",
       tree: [
@@ -32,21 +33,23 @@ export function createPresets(): Presets {
         createMinersPresets("date"),
         createTransactionsPresets("date"),
         ...createCohortPresetList({
+          datasets,
           scale: "date",
           id: "all",
           color: colors.bitcoin,
           datasetKey: "",
         }),
-        createHodlersPresets("date"),
-        createAddressesPresets("date"),
-        averagesPresets,
-        createCoinblocksPresets("date"),
+        createAveragesPresets(datasets),
+        createHodlersPresets({ scale: "date", datasets }),
+        createAddressesPresets({ scale: "date", datasets }),
+        createCoinblocksPresets({ scale: "date", datasets }),
         marketcapsPresets,
         fiatPresets,
         metalsPresets,
       ],
     },
     {
+      scale: "height",
       id: "height",
       name: "Height",
       tree: [
@@ -55,14 +58,15 @@ export function createPresets(): Presets {
         createMinersPresets("height"),
         createTransactionsPresets("height"),
         ...createCohortPresetList({
+          datasets,
           scale: "height",
           id: "all",
           color: colors.bitcoin,
           datasetKey: "",
         }),
-        createHodlersPresets("height"),
-        createAddressesPresets("height"),
-        createCoinblocksPresets("height"),
+        createHodlersPresets({ scale: "height", datasets }),
+        createAddressesPresets({ scale: "height", datasets }),
+        createCoinblocksPresets({ scale: "height", datasets }),
       ],
     },
   ];
@@ -235,26 +239,39 @@ function _select(preset: Preset, set: Setter<Preset>) {
 function flatten(ref: PresetTree) {
   const result: { list: PresetList; ids: string[] } = { list: [], ids: [] };
 
-  const _flatten = (ref: PresetTree, path?: FilePath) => {
+  const _flatten = (
+    ref: PresetTree,
+    path?: FilePath,
+    scale?: ResourceScale,
+  ) => {
     ref.forEach((anyPreset) => {
       if ("tree" in anyPreset) {
         result.ids.push(anyPreset.id);
 
-        return _flatten(anyPreset.tree, [
-          ...(path || []),
-          {
-            name: anyPreset.name,
-            id: anyPreset.id,
-          },
-        ]);
+        return _flatten(
+          anyPreset.tree,
+          [
+            ...(path || []),
+            {
+              name: anyPreset.name,
+              id: anyPreset.id,
+            },
+          ],
+          anyPreset.scale || scale,
+        );
       } else {
         const preset = anyPreset as Partial<Preset>;
         preset.path = path || [];
         preset.isFavorite = createASS(false);
         preset.visited = createASS(false);
+        preset.scale = scale;
 
         if (!preset.id) {
           throw Error("Preset MUST have an ID");
+        }
+
+        if (!preset.scale) {
+          throw Error("Preset MUST have a scale");
         }
 
         result.list.push(preset as Preset);

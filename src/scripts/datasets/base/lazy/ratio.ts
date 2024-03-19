@@ -6,30 +6,23 @@ import {
   createLazyMomentumDataset,
   createLazyPercentileDataset,
   createMultipliedLazyDataset,
-} from "./base";
-
-// export const FIRST_USABLE_MEAN_RATIO_DATE = '2014-01-01'
+} from ".";
 
 export function appendRatioLazyDatasets<
-  Key extends
-    | `${AnyPossibleCohortKey}RealizedPrice`
-    | `price${AverageName}MA`
-    | "activePrice"
-    | "vaultedPrice"
-    | "trueMarketMean",
   Scale extends ResourceScale,
+  Key extends string,
 >({
   datasets = {},
   sourceDataset,
   price,
   key,
 }: {
-  datasets?: Partial<Record<`${Key}${RatioKey}`, Dataset<Scale>>>;
+  datasets: Partial<Record<`${Key}${RatioKey}`, Dataset<Scale>>>;
   key: Key;
   sourceDataset: Dataset<Scale>;
-  price: Dataset<Scale, DatasetCandlestickData>;
+  price: Dataset<Scale>;
 }) {
-  const ratio = createDividedLazyDataset(sourceDataset, price);
+  const ratio = createDividedLazyDataset(price, sourceDataset);
 
   const ratio7DMA = createLazyAverageDataset(ratio, 7);
 
@@ -97,70 +90,22 @@ export function appendRatioLazyDatasets<
   return datasets as Record<`${Key}${RatioKey}`, Dataset<Scale>>;
 }
 
-// // TODO: Replace those with createDividerDataset
-// export function createLazyRatioDataset(dataset: Dataset, closes: Dataset) {
-//   const firstIndexWithData = createLazyMemo(() => {
-//     const index = closes
-//       .values()
-//       ?.findIndex((close) => close.date === dataset.values()?.at(0)?.date);
-
-//     return !index || index === -1 ? 0 : index;
-//   });
-
-//   // const firstUsableCloseIndex = createLazyMemo(
-//   //   () =>
-//   //     closes()?.findIndex(
-//   //       (close) => close.date === USABLE_CANDLESTICKS_START_DATE,
-//   //     ) || 0,
-//   // )
-
-//   // const firstCloseIndex = createLazyMemo(() =>
-//   //   Math.max(firstIndexWithData(), firstUsableCloseIndex()),
-//   // )
-
-//   const usableCandlesticks = createLazyMemo(() =>
-//     (closes.values() || []).slice(
-//       // firstCloseIndex(),
-//       firstIndexWithData(),
-//       (dataset.values()?.length ?? 0) + firstIndexWithData(),
-//     ),
-//   );
-
-//   const slicedValues = createLazyMemo(() =>
-//     dataset.values()?.slice(
-//       dataset
-//         .values()!
-//         .findIndex(
-//           (data) => data.date === closes.values()![firstIndexWithData()].date,
-//         ),
-//       // .findIndex((data) => data.date === closes()![firstCloseIndex()].date),
-//     ),
-//   );
-
-//   return createLazyDataset(
-//     () => computeRatios(slicedValues() || [], usableCandlesticks()),
-//     [dataset.sources, closes.sources],
-//   );
-// }
-
-// const computeRatios = (
-//   dataset: SingleValueData[],
-//   closes: SingleValueData[],
-// ) => {
-//   if (!dataset.length || !closes.length) return [];
-
-//   return dataset.map(({ time, date, value }, index) => {
-//     const closeData = closes[index];
-
-//     if (date !== closeData.date) {
-//       console.log({ dataset, closes });
-//       throw Error(`Unsynced data (${date} vs ${closeData.date})`);
-//     }
-
-//     return {
-//       time,
-//       date,
-//       value: closeData.value / value,
-//     };
-//   });
-// };
+export function createRatioDatasets<
+  Key extends string,
+  Scale extends ResourceScale,
+>({
+  sourceDataset,
+  price,
+  key,
+}: {
+  key: Key;
+  sourceDataset: Dataset<Scale>;
+  price: Dataset<Scale>;
+}) {
+  return appendRatioLazyDatasets({
+    datasets: {},
+    key,
+    sourceDataset,
+    price,
+  });
+}

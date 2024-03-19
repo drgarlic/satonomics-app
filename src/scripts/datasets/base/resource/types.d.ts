@@ -30,38 +30,6 @@ interface Source {
   color: string;
 }
 
-type CurrencyName = (typeof import("./index").currencies)[number]["name"];
-
-type AnyCohortDatasetKey =
-  (typeof import("./index").anyCohortDatasets)[number]["key"];
-
-type AgeCohortKey = (typeof import("./index").ageCohorts)[number]["key"];
-
-type AgeCohortDatasetKey = AnyCohortDatasetKey;
-
-type AddressOnlyCohortAttributeKey =
-  (typeof import("./index").addressOnlyDatasets)[number]["key"];
-
-type AddressCohortDatasetKey =
-  | AnyCohortDatasetKey
-  | AddressOnlyCohortAttributeKey;
-
-type AnyCohortName = AgeCohortKey | AddressCohortKey;
-
-type AnyPossibleCohortKey = AnyCohortName | AddressCohortKeySplitByLiquidity;
-
-type AddressCohortName =
-  (typeof import("./index").addressCohorts)[number]["name"];
-
-type AddressCohortKey =
-  (typeof import("./index").addressCohorts)[number]["key"];
-
-type LiquidityKey = (typeof import("./index").liquidities)[number]["key"];
-
-type AddressCohortKeySplitByLiquidity = `${AddressCohortKey}${LiquidityKey}`;
-
-type ResourceScale = (typeof import("./index").scales)[index];
-
 interface FetchedCandlestickData {
   date: string;
   open: number;
