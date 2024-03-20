@@ -6,17 +6,25 @@ import {
   WHITEPAPER_DAY,
 } from "/src/scripts";
 
-export const setMinMaxMarkers = (
-  candlesticks: DatasetCandlestickData[],
-  range: LogicalRange | null,
-  lowerOpacity: boolean,
-) => {
+export const setMinMaxMarkers = ({
+  scale,
+  candlesticks,
+  range,
+  lowerOpacity,
+}: {
+  scale: ResourceScale;
+  candlesticks: DatasetValue<CandlestickData | SingleValueData>[];
+  range: LogicalRange | null;
+  lowerOpacity: boolean;
+}) => {
   const first = candlesticks.at(0);
 
   if (!first) return;
 
   const offset =
-    first.number - new Date(WHITEPAPER_DAY).valueOf() / ONE_DAY_IN_MS;
+    scale === "date"
+      ? first.number - new Date(WHITEPAPER_DAY).valueOf() / ONE_DAY_IN_MS
+      : 0;
 
   const slicedDataList = range
     ? candlesticks.slice(
@@ -66,15 +74,28 @@ export const setMinMaxMarkers = (
       }) => {
         const value = Math[mathFunction](
           // ...slicedDataList.map((data) => data[valueAttribute] || 0),
-          ...slicedDataList.map((data) => data[placementAttribute] || 0),
+          ...slicedDataList.map(
+            (data) =>
+              (placementAttribute in data
+                ? data[placementAttribute]
+                : data.value) || 0,
+          ),
         );
 
         const placement = Math[mathFunction](
-          ...slicedDataList.map((data) => data[placementAttribute] || 0),
+          ...slicedDataList.map(
+            (data) =>
+              (placementAttribute in data
+                ? data[placementAttribute]
+                : data.value) || 0,
+          ),
         );
 
         const candle = slicedDataList.find(
-          (data) => data[placementAttribute] === placement,
+          (data) =>
+            (placementAttribute in data
+              ? data[placementAttribute]
+              : data.value) === placement,
         );
 
         return (

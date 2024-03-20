@@ -56,8 +56,8 @@ export function Selector({
         setSelected={setSelected}
         icon={() =>
           selected() === "Settings"
-            ? IconTablerAssemblyFilled
-            : IconTablerAssembly
+            ? IconTablerSettingsFilled
+            : IconTablerSettings
         }
       />
     </div>

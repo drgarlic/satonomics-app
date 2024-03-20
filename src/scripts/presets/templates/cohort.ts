@@ -16,6 +16,7 @@ export function createCohortPresetFolder<Scale extends ResourceScale>({
   color,
   name,
   datasetKey,
+  title,
 }: {
   datasets: Datasets;
   scale: Scale;
@@ -23,11 +24,13 @@ export function createCohortPresetFolder<Scale extends ResourceScale>({
   name: string;
   datasetKey: AnyPossibleCohortKey;
   color: string;
+  title: string;
 }): PresetFolder {
   return {
     id: `${scale}-cohort-${id}`,
     name,
     tree: createCohortPresetList({
+      title,
       datasets,
       scale,
       color,
@@ -43,11 +46,13 @@ export function createCohortPresetList<Scale extends ResourceScale>({
   id,
   color,
   datasetKey,
+  title,
 }: {
   datasets: Datasets;
   scale: Scale;
   id: string;
   datasetKey: AnyPossibleCohortKey;
+  title: string;
   color: string;
 }): PresetTree {
   return [
@@ -58,7 +63,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-utxo-count`,
           name: `Count`,
-          title: `${datasetKey} UTXO Count`,
+          title: `${title} UTXO Count`,
           icon: () => IconTablerTicket,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -89,7 +94,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-realized-capitalization`,
           name: `Capitalization`,
-          title: `${datasetKey} Realized Capitalization`,
+          title: `${title} Realized Capitalization`,
           icon: () => IconTablerPigMoney,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -112,7 +117,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                   : []),
                 {
                   id: `${scale}-${id}-realized-capitalization`,
-                  title: `${datasetKey} Realized Capitalization`,
+                  title: `${title} Realized Capitalization`,
                   color,
                   seriesType: SeriesType.Area,
                   dataset:
@@ -128,7 +133,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-realized-capitalization-30d-change`,
           name: `Capitalization 30 Day Change`,
-          title: `${datasetKey} Realized Capitalization 30 Day Change`,
+          title: `${title} Realized Capitalization 30 Day Change`,
           icon: () => IconTablerStatusChange,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -140,7 +145,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
               list: [
                 {
                   id: `${scale}-${id}-realized-capitalization-30d-change`,
-                  title: `${datasetKey} Realized Cap. 30 Day Change`,
+                  title: `${title} Realized Cap. 30 Day Change`,
                   seriesType: SeriesType.Based,
                   dataset:
                     params.datasets[scale][
@@ -159,7 +164,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-realized-price`,
               name: `Value`,
-              title: `${datasetKey} Realized Price`,
+              title: `${title} Realized Price`,
               icon: () => IconTablerMathAvg,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -183,7 +188,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
               scale,
               id: `${id}-realized-price`,
               color,
-              title: `${datasetKey} Realized Price`,
+              title: `${title} Realized Price`,
               datasetKey: `${datasetKey}RealizedPrice`,
             }),
           ],
@@ -191,7 +196,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-realized-profit`,
           name: `Profit`,
-          title: `${datasetKey} Realized Profit`,
+          title: `${title} Realized Profit`,
           icon: () => IconTablerCash,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -217,7 +222,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-realized-loss`,
           name: "Loss",
-          title: `${datasetKey} Realized Loss`,
+          title: `${title} Realized Loss`,
           icon: () => IconTablerCoffin,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -242,7 +247,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-realized-profit-and-loss`,
           name: `PNL - Profit And Loss`,
-          title: `${datasetKey} PNL - Profit And Loss`,
+          title: `${title} PNL - Profit And Loss`,
           icon: () => IconTablerArrowsVertical,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -276,7 +281,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-net-realized-profit-and-loss`,
           name: `Net PNL`,
-          title: `${datasetKey} Net Realized Profit And Loss`,
+          title: `${title} Net Realized Profit And Loss`,
           icon: () => IconTablerScale,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -303,7 +308,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-relative-net-realized-profit-and-loss`,
           name: `Relative Net PNL`,
-          title: `${datasetKey} Net Realized Profit And Loss Relative To Total Market Capitalization`,
+          title: `${title} Net Realized Profit And Loss Relative To Total Market Capitalization`,
           icon: () => IconTablerDivide,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -330,7 +335,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-cumulative-realized-profit`,
           name: `Cumulative Profit`,
-          title: `${datasetKey} Cumulative Realized Profit`,
+          title: `${title} Cumulative Realized Profit`,
           icon: () => IconTablerSum,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -358,7 +363,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-cumulative-realized-loss`,
           name: "Cumulative Loss",
-          title: `${datasetKey} Cumulative Realized Loss`,
+          title: `${title} Cumulative Realized Loss`,
           icon: () => IconTablerSum,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -386,7 +391,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-cumulative-net-realized-profit-and-loss`,
           name: `Cumulative Net PNL`,
-          title: `${datasetKey} Cumulative Net Realized Profit And Loss`,
+          title: `${title} Cumulative Net Realized Profit And Loss`,
           icon: () => IconTablerSum,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -413,7 +418,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-cumulative-net-realized-profit-and-loss-30d-change`,
           name: `Cumulative Net PNL 30 Day Change`,
-          title: `${datasetKey} Cumulative Net Realized Profit And Loss 30 Day Change`,
+          title: `${title} Cumulative Net Realized Profit And Loss 30 Day Change`,
           icon: () => IconTablerTimeDuration30,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -446,7 +451,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-unrealized-profit`,
           name: `Profit`,
-          title: `${datasetKey} Unrealized Profit`,
+          title: `${title} Unrealized Profit`,
           icon: () => IconTablerMoodDollar,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -472,7 +477,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-unrealized-loss`,
           name: "Loss",
-          title: `${datasetKey} Unrealized Loss`,
+          title: `${title} Unrealized Loss`,
           icon: () => IconTablerMoodSadDizzy,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -498,7 +503,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-unrealized-profit-and-loss`,
           name: `PNL - Profit And Loss`,
-          title: `${datasetKey} Unrealized PNL - Profit And Loss`,
+          title: `${title} Unrealized PNL - Profit And Loss`,
           icon: () => IconTablerArrowsVertical,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -534,7 +539,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-net-unrealized-profit-and-loss`,
           name: `Net PNL`,
-          title: `${datasetKey} Net Unrealized Profit And Loss`,
+          title: `${title} Net Unrealized Profit And Loss`,
           icon: () => IconTablerScale,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -561,7 +566,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-relative-net-unrealized-profit-and-loss`,
           name: `Relative Net PNL`,
-          title: `${datasetKey} Net Unrealized Profit And Loss Relative To Total Market Capitalization`,
+          title: `${title} Net Unrealized Profit And Loss Relative To Total Market Capitalization`,
           icon: () => IconTablerDivide,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -598,7 +603,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-total-supply-absolute`,
               name: `Absolute`,
-              title: `${datasetKey} Total supply`,
+              title: `${title} Total supply`,
               icon: () => IconTablerSum,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -624,7 +629,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-total-supply-percentage-all`,
               name: `% All`,
-              title: `${datasetKey} Total supply (% All)`,
+              title: `${title} Total supply (% All)`,
               icon: () => IconTablerPercentage,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -656,7 +661,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-profit-absolute`,
               name: "Absolute",
-              title: `${datasetKey} Supply in profit`,
+              title: `${title} Supply in profit`,
               icon: () => IconTablerTrendingUp,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -682,7 +687,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-profit-percentage-self`,
               name: "% Self",
-              title: `${datasetKey} Supply in profit (% Self)`,
+              title: `${title} Supply in profit (% Self)`,
               icon: () => IconTablerPercentage,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -710,7 +715,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-profit-percentage-all`,
               name: "% All",
-              title: `${datasetKey} Supply in profit (% All)`,
+              title: `${title} Supply in profit (% All)`,
               icon: () => IconTablerPercentage,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -744,7 +749,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-loss`,
               name: "Absolute",
-              title: `${datasetKey} Supply in loss`,
+              title: `${title} Supply in loss`,
               icon: () => IconTablerTrendingDown,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -770,7 +775,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-loss-percentage-self`,
               name: "% Self",
-              title: `${datasetKey} Supply in loss (% Self)`,
+              title: `${title} Supply in loss (% Self)`,
               icon: () => IconTablerPercentage,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -798,7 +803,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
             {
               id: `${scale}-${id}-in-loss-percentage-all`,
               name: "% All",
-              title: `${datasetKey} Supply in loss (% All)`,
+              title: `${title} Supply in loss (% All)`,
               icon: () => IconTablerPercentage,
               applyPreset(params) {
                 return applyMultipleSeries({
@@ -834,7 +839,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-profit-and-loss-absolute-crossed`,
                   name: "Crossed",
-                  title: `${datasetKey} Profit And Loss (Crossed, Absolute)`,
+                  title: `${title} Profit And Loss (Crossed, Absolute)`,
                   icon: () => IconTablerArrowsCross,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -893,7 +898,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-stacked-profit-and-loss-absolute-stacked`,
                   name: "Stacked",
-                  title: `${datasetKey} Profit And Loss (Stacked, Absolute)`,
+                  title: `${title} Profit And Loss (Stacked, Absolute)`,
                   icon: () => IconTablerStack,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -947,7 +952,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-profit-and-loss-percentage-all-crossed`,
                   name: "Crossed",
-                  title: `${datasetKey} Profit And Loss (% All) Crossed`,
+                  title: `${title} Profit And Loss (% All) Crossed`,
                   icon: () => IconTablerArrowsCross,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -985,7 +990,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-profit-and-loss-percentage-all-stacked`,
                   name: "Stacked",
-                  title: `${datasetKey} Profit And Loss (% All) Stacked`,
+                  title: `${title} Profit And Loss (% All) Stacked`,
                   icon: () => IconTablerStack,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -1029,7 +1034,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-supply-in-profit-and-loss-percentage-self-crossed`,
                   name: "Crossed",
-                  title: `${datasetKey} Supply In Profit And Loss (% Self) Crossed`,
+                  title: `${title} Supply In Profit And Loss (% Self) Crossed`,
                   icon: () => IconTablerArrowsCross,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -1086,7 +1091,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                 {
                   id: `${scale}-${id}-supply-in-profit-and-loss-percentage-self-stacked`,
                   name: "Stacked",
-                  title: `${datasetKey} Supply In Profit And Loss (% Self) Stacked`,
+                  title: `${title} Supply In Profit And Loss (% Self) Stacked`,
                   icon: () => IconTablerStack,
                   applyPreset(params) {
                     return applyMultipleSeries({
@@ -1135,7 +1140,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
                   datasets: datasets[scale],
                   scale,
                   id: `${scale}-${id}-supply-in-profit-and-loss-percentage-self`,
-                  title: `${datasetKey} Supply In Profit And Loss (% Self)`,
+                  title: `${title} Supply In Profit And Loss (% Self)`,
                   datasetKey: `${datasetKey}SupplyPNL%Self`,
                 }),
               ],
@@ -1151,7 +1156,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-mean-price-paid`,
           name: `Mean`,
-          title: `${datasetKey} Mean Price Paid`,
+          title: `${title} Mean Price Paid`,
           icon: () => IconTablerMathAvg,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -1172,7 +1177,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
         {
           id: `${scale}-${id}-price-paid-deciles`,
           name: `Deciles`,
-          title: `${datasetKey} deciles`,
+          title: `${title} deciles`,
           icon: () => IconTablerSquareHalf,
           applyPreset(params) {
             return applyMultipleSeries({
@@ -1194,7 +1199,7 @@ export function createCohortPresetList<Scale extends ResourceScale>({
           ({ name, route, key, title }): PartialPreset => ({
             id: `${scale}-${id}-${route.replaceAll("_", "-")}`,
             name,
-            title: `${datasetKey} ${title}`,
+            title: `${title} ${title}`,
             icon: () => IconTablerSquareHalf,
             applyPreset(params) {
               return applyMultipleSeries({

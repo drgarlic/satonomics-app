@@ -21,20 +21,22 @@ const debouncedUpdateURLParams = debounce((range: LogicalRange | null) => {
   localStorage.setItem(LOCAL_STORAGE_RANGE_KEY, JSON.stringify(range));
 }, 1000);
 
-export const setTimeScale = ({
+export function setTimeScale({
+  scale,
   switchBetweenCandlestickAndLine,
-  // lowerOpacity,
-  // candlesticks,
+  lowerOpacity,
+  candlesticks,
 }: {
+  scale: ResourceScale;
   switchBetweenCandlestickAndLine: boolean;
-  // candlesticks: DatasetCandlestickData[];
-  // lowerOpacity: boolean;
-}) => {
-  if (switchBetweenCandlestickAndLine) {
-    const debouncedCallback = debounce((range: LogicalRange | null) => {
-      const { chart, priceSeries: series } = chartState;
-      if (!chart || !series) return;
+  candlesticks: DatasetValue<CandlestickData | SingleValueData>[];
+  lowerOpacity: boolean;
+}) {
+  const debouncedCallback = debounce((range: LogicalRange | null) => {
+    const { chart, priceSeries: series } = chartState;
+    if (!chart || !series) return;
 
+    if (switchBetweenCandlestickAndLine) {
       try {
         const seriesType = checkIfUpClose(chart, range);
 
@@ -50,15 +52,17 @@ export const setTimeScale = ({
 
           chartState.reset?.();
         } else {
-          // setMinMaxMarkers(candlesticks, range, lowerOpacity);
+          setMinMaxMarkers({ scale, candlesticks, range, lowerOpacity });
         }
       } catch {}
-    }, 50);
+    } else {
+      setMinMaxMarkers({ scale, candlesticks, range, lowerOpacity });
+    }
+  }, 50);
 
-    chartState.chart
-      ?.timeScale()
-      .subscribeVisibleLogicalRangeChange(debouncedCallback);
-  }
+  chartState.chart
+    ?.timeScale()
+    .subscribeVisibleLogicalRangeChange(debouncedCallback);
 
   if (chartState.range) {
     chartState.chart?.timeScale().setVisibleLogicalRange(chartState.range);
@@ -76,7 +80,7 @@ export const setTimeScale = ({
     50,
     setTimeout,
   );
-};
+}
 
 export function checkIfUpClose(chart: IChartApi, range?: LogicalRange | null) {
   const from = range?.from || 0;

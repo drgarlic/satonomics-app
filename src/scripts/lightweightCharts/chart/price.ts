@@ -3,13 +3,13 @@ import { PriceScaleMode } from "lightweight-charts";
 import {
   chartState,
   colors,
+  convertCandleToCandleColor,
   createCandlesticksSeries,
   createLineSeries,
   createPriceLine,
   createSeriesLegend,
   setMinMaxMarkers,
   setTimeScale,
-  updateChartUsingLiveCandle,
 } from "/src/scripts";
 import { createASS } from "/src/solid";
 
@@ -89,18 +89,12 @@ export const applyPriceSeries = <
     chartState.priceLine = createPriceLine(chartState.priceSeries);
 
     createEffect(() => {
-      if (!dataset && liveCandle && scale === "date") {
-        // updateChartUsingLiveCandle({
-        //   candle:
-        //     liveCandle() || datasets[scale].price.values()?.at(-1) || null,
-        //   datasets,
-        // });
-      } else {
-        chartState.priceLine?.applyOptions({
-          color: colors.white,
-          price: dataset?.values()?.at(-1)?.value,
-        });
-      }
+      updateLastPriceValue(
+        dataset?.values()?.at(-1) ||
+          (scale === "date" ? liveCandle?.() : null) ||
+          datasets[scale].price.values()?.at(-1) ||
+          null,
+      );
     });
   }
 
@@ -121,18 +115,20 @@ export const applyPriceSeries = <
     ...options?.priceScaleOptions,
   });
 
-  if (!dataset) {
-    // setMinMaxMarkers(
-    //   datasets[scale].price.values() || [],
-    //   chartState.range,
-    //   lowerOpacity,
-    // );
-  }
+  setMinMaxMarkers({
+    scale,
+    candlesticks:
+      dataset?.values() || datasets[scale].price.values() || ([] as any),
+    range: chartState.range,
+    lowerOpacity,
+  });
 
   setTimeScale({
+    scale,
     switchBetweenCandlestickAndLine: !dataset && scale === "date",
-    // candlesticks: datasets[scale].price.values() || [],
-    // lowerOpacity,
+    candlesticks:
+      dataset?.values() || datasets[scale].price.values() || ([] as any),
+    lowerOpacity,
   });
 
   return {
@@ -155,4 +151,42 @@ function checkIfUpClose(chart: IChartApi, range?: LogicalRange | null) {
   const difference = to - from;
 
   return width / difference >= 2 ? "Candlestick" : "Line";
+}
+
+export function updateLastPriceValue(
+  data: DatasetValue<CandlestickData | SingleValueData> | null,
+) {
+  if (!data || !chartState.chart) return;
+
+  // const priceMode = chartState.priceMode
+  // const isInGoldMode = priceMode === 'gold'
+  // const isInSatsMode = priceMode === 'sats'
+  const isInSatsMode = false;
+
+  try {
+    // const candlestick = isInSatsMode
+    //   ? convertNormalCandleToSatCandle(candle)
+    //   : isInGoldMode
+    //     ? run(() => {
+    //         const goldPrice = datasets.goldPrice.values()?.at(-1)?.value
+
+    //         return goldPrice
+    //           ? convertNormalCandleToGoldPerBitcoinCandle(candle, goldPrice)
+    //           : undefined
+    //       })
+    //     : candle
+
+    if (!data.value) return;
+
+    chartState.priceSeries?.update(data);
+
+    chartState.priceLine?.applyOptions({
+      price: data.value,
+      color:
+        chartState.priceSeries?.seriesType() === "Candlestick" &&
+        "close" in data
+          ? convertCandleToCandleColor(data, isInSatsMode)
+          : colors.white,
+    });
+  } catch {}
 }

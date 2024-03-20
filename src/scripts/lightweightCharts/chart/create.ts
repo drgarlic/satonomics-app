@@ -65,6 +65,7 @@ export const createChart = (scale: ResourceScale) => {
 };
 
 // https://github.com/tradingview/lightweight-charts/blob/master/tests/e2e/graphics/test-cases/horizontal-price-scale.js
+// @ts-ignore
 class HorzScaleBehaviorPrice {
   options() {}
   setOptions() {}

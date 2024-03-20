@@ -12,7 +12,21 @@ export function SettingsFrame({
   return (
     <ScrollableFrame hidden={() => selectedFrame() !== "Settings"}>
       <div class="space-y-4 p-3">
-        <div>settings</div>
+        <div class="space-y-2">
+          <p>Explorer</p>
+          <div>Preset right side</div>
+          <div>Opened group right side</div>
+          <div>Closed group right side</div>
+        </div>
+        <div class="space-y-2">
+          <p>Background</p>
+          <div>Opacity</div>
+          <div>Scroll</div>
+        </div>
+        <div class="space-y-2">
+          <p>Chart</p>
+          <div>Right scale</div>
+        </div>
         <div>
           <label class="switch">
             Marquee

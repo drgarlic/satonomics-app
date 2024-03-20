@@ -111,7 +111,7 @@ export function createRatioPresetFolder<
             datasets,
             scale,
             id: `${scale}-${id}-ratio-averages`,
-            title: `${datasetKey} Ratio Moving Averages`,
+            title: `${title} Ratio Moving Averages`,
             datasetKey: `${datasetKey}Ratio`,
           }),
         ],
@@ -125,7 +125,7 @@ export function createRatioPresetFolder<
             name: "Top Ratios",
             description: "",
             icon: () => IconTablerJetpack,
-            title: `${datasetKey} Extreme Top Ratios`,
+            title: `${title} Extreme Top Ratios`,
             applyPreset(params) {
               return applyMultipleSeries({
                 scale,
@@ -175,7 +175,7 @@ export function createRatioPresetFolder<
             name: "Bottom Ratios",
             description: "",
             icon: () => IconTablerScubaMask,
-            title: `${datasetKey} Extreme Bottom Ratios`,
+            title: `${title} Extreme Bottom Ratios`,
             applyPreset(params) {
               return applyMultipleSeries({
                 scale,
@@ -225,7 +225,7 @@ export function createRatioPresetFolder<
             name: "Top Prices",
             description: "",
             icon: () => IconTablerRocket,
-            title: `${datasetKey} Extreme Top Prices`,
+            title: `${title} Extreme Top Prices`,
             applyPreset(params) {
               return applyMultipleSeries({
                 scale,
@@ -258,7 +258,7 @@ export function createRatioPresetFolder<
             name: "Bottom Prices",
             description: "",
             icon: () => IconTablerSubmarine,
-            title: `${datasetKey} Extreme Bottom Prices`,
+            title: `${title} Extreme Bottom Prices`,
             applyPreset(params) {
               return applyMultipleSeries({
                 scale,
